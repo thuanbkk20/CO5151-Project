@@ -1,7 +1,9 @@
 # Virtual workspace root — mỗi thành phần là một package uv riêng.
 # Thành viên phụ trách thêm package của mình vào `members` khi đã có pyproject.toml.
 [tool.uv.workspace]
-members = []
+members = [
+    "packages/contracts",
+]
 
 [dependency-groups]
 dev = [
@@ -18,3 +20,6 @@ select = ["E", "F", "I", "B", "UP"]
 
 [tool.pytest.ini_options]
 addopts = "-q --import-mode=importlib"
+
+[tool.ruff.lint.isort]
+known-first-party = ["co5151_contracts"]
