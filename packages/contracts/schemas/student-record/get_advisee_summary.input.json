@@ -1,0 +1,16 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "student_id": {
+      "description": "MSSV 7 chữ số của sinh viên thuộc danh sách cố vấn.",
+      "pattern": "^[0-9]{7}$",
+      "title": "Student Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id"
+  ],
+  "title": "AdviseeQuery",
+  "type": "object"
+}

@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "student_id": {
+      "pattern": "^[0-9]{7}$",
+      "title": "Student Id",
+      "type": "string"
+    },
+    "full_name": {
+      "title": "Full Name",
+      "type": "string"
+    },
+    "faculty": {
+      "title": "Faculty",
+      "type": "string"
+    },
+    "program_type": {
+      "description": "Hệ đào tạo, ví dụ CQ (chính quy).",
+      "title": "Program Type",
+      "type": "string"
+    },
+    "cohort": {
+      "description": "Khóa tuyển sinh, ví dụ 2023.",
+      "title": "Cohort",
+      "type": "integer"
+    },
+    "ctdt": {
+      "description": "Phiên bản chương trình đào tạo / quy chế áp dụng, ví dụ 2019 hoặc 2023.",
+      "title": "Ctdt",
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "full_name",
+    "faculty",
+    "program_type",
+    "cohort",
+    "ctdt"
+  ],
+  "title": "StudentProfile",
+  "type": "object"
+}

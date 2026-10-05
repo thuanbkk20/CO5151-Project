@@ -1,0 +1,72 @@
+{
+  "$defs": {
+    "Role": {
+      "enum": [
+        "student",
+        "advisor"
+      ],
+      "title": "Role",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "sub": {
+      "title": "Sub",
+      "type": "string"
+    },
+    "role": {
+      "$ref": "#/$defs/Role"
+    },
+    "student_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9]{7}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Student Id"
+    },
+    "advisor_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Advisor Id"
+    },
+    "advisees": {
+      "default": [],
+      "items": {
+        "pattern": "^[0-9]{7}$",
+        "type": "string"
+      },
+      "title": "Advisees",
+      "type": "array"
+    },
+    "iat": {
+      "title": "Iat",
+      "type": "integer"
+    },
+    "exp": {
+      "title": "Exp",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "sub",
+    "role",
+    "iat",
+    "exp"
+  ],
+  "title": "SessionClaims",
+  "type": "object"
+}

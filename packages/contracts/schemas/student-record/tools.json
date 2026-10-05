@@ -1,0 +1,56 @@
+[
+  {
+    "name": "get_my_profile",
+    "description": "Hồ sơ của sinh viên ĐANG ĐĂNG NHẬP: MSSV, họ tên, khoa, hệ, khóa tuyển sinh, chương trình đào tạo.",
+    "permission": "read-only",
+    "roles": [
+      "student"
+    ],
+    "scope": "records.read"
+  },
+  {
+    "name": "get_my_academic_summary",
+    "description": "Tóm tắt học vụ của sinh viên đang đăng nhập: tín chỉ tích lũy, ĐTBTL thang 4 (cgpa) và thang 10 (cgpa10), đồ án chuyên ngành, chứng chỉ ngoại ngữ (quy đổi TOEIC), GDTC/GDQP, trạng thái cảnh báo.",
+    "permission": "read-only",
+    "roles": [
+      "student"
+    ],
+    "scope": "records.read"
+  },
+  {
+    "name": "get_my_transcript",
+    "description": "Bảng điểm môn học của sinh viên đang đăng nhập (mã điểm đặc biệt đã được giải mã), có thể lọc theo học kỳ dạng 20252 hoặc BL.",
+    "permission": "read-only",
+    "roles": [
+      "student"
+    ],
+    "scope": "records.read"
+  },
+  {
+    "name": "get_my_semester_summary",
+    "description": "Bảng điểm theo học kỳ của sinh viên đang đăng nhập: tín chỉ tích lũy và điểm trung bình (thang 10) từng học kỳ và cộng dồn.",
+    "permission": "read-only",
+    "roles": [
+      "student"
+    ],
+    "scope": "records.read"
+  },
+  {
+    "name": "get_my_warnings",
+    "description": "Lịch sử cảnh báo học tập của sinh viên đang đăng nhập.",
+    "permission": "read-only",
+    "roles": [
+      "student"
+    ],
+    "scope": "records.read"
+  },
+  {
+    "name": "get_advisee_summary",
+    "description": "(Chỉ dành cho Cố vấn học tập) Tóm tắt học vụ của một sinh viên thuộc danh sách cố vấn của tài khoản đang đăng nhập.",
+    "permission": "read-only",
+    "roles": [
+      "advisor"
+    ],
+    "scope": "records.read"
+  }
+]

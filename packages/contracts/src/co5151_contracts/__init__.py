@@ -2,6 +2,7 @@
 
 from .auth import SCOPE_RECORDS_READ, Role, SessionClaims, StudentId
 from .envelope import ErrorCode, ToolError, ToolErrorBody, ToolResult, err, ok
+from .tools import STUDENT_RECORD_TOOLS, Permission, ToolSpec
 
 __all__ = [
     "SCOPE_RECORDS_READ",
@@ -14,5 +15,8 @@ __all__ = [
     "ToolResult",
     "err",
     "ok",
+    "STUDENT_RECORD_TOOLS",
+    "Permission",
+    "ToolSpec",
 ]
 __version__ = "0.1.0"

@@ -1,0 +1,128 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "student_id": {
+      "pattern": "^[0-9]{7}$",
+      "title": "Student Id",
+      "type": "string"
+    },
+    "cohort": {
+      "title": "Cohort",
+      "type": "integer"
+    },
+    "ctdt": {
+      "title": "Ctdt",
+      "type": "string"
+    },
+    "program_credits": {
+      "description": "Tổng số tín chỉ của chương trình đào tạo.",
+      "title": "Program Credits",
+      "type": "integer"
+    },
+    "credits_earned": {
+      "description": "Số tín chỉ tích lũy (theo bảng điểm học kỳ).",
+      "title": "Credits Earned",
+      "type": "integer"
+    },
+    "cgpa": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Điểm trung bình tích lũy thang 4.",
+      "title": "Cgpa"
+    },
+    "cgpa10": {
+      "description": "Điểm trung bình tích lũy thang 10.",
+      "title": "Cgpa10",
+      "type": "number"
+    },
+    "capstone_project_passed": {
+      "description": "Đã đạt Đồ án chuyên ngành.",
+      "title": "Capstone Project Passed",
+      "type": "boolean"
+    },
+    "toeic": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Điểm TOEIC hoặc điểm quy đổi tương đương từ chứng chỉ khác.",
+      "title": "Toeic"
+    },
+    "english_cert": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Chứng chỉ ngoại ngữ đã nộp, ví dụ 'IELTS 6.5'.",
+      "title": "English Cert"
+    },
+    "gdtc_completed": {
+      "title": "Gdtc Completed",
+      "type": "boolean"
+    },
+    "gdqp_completed": {
+      "title": "Gdqp Completed",
+      "type": "boolean"
+    },
+    "currently_warned": {
+      "description": "Đang bị cảnh báo học tập ở học kỳ chính gần nhất.",
+      "title": "Currently Warned",
+      "type": "boolean"
+    },
+    "consecutive_warnings": {
+      "title": "Consecutive Warnings",
+      "type": "integer"
+    },
+    "retake_credits": {
+      "description": "Tổng số tín chỉ đã học lại.",
+      "title": "Retake Credits",
+      "type": "integer"
+    },
+    "last_semester": {
+      "anyOf": [
+        {
+          "pattern": "^([0-9]{4}[123]|BL)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Last Semester"
+    }
+  },
+  "required": [
+    "student_id",
+    "cohort",
+    "ctdt",
+    "program_credits",
+    "credits_earned",
+    "cgpa",
+    "cgpa10",
+    "capstone_project_passed",
+    "toeic",
+    "english_cert",
+    "gdtc_completed",
+    "gdqp_completed",
+    "currently_warned",
+    "consecutive_warnings",
+    "retake_credits",
+    "last_semester"
+  ],
+  "title": "AcademicSummary",
+  "type": "object"
+}

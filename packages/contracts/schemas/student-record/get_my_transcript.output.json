@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "CourseRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "semester": {
+          "pattern": "^([0-9]{4}[123]|BL)$",
+          "title": "Semester",
+          "type": "string"
+        },
+        "course": {
+          "title": "Course",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "credits": {
+          "title": "Credits",
+          "type": "integer"
+        },
+        "letter": {
+          "description": "Điểm chữ (A+ … F) hoặc mã đặc biệt (MT, CT, VT, HT).",
+          "title": "Letter",
+          "type": "string"
+        },
+        "score10": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Điểm thang 10; null với mã điểm đặc biệt.",
+          "title": "Score10"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Ý nghĩa mã điểm đặc biệt, ví dụ 'Hoãn thi'.",
+          "title": "Status"
+        },
+        "in_gpa": {
+          "description": "Có được tính vào điểm trung bình không.",
+          "title": "In Gpa",
+          "type": "boolean"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        }
+      },
+      "required": [
+        "semester",
+        "course",
+        "name",
+        "credits",
+        "letter",
+        "score10",
+        "passed",
+        "status",
+        "in_gpa",
+        "note"
+      ],
+      "title": "CourseRecord",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "student_id": {
+      "pattern": "^[0-9]{7}$",
+      "title": "Student Id",
+      "type": "string"
+    },
+    "semester": {
+      "anyOf": [
+        {
+          "pattern": "^([0-9]{4}[123]|BL)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Semester"
+    },
+    "courses": {
+      "items": {
+        "$ref": "#/$defs/CourseRecord"
+      },
+      "title": "Courses",
+      "type": "array"
+    }
+  },
+  "required": [
+    "student_id",
+    "courses"
+  ],
+  "title": "Transcript",
+  "type": "object"
+}

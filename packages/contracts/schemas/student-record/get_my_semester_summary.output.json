@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "SemesterRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "semester": {
+          "pattern": "^([0-9]{4}[123]|BL)$",
+          "title": "Semester",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "credits_semester": {
+          "title": "Credits Semester",
+          "type": "integer"
+        },
+        "gpa10_semester": {
+          "title": "Gpa10 Semester",
+          "type": "number"
+        },
+        "credits_cumulative": {
+          "title": "Credits Cumulative",
+          "type": "integer"
+        },
+        "gpa10_cumulative": {
+          "title": "Gpa10 Cumulative",
+          "type": "number"
+        },
+        "updated": {
+          "title": "Updated",
+          "type": "string"
+        }
+      },
+      "required": [
+        "semester",
+        "label",
+        "credits_semester",
+        "gpa10_semester",
+        "credits_cumulative",
+        "gpa10_cumulative",
+        "updated"
+      ],
+      "title": "SemesterRecord",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "student_id": {
+      "pattern": "^[0-9]{7}$",
+      "title": "Student Id",
+      "type": "string"
+    },
+    "semesters": {
+      "description": "Mới nhất trước.",
+      "items": {
+        "$ref": "#/$defs/SemesterRecord"
+      },
+      "title": "Semesters",
+      "type": "array"
+    }
+  },
+  "required": [
+    "student_id",
+    "semesters"
+  ],
+  "title": "SemesterSummary",
+  "type": "object"
+}

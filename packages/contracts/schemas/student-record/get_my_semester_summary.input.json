@@ -1,0 +1,7 @@
+{
+  "additionalProperties": false,
+  "description": "Tool không nhận tham số — danh tính lấy từ token phiên.",
+  "properties": {},
+  "title": "NoArgs",
+  "type": "object"
+}

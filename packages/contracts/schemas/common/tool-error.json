@@ -1,0 +1,43 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "INVALID_ARGUMENT",
+        "UNAUTHENTICATED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "INTERNAL"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "code": {
+      "$ref": "#/$defs/ErrorCode"
+    },
+    "message": {
+      "title": "Message",
+      "type": "string"
+    },
+    "details": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Details"
+    }
+  },
+  "required": [
+    "code",
+    "message"
+  ],
+  "title": "ToolErrorBody",
+  "type": "object"
+}

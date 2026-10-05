@@ -1,0 +1,21 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "semester": {
+      "anyOf": [
+        {
+          "pattern": "^([0-9]{4}[123]|BL)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Mã học kỳ dạng YYYYK (K = 1, 2, 3 hè), ví dụ 20252; hoặc BL (bảo lưu / công nhận).",
+      "title": "Semester"
+    }
+  },
+  "title": "TranscriptQuery",
+  "type": "object"
+}
