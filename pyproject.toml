@@ -3,6 +3,7 @@
 [tool.uv.workspace]
 members = [
     "packages/contracts",
+    "mcp/student-server",
 ]
 
 [dependency-groups]
@@ -22,4 +23,4 @@ select = ["E", "F", "I", "B", "UP"]
 addopts = "-q --import-mode=importlib"
 
 [tool.ruff.lint.isort]
-known-first-party = ["co5151_contracts"]
+known-first-party = ["co5151_contracts", "student_server"]
