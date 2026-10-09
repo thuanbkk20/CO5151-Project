@@ -1,0 +1,71 @@
+[
+  {
+    "username": "sv001",
+    "password": "demo",
+    "role": "student",
+    "mssv": "2310001",
+    "persona": "K2023, đủ điều kiện LVTN, không cảnh báo"
+  },
+  {
+    "username": "sv002",
+    "password": "demo",
+    "role": "student",
+    "mssv": "2310002",
+    "persona": "K2023, thiếu TC, rớt Đồ án chuyên ngành, chưa có chứng chỉ NN"
+  },
+  {
+    "username": "sv003",
+    "password": "demo",
+    "role": "student",
+    "mssv": "2310003",
+    "persona": "K2023, bị cảnh báo HK 20252 (lần 1)"
+  },
+  {
+    "username": "sv004",
+    "password": "demo",
+    "role": "student",
+    "mssv": "2210004",
+    "persona": "K2022 (QC2019), tạm dừng 20231–20232, đủ ĐK LVTN theo QC2019"
+  },
+  {
+    "username": "sv005",
+    "password": "demo",
+    "role": "student",
+    "mssv": "2210005",
+    "persona": "K2022, thiếu 4 TC và GDTC 3 để tốt nghiệp"
+  },
+  {
+    "username": "sv006",
+    "password": "demo",
+    "role": "student",
+    "mssv": "2410006",
+    "persona": "K2024 năm 2, học bình thường"
+  },
+  {
+    "username": "sv007",
+    "password": "demo",
+    "role": "student",
+    "mssv": "2310007",
+    "persona": "K2023 GPA ≥ 3.2 → được đăng ký 28 TC"
+  },
+  {
+    "username": "sv008",
+    "password": "demo",
+    "role": "student",
+    "mssv": "2510008",
+    "persona": "K2025, bị cảnh báo HK đầu 20251, HK 20252 đã cải thiện"
+  },
+  {
+    "username": "cvht01",
+    "password": "demo",
+    "role": "advisor",
+    "advisor_id": "CVHT01",
+    "hoVaTen": "TS. Mai Văn Hùng",
+    "advisees": [
+      "2310001",
+      "2310002",
+      "2310003",
+      "2310007"
+    ]
+  }
+]
