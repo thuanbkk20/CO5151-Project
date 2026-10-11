@@ -45,7 +45,7 @@ class StudentDB:
 
     def _create(self):
         ddl = [
-            "CREATE TABLE IF NOT EXISTS accounts(username TEXT PRIMARY KEY, password TEXT, role TEXT, mssv TEXT,"
+            "CREATE TABLE IF NOT EXISTS accounts(username TEXT PRIMARY KEY, password_hash TEXT, role TEXT, mssv TEXT,"
             " advisor_id TEXT, advisees TEXT, persona TEXT)",
             "CREATE TABLE IF NOT EXISTS profiles(mssv TEXT PRIMARY KEY, raw TEXT)",
         ]
@@ -59,7 +59,7 @@ class StudentDB:
         for a in _load(folder, "accounts"):
             c.execute(
                 "INSERT INTO accounts VALUES (?,?,?,?,?,?,?)",
-                (a["username"], a["password"], a["role"], a.get("mssv"), a.get("advisor_id"),
+                (a["username"], a["password_hash"], a["role"], a.get("mssv"), a.get("advisor_id"),
                  json.dumps(a.get("advisees", [])), a.get("persona")),
             )  # fmt: skip
         for mssv, p in _load(folder, "profiles").items():

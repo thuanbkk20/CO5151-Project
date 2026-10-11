@@ -8,7 +8,7 @@ Outputs (in this folder):
   diem_mon_hoc.json    {mssv: {"data": [<course row>, ...]}}     — schema "bảng điểm môn học"
   diem_hoc_ky.json     {mssv: [<semester row>, ...]}             — schema "bảng điểm học kỳ" (mới nhất trước)
   xu_ly_hoc_vu.json    {mssv: [<warning row>, ...]}              — schema GIẢ ĐỊNH (chưa có mẫu thật)
-  accounts.json        demo logins (username/password → mssv / advisees)
+  accounts.json        demo logins (username / PBKDF2 password hash → mssv / advisees)
   reference.json       CTĐT mô phỏng, bảng mã điểm đặc biệt, quy đổi chứng chỉ ngoại ngữ
 
 Everything is internally consistent: semester rows and warnings are COMPUTED from course rows,
@@ -16,10 +16,13 @@ so tổng tín chỉ / điểm TB / cảnh báo always agree with the transcript
 """
 
 import argparse
+import hashlib
 import json
 import random
 import sys
 from pathlib import Path
+
+from student_server.auth.passwords import hash_password
 
 HERE = Path(__file__).resolve().parent
 SEED = 2026
@@ -254,7 +257,6 @@ PERSONAS = [
 ADVISORS = [
     {
         "username": "cvht01",
-        "password": "demo",
         "role": "advisor",
         "advisor_id": "CVHT01",
         "hoVaTen": "TS. Mai Văn Hùng",
@@ -443,6 +445,14 @@ def profile(p, i):
     }
 
 
+DEMO_PASSWORD = "demo"
+
+
+def demo_hash(username):
+    """Salt derived from the username so regenerated files stay byte-identical."""
+    return hash_password(DEMO_PASSWORD, salt=hashlib.sha256(f"co5151-mock:{username}".encode()).hexdigest()[:16])
+
+
 def build():
     """Return {file stem: JSON object} for every mock API payload."""
     rng = random.Random(SEED)
@@ -454,9 +464,15 @@ def build():
         dhk[p["mssv"]] = semester_rows(p, rows)
         xlhv[p["mssv"]] = warnings(p, rows)
         accounts.append(
-            {"username": p["user"], "password": "demo", "role": "student", "mssv": p["mssv"], "persona": p["note"]}
+            {
+                "username": p["user"],
+                "password_hash": demo_hash(p["user"]),
+                "role": "student",
+                "mssv": p["mssv"],
+                "persona": p["note"],
+            }
         )
-    accounts += ADVISORS
+    accounts += [{**a, "password_hash": demo_hash(a["username"])} for a in ADVISORS]
     ref = {
         "_note": (
             "Dữ liệu tham chiếu MÔ PHỎNG cho mock API. Mã môn/CTĐT mang tính minh họa — đối chiếu CTĐT thật trước D3."

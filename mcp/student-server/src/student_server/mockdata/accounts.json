@@ -1,63 +1,62 @@
 [
   {
     "username": "sv001",
-    "password": "demo",
+    "password_hash": "pbkdf2_sha256$60000$f7cbec4564d9969c$78535513540c2f7a2aa73e57b37036a974c56b9094cb71513f6e63988a34368e",
     "role": "student",
     "mssv": "2310001",
     "persona": "K2023, đủ điều kiện LVTN, không cảnh báo"
   },
   {
     "username": "sv002",
-    "password": "demo",
+    "password_hash": "pbkdf2_sha256$60000$688569b899166d8c$0ed9524450ce13ea964cd838087f9ca6caacad8094d5d1a98a885dfe9f82929b",
     "role": "student",
     "mssv": "2310002",
     "persona": "K2023, thiếu TC, rớt Đồ án chuyên ngành, chưa có chứng chỉ NN"
   },
   {
     "username": "sv003",
-    "password": "demo",
+    "password_hash": "pbkdf2_sha256$60000$24b74449bc985825$f2ec90a0df969b356ca2ada2ec4cfd6d02e0d70f4121265907ef16a0453ad454",
     "role": "student",
     "mssv": "2310003",
     "persona": "K2023, bị cảnh báo HK 20252 (lần 1)"
   },
   {
     "username": "sv004",
-    "password": "demo",
+    "password_hash": "pbkdf2_sha256$60000$7d9f1f21e635f209$2e960eb56f55ce5b772ae1437c05bf7d35fa53c92dd8ff3dfb049b0530516545",
     "role": "student",
     "mssv": "2210004",
     "persona": "K2022 (QC2019), tạm dừng 20231–20232, đủ ĐK LVTN theo QC2019"
   },
   {
     "username": "sv005",
-    "password": "demo",
+    "password_hash": "pbkdf2_sha256$60000$84346634fdc9e14b$ea560c8cddcdd379213d6209455007f2bf51c78bcc2cb7d46cb4809569aee11d",
     "role": "student",
     "mssv": "2210005",
     "persona": "K2022, thiếu 4 TC và GDTC 3 để tốt nghiệp"
   },
   {
     "username": "sv006",
-    "password": "demo",
+    "password_hash": "pbkdf2_sha256$60000$ca8369a19b1ccb04$e968c25e681de82002f30f7f6261eb1451e13bcec987ed633fd02874400daa7c",
     "role": "student",
     "mssv": "2410006",
     "persona": "K2024 năm 2, học bình thường"
   },
   {
     "username": "sv007",
-    "password": "demo",
+    "password_hash": "pbkdf2_sha256$60000$82e6cca923dcd22f$dab92ca03fcde016eac3b279958ace737d5f298a843754782a8c20953fa5704e",
     "role": "student",
     "mssv": "2310007",
     "persona": "K2023 GPA ≥ 3.2 → được đăng ký 28 TC"
   },
   {
     "username": "sv008",
-    "password": "demo",
+    "password_hash": "pbkdf2_sha256$60000$d8b83040140e3846$0193aa85ac93eb712928a23823f90ac13f99789c0f9d7736d5ba6ee2f1c485fb",
     "role": "student",
     "mssv": "2510008",
     "persona": "K2025, bị cảnh báo HK đầu 20251, HK 20252 đã cải thiện"
   },
   {
     "username": "cvht01",
-    "password": "demo",
     "role": "advisor",
     "advisor_id": "CVHT01",
     "hoVaTen": "TS. Mai Văn Hùng",
@@ -66,6 +65,7 @@
       "2310002",
       "2310003",
       "2310007"
-    ]
+    ],
+    "password_hash": "pbkdf2_sha256$60000$da436b174f402e76$07d226317bd1e13372dc812ac7d51242b0ab2c3eb48651ae6bbcc646582188f3"
   }
 ]

@@ -10,7 +10,7 @@ Toàn bộ được sinh tất định bởi `uv run python -m student_server.mo
 | `diem_mon_hoc.json` | Bảng điểm môn học | `{mssv: {"data": [{sinhVienId, namHocHocKyId, maHocKy, monHocId, maMonHoc, tenMonHoc, soTinChi, diemChu, diemSo, diemDat, tinhTrangDiem, diemKhongIn, nhomTo, ghiChu, code, msg}]}}` |
 | `diem_hoc_ky.json` | Bảng điểm học kỳ | `{mssv: [{sinhVienId, namHocHocKyId, maNamHocHocKy, namHocHocKyTen, soTCTLHocKy (int), diemTBTLHocKy (string), soTCTLChung (string), diemTBTLChung (string), capNhatCuoi, code, msg}]}` — mới nhất trước |
 | `xu_ly_hoc_vu.json` | Xử lý học vụ (**giả định**) | `{mssv: [{maHocKy, hinhThucXuLy, lanLienTiep, lyDo, soQuyetDinh, ngayQuyetDinh, ...}]}` |
-| `accounts.json` | — | Tài khoản demo → MSSV, danh sách cố vấn của CVHT |
+| `accounts.json` | — | Tài khoản demo (mật khẩu `demo`, lưu dạng PBKDF2-SHA256) → MSSV, danh sách cố vấn của CVHT |
 | `reference.json` | — | CTĐT mô phỏng (128/130 TC), mã điểm đặc biệt, quy đổi chứng chỉ ngoại ngữ |
 
 ## Tính nhất quán
