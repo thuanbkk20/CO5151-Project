@@ -20,7 +20,10 @@ target-version = "py310"
 select = ["E", "F", "I", "B", "UP"]
 
 [tool.pytest.ini_options]
-addopts = "-q --import-mode=importlib"
+# Default (prepend) import mode: importlib mode would synthesize a `mcp` package from the
+# `mcp/` folder and shadow the MCP SDK. Keep test file names unique across packages.
+addopts = "-q"
+testpaths = ["packages/contracts/tests", "mcp/student-server/tests"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["co5151_contracts", "student_server"]
