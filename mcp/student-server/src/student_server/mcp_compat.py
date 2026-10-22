@@ -2,8 +2,12 @@
 
 Server side: build a server, optionally protected by Bearer-token auth (OAuth 2.1 resource-server
 pattern from the MCP authorization spec), and run it over stdio or Streamable HTTP.
+Client side: open an initialized Streamable HTTP session that sends `Authorization: Bearer <token>`
+(used by the host app / agents and by the end-to-end tests).
 """
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import Any
 
 try:  # mcp >= 2.0
@@ -15,6 +19,7 @@ except ImportError:  # mcp 1.x
 
     SDK_MAJOR = 1
 
+from mcp import ClientSession
 from mcp.server.auth.middleware.auth_context import get_access_token  # noqa: F401  (re-exported)
 from mcp.server.auth.provider import AccessToken
 from mcp.server.auth.settings import AuthSettings
@@ -70,3 +75,24 @@ def run(server: Any, transport: str, *, host: str, port: int) -> None:
         server.run(transport="streamable-http")
     else:
         server.run("streamable-http", host=host, port=port)
+
+
+@asynccontextmanager
+async def open_session(url: str, token: str | None = None, timeout: float = 30) -> AsyncIterator[ClientSession]:
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    if SDK_MAJOR == 2:
+        import httpx2
+        from mcp.client.streamable_http import streamable_http_client
+
+        async with httpx2.AsyncClient(headers=headers, timeout=timeout) as http:
+            async with streamable_http_client(url, http_client=http) as streams:
+                async with ClientSession(streams[0], streams[1]) as session:
+                    await session.initialize()
+                    yield session
+    else:
+        from mcp.client.streamable_http import streamablehttp_client
+
+        async with streamablehttp_client(url, headers=headers, timeout=timeout) as streams:
+            async with ClientSession(streams[0], streams[1]) as session:
+                await session.initialize()
+                yield session
