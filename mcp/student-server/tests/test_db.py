@@ -39,3 +39,13 @@ def test_file_backed_db_is_seeded_once(tmp_path):
     StudentDB(path).conn.close()
     again = StudentDB(path)
     assert again.conn.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 8
+
+
+def test_concurrent_reads_from_worker_threads(db):
+    """The MCP SDK runs sync tools in a thread pool; one shared connection must survive that."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    mssvs = ["2310001", "2310002", "2310003", "2210004", "2210005", "2410006", "2310007", "2510008"] * 25
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        names = list(pool.map(lambda m: (m, db.raw_profile(m)["userId"], len(db.raw_transcript(m))), mssvs))
+    assert all(m == uid and n > 0 for m, uid, n in names)

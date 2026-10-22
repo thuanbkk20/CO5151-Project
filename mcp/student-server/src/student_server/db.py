@@ -3,10 +3,13 @@
 Loads the mock API payloads (mockdata/*.json — same JSON shape as the university endpoints) into
 SQLite, keeping the raw columns. After seeding, the connection is switched to `PRAGMA query_only`,
 so nothing reachable from a tool can write to the store.
+
+The MCP SDK runs sync tools in worker threads, so the single connection is guarded by a lock.
 """
 
 import json
 import sqlite3
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +40,7 @@ class StudentDB:
     def __init__(self, path: str = ":memory:", data_dir: Path = MOCK_DIR):
         self.conn = sqlite3.connect(path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
+        self._lock = threading.RLock()
         self.ref = _load(data_dir, "reference")
         self._create()
         if self.conn.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 0:
@@ -72,17 +76,23 @@ class StudentDB:
         c.commit()
 
     # ---------------- raw (API-shaped) access ----------------
+    def _query(self, sql: str, params: tuple = ()) -> list[sqlite3.Row]:
+        with self._lock:
+            return self.conn.execute(sql, params).fetchall()
+
     def _rows(self, table: str, mssv: str) -> list[dict]:
         _, cols, _, order = _TABLES[table]
-        cur = self.conn.execute(f"SELECT {', '.join(cols)} FROM {table} WHERE mssv=? ORDER BY {order}", (mssv,))
-        return [dict(r) for r in cur]
+        return [
+            dict(r)
+            for r in self._query(f"SELECT {', '.join(cols)} FROM {table} WHERE mssv=? ORDER BY {order}", (mssv,))
+        ]
 
     def exists(self, mssv: str) -> bool:
-        return self.conn.execute("SELECT 1 FROM profiles WHERE mssv=?", (mssv,)).fetchone() is not None
+        return bool(self._query("SELECT 1 FROM profiles WHERE mssv=?", (mssv,)))
 
     def raw_profile(self, mssv: str) -> dict | None:
-        r = self.conn.execute("SELECT raw FROM profiles WHERE mssv=?", (mssv,)).fetchone()
-        return json.loads(r[0]) if r else None
+        r = self._query("SELECT raw FROM profiles WHERE mssv=?", (mssv,))
+        return json.loads(r[0][0]) if r else None
 
     def raw_transcript(self, mssv: str) -> list[dict]:
         return self._rows("diem_mon_hoc", mssv)
@@ -96,9 +106,9 @@ class StudentDB:
 
     # ---------------- accounts ----------------
     def account(self, username: str) -> dict | None:
-        r = self.conn.execute("SELECT * FROM accounts WHERE username=?", (username,)).fetchone()
+        r = self._query("SELECT * FROM accounts WHERE username=?", (username,))
         if not r:
             return None
-        d = dict(r)
+        d = dict(r[0])
         d["advisees"] = json.loads(d["advisees"] or "[]")
         return d
