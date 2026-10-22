@@ -80,9 +80,9 @@ target vẫn lấy từ token.
 from student_server.mcp_compat import open_session
 
 async with open_session("http://127.0.0.1:8102/mcp", token=session_token) as s:
-    tools = (await s.list_tools()).tools                 # name, description, inputSchema → function-calling schema
+    tools = (await s.list_tools()).tools  # name, description, inputSchema → function-calling schema
     res = await s.call_tool("get_my_academic_summary", {})
-    envelope = json.loads(res.content[0].text)           # {"ok": ..., "data" | "error": ...}
+    envelope = json.loads(res.content[0].text)  # {"ok": ..., "data" | "error": ...}
 ```
 
 **Trong tiến trình (test, eval offline):**
@@ -94,7 +94,7 @@ from student_server.auth import login
 
 svc = build_service(Settings.from_env())
 token = login(svc.db, svc.signer, "sv001", "demo")
-svc.call("get_my_transcript", token, {"semester": "20252"})   # → ToolResult
+svc.call("get_my_transcript", token, {"semester": "20252"})  # → ToolResult
 ```
 
 Gợi ý cho Advisor Agent:
