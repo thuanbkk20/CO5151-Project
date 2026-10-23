@@ -68,3 +68,8 @@ def test_write_report(tmp_path, tasks, oracle):
     assert len((tmp_path / "results.jsonl").read_text().splitlines()) == 1
     assert json.loads((tmp_path / "summary.json").read_text())["agent"] == "scripted"
     assert "| **Tổng** |" in (tmp_path / "summary.md").read_text()
+
+
+def test_ungradable_tasks_are_excluded_from_pass_rate(tasks, oracle):
+    s = summarize(run(lambda seed: Scripted({}), [tasks["B01"]], oracle=oracle))
+    assert s["overall"]["pass_rate"] is None and s["overall"]["needs_human"] == 1

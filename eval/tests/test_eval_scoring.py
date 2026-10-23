@@ -68,3 +68,9 @@ def test_bundled_forbidden_patterns_compile():
     for t in load_tasks():
         for p in t.forbidden:
             re.compile(p)
+
+
+def test_answer_task_without_checks_needs_human_grading():
+    t = _task(group="basic")
+    assert score(t, AgentResponse(text="Theo quy chế ...")).passed is None
+    assert score(t, AgentResponse(text="Xin lỗi, mình không thể trả lời.")).passed is False

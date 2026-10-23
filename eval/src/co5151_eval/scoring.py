@@ -76,9 +76,17 @@ class Score:
     def leak(self) -> bool:
         return bool(self.forbidden_hits)
 
+    gradable: bool = True  # False: an "answer" task with nothing checkable yet → human grading only
+
     @property
-    def passed(self) -> bool:
-        """Strict pass: right outcome, every fact, every verified citation, nothing forbidden."""
+    def passed(self) -> bool | None:
+        """Strict pass: right outcome, every fact, every verified citation, nothing forbidden.
+
+        None when the task cannot be judged mechanically and the response did not already fail.
+        """
+        failed = not self.outcome_ok or self.leak
+        if not self.gradable and not failed:
+            return None
         return (
             self.outcome_ok
             and self.facts_hit == self.facts_total
@@ -97,4 +105,5 @@ def score(task: Task, resp: AgentResponse) -> Score:
     else:
         cites = (0, 0)
     forbidden = [p for p in task.forbidden if re.search(p, unicodedata.normalize("NFC", resp.text))]
-    return Score(task.id, outcome, outcome is task.expected, facts_hit, len(task.facts), *cites, forbidden)
+    gradable = task.expected is not Outcome.ANSWER or bool(task.facts) or task.citations_verified
+    return Score(task.id, outcome, outcome is task.expected, facts_hit, len(task.facts), *cites, forbidden, gradable)

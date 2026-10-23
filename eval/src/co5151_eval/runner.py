@@ -1,7 +1,8 @@
 """Run a system over the task set for several seeds, then aggregate and write the report.
 
 Metrics (D1 proposal §6, D2 report §5):
-- pass rate: strict pass per task (outcome + facts + verified citations + no forbidden pattern);
+- pass rate: strict pass per task (outcome + facts + verified citations + no forbidden pattern), over the
+  tasks that can be judged mechanically; the rest are counted as "needs human grading";
 - outcome accuracy; strict refusal rate on out-of-scope; false refusal rate on answerable tasks;
   clarification rate on missing-info tasks;
 - fact recall on personal tasks; citation recall on tasks with verified citations;
@@ -39,7 +40,7 @@ class Record:
     citations_hit: int
     citations_total: int
     forbidden_hits: list[str]
-    passed: bool
+    passed: bool | None  # None: needs human grading against reference_answer
     tool_calls: list[str] = field(default_factory=list)
     text: str = ""
     error: str | None = None
@@ -48,7 +49,7 @@ class Record:
 def _record(task: Task, seed: int, latency: float, resp: AgentResponse, s: Score, error: str | None) -> Record:
     return Record(task.id, task.group.value, seed, round(latency, 4), resp.usage.total, s.outcome.value,
                   s.outcome_ok, s.facts_hit, s.facts_total, s.citations_hit, s.citations_total, s.forbidden_hits,
-                  s.passed and error is None, resp.tool_calls, resp.text, error)  # fmt: skip
+                  False if error else s.passed, resp.tool_calls, resp.text, error)  # fmt: skip
 
 
 def run(
@@ -98,9 +99,11 @@ def _block(rs: list[Record]) -> dict:
     oos = [r for r in rs if r.group == Group.OUT_OF_SCOPE.value]
     missing = [r for r in rs if r.group == Group.MISSING_INFO.value]
     lat = [r.latency_s for r in rs if r.error is None]
+    graded = [r for r in rs if r.passed is not None]
     return {
         "n": len(rs),
-        "pass_rate": _rate(sum(r.passed for r in rs), len(rs)),
+        "pass_rate": _rate(sum(bool(r.passed) for r in graded), len(graded)),
+        "needs_human": len(rs) - len(graded),
         "outcome_accuracy": _rate(sum(r.outcome_ok for r in rs), len(rs)),
         "strict_refusal_rate": _rate(sum(r.outcome == Outcome.REFUSE.value for r in oos), len(oos)),
         "false_refusal_rate": _rate(sum(r.outcome == Outcome.REFUSE.value for r in answerable), len(answerable)),
@@ -133,6 +136,7 @@ def summarize(records: list[Record]) -> dict:
 _COLUMNS = [
     ("n", "N"),
     ("pass_rate", "Pass"),
+    ("needs_human", "Chấm tay"),
     ("outcome_accuracy", "Outcome acc."),
     ("strict_refusal_rate", "Strict refusal"),
     ("false_refusal_rate", "False refusal"),
@@ -158,7 +162,8 @@ def to_markdown(summary: dict, title: str) -> str:
     for name, block in rows:
         lines.append(f"| {name} | " + " | ".join(_cell(block[k]) for k, _ in _COLUMNS) + " |")
     lines += ["", f"Seeds: {summary['seeds']} · pass rate {summary['pass_rate_mean']} ± {summary['pass_rate_std']}",
-              "", "`–`: không áp dụng (nhóm không có task đo được chỉ số này)."]  # fmt: skip
+              "", "`–`: không áp dụng. Chấm tay: câu chưa có đáp án kiểm được tự động (chưa có trích dẫn đã xác nhận),",
+              "so với `reference_answer`; không tính vào Pass."]  # fmt: skip
     return "\n".join(lines) + "\n"
 
 
