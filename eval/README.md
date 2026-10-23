@@ -63,6 +63,7 @@ Viết một factory `make_agent(seed) -> Agent` (xem `agent.py`):
 ```python
 from co5151_eval.agent import AgentResponse, Usage
 
+
 class AdvisorAdapter:
     name = "advisor"
 
@@ -73,8 +74,14 @@ class AdvisorAdapter:
         # session_token: token của tài khoản demo, gắn vào header Bearer khi mở session Student Record MCP.
         # Không đưa token vào prompt.
         ...
-        return AgentResponse(text=..., outcome="answer", citations=[...], tool_calls=[...],
-                             usage=Usage(input_tokens=..., output_tokens=...))
+        return AgentResponse(
+            text=...,
+            outcome="answer",
+            citations=[...],
+            tool_calls=[...],
+            usage=Usage(input_tokens=..., output_tokens=...),
+        )
+
 
 def make_agent(seed):
     return AdvisorAdapter(seed)
