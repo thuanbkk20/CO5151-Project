@@ -3,6 +3,7 @@
 co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2
 co5151-eval run --agent my_pkg.adapter:make_agent --only P01,O02
 co5151-eval check-gold
+co5151-eval security [--url http://127.0.0.1:8102/mcp]
 """
 
 import argparse
@@ -64,6 +65,16 @@ def cmd_check_gold(a) -> int:
     return 1 if problems else 0
 
 
+def cmd_security(a) -> int:
+    from . import security
+
+    results = security.run_suite(a.url)
+    print(security.to_markdown(results))
+    if a.json:
+        a.json.write_text(security.to_json(results), "utf-8")
+    return 0 if all(r.passed for r in results) else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="co5151-eval")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -81,6 +92,11 @@ def main(argv: list[str] | None = None) -> int:
     g = sub.add_parser("check-gold", help="đối chiếu đáp án facts với mock data của Student Record MCP")
     g.add_argument("--tasks")
     g.set_defaults(fn=cmd_check_gold)
+
+    s = sub.add_parser("security", help="kiểm thử tấn công tầng tool vào Student Record MCP qua HTTP")
+    s.add_argument("--url", help="server đang chạy (cần STUDENT_MCP_TOKEN_SECRET trùng); mặc định tự dựng server local")
+    s.add_argument("--json", type=Path, help="ghi thêm kết quả dạng JSON")
+    s.set_defaults(fn=cmd_security)
 
     a = p.parse_args(argv)
     return a.fn(a)
