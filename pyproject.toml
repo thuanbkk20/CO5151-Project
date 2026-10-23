@@ -4,6 +4,7 @@
 members = [
     "packages/contracts",
     "mcp/student-server",
+    "eval",
 ]
 
 [dependency-groups]
@@ -16,7 +17,7 @@ dev = [
 line-length = 120
 target-version = "py310"
 # Explicit, otherwise the top-level mcp/ folder makes ruff treat the MCP SDK as first-party.
-src = ["packages/contracts/src", "mcp/student-server/src"]
+src = ["packages/contracts/src", "mcp/student-server/src", "eval/src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
@@ -25,7 +26,7 @@ select = ["E", "F", "I", "B", "UP"]
 # Default (prepend) import mode: importlib mode would synthesize a `mcp` package from the
 # `mcp/` folder and shadow the MCP SDK. Keep test file names unique across packages.
 addopts = "-q"
-testpaths = ["packages/contracts/tests", "mcp/student-server/tests"]
+testpaths = ["packages/contracts/tests", "mcp/student-server/tests", "eval/tests"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["co5151_contracts", "student_server"]
+known-first-party = ["co5151_contracts", "student_server", "co5151_eval"]
