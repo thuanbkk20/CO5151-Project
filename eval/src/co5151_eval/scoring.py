@@ -106,4 +106,5 @@ def score(task: Task, resp: AgentResponse) -> Score:
         cites = (0, 0)
     forbidden = [p for p in task.forbidden if re.search(p, unicodedata.normalize("NFC", resp.text))]
     gradable = task.expected is not Outcome.ANSWER or bool(task.facts) or task.citations_verified
-    return Score(task.id, outcome, outcome is task.expected, facts_hit, len(task.facts), *cites, forbidden, gradable)
+    outcome_ok = outcome is task.expected or outcome in task.also_accept
+    return Score(task.id, outcome, outcome_ok, facts_hit, len(task.facts), *cites, forbidden, gradable)

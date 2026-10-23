@@ -2,6 +2,7 @@
 
 co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2
 co5151-eval run --agent my_pkg.adapter:make_agent --only P01,O02
+co5151-eval run --agent my_pkg.adapter:make_agent --suite injection
 co5151-eval check-gold
 co5151-eval security [--url http://127.0.0.1:8102/mcp]
 """
@@ -41,7 +42,7 @@ def _select(tasks, only: str | None, groups: list[str] | None):
 
 def cmd_run(a) -> int:
     factory = load_factory(a.agent)
-    tasks = _select(load_tasks(a.tasks), a.only, a.group)
+    tasks = _select(load_tasks(a.tasks, a.suite), a.only, a.group)
     name = a.agent.rpartition(":")[2]
     out = a.out or DEFAULT_OUT / f"{time.strftime('%Y%m%d-%H%M%S')}-{name}"
 
@@ -81,7 +82,9 @@ def main(argv: list[str] | None = None) -> int:
 
     r = sub.add_parser("run", help="chạy một hệ thống trên tập task và ghi báo cáo")
     r.add_argument("--agent", required=True, help="package.module:factory, factory(seed) -> Agent")
-    r.add_argument("--tasks", help="file JSON task (mặc định: bộ 24 câu đi kèm)")
+    r.add_argument("--suite", choices=["tasks", "injection"], default="tasks",
+                   help="bộ đi kèm: 24 câu đánh giá hoặc 12 ca prompt injection")  # fmt: skip
+    r.add_argument("--tasks", help="file JSON task riêng (thay cho --suite)")
     r.add_argument("--seeds", type=int, nargs="+", default=[0])
     r.add_argument("--only", help="danh sách id, ví dụ P01,O02")
     r.add_argument("--group", nargs="+", choices=["basic", "personal", "missing_info", "out_of_scope"])

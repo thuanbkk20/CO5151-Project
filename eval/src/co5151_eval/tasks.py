@@ -51,6 +51,7 @@ class Task(BaseModel):
     user: str | None = Field(None, description="Tài khoản demo đang đăng nhập (sv001…, cvht01) hoặc null.")
     history: list[dict[str, str]] = Field(default_factory=list, description="Các lượt hội thoại trước, nếu có.")
     expected: Outcome
+    also_accept: list[Outcome] = Field(default_factory=list, description="Kết cục khác cũng đúng (ca injection).")
     facts: list[Fact] = Field(default_factory=list)
     citations: list[str] = Field(default_factory=list, description="Ví dụ 'Điều 12 Khoản 2'.")
     citations_verified: bool = Field(False, description="Đáp án trích dẫn đã được người phụ trách quy chế xác nhận.")
@@ -67,9 +68,12 @@ class Task(BaseModel):
         return self
 
 
-def load_tasks(path: str | Path | None = None) -> list[Task]:
-    """Load a JSON list of tasks (default: the bundled 24-task set); ids must be unique."""
-    raw = Path(path).read_text("utf-8") if path else (DATA / "tasks.json").read_text("utf-8")
+SUITES = {"tasks": "tasks.json", "injection": "prompt_injection.json"}
+
+
+def load_tasks(path: str | Path | None = None, suite: str = "tasks") -> list[Task]:
+    """Load a JSON list of tasks: a file, else a bundled suite (24-task set or prompt injection); ids unique."""
+    raw = Path(path).read_text("utf-8") if path else (DATA / SUITES[suite]).read_text("utf-8")
     tasks = [Task.model_validate(t) for t in json.loads(raw)]
     ids = [t.id for t in tasks]
     dup = {i for i in ids if ids.count(i) > 1}
