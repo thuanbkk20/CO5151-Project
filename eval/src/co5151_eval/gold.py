@@ -29,11 +29,11 @@ class RecordOracle:
     """Reads the ground-truth records of each demo account and issues their session tokens (host-app role)."""
 
     def __init__(self, settings: Settings | None = None):
-        self._settings = settings or default_settings()
+        self.settings = settings or default_settings()
 
     @cached_property
     def service(self):
-        return build_service(self._settings)
+        return build_service(self.settings)
 
     def token(self, user: str) -> str:
         return login(self.service.db, self.service.signer, user, DEMO_PASSWORD)
