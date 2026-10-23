@@ -5,6 +5,7 @@ mcp/student-server/README.md — so a regenerated mock dataset that changes a pe
 instead of silently invalidating the benchmark.
 """
 
+import os
 from functools import cached_property
 
 from student_server.auth import login
@@ -14,13 +15,21 @@ from student_server.server import build_service
 from .tasks import Task
 
 DEMO_PASSWORD = "demo"
+EVAL_SECRET = b"eval-local-secret"
+
+
+def default_settings() -> Settings:
+    """Shared secret of the deployment under test if set (tokens must verify there), else a local one."""
+    if os.environ.get("STUDENT_MCP_TOKEN_SECRET"):
+        return Settings.from_env()
+    return Settings(token_secret=EVAL_SECRET)
 
 
 class RecordOracle:
-    """Reads the ground-truth summary and warning history of each demo account."""
+    """Reads the ground-truth records of each demo account and issues their session tokens (host-app role)."""
 
     def __init__(self, settings: Settings | None = None):
-        self._settings = settings or Settings(token_secret=b"eval-oracle")
+        self._settings = settings or default_settings()
 
     @cached_property
     def service(self):
