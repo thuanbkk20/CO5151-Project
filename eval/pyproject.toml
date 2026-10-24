@@ -1,0 +1,24 @@
+[project]
+name = "co5151-eval"
+version = "0.1.0"
+description = "Evaluation harness: 24-task benchmark, metrics, baselines and security / prompt-injection suites"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "co5151-contracts",
+    "co5151-student-server",
+]
+
+[project.scripts]
+co5151-eval = "co5151_eval.cli:main"
+
+[tool.uv.sources]
+co5151-contracts = { workspace = true }
+co5151-student-server = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/co5151_eval"]

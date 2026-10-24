@@ -26,3 +26,6 @@ htmlcov/
 .vscode/
 .idea/
 .DS_Store
+
+# Evaluation runs (regenerate with co5151-eval run)
+eval/results/
