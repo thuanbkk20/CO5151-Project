@@ -114,3 +114,61 @@ class DecisionPlanner:
 
         # Fallback for unrecognized/vague requests
         return Action.CLARIFY
+
+
+class LayaDecisionPlanner:
+    """Option: Non-autoregressive System 1 decision engine using Laya (https://github.com/NandhaKishorM/laya).
+
+    Design Rationale:
+    -----------------
+    Instead of relying on an autoregressive LLM (e.g., GPT/Kimi) or hardcoded regex rules for decision
+    planning, Laya operates as a fast, calibrated, non-autoregressive decision engine that maps textual
+    inputs directly into typed enum choices (Action) in a single forward pass (~20-40ms, < 1GB RAM).
+
+    How Laya is used for Decision-driven RAG routing:
+    ------------------------------------------------
+    1. Input Context Framing:
+       Construct a structured context string encoding:
+       - user_query: student's question
+       - evidence_state: [has_summary: bool, has_regulations: bool, has_warnings: bool]
+       - privacy_flags: detected external student_id or cross-student intent
+
+    2. Typed Action Decision (Single Forward Pass):
+       choices = [Action.SUMMARY, Action.WARNINGS, Action.REGULATIONS, Action.CLARIFY, Action.REFUSE, Action.RESPOND]
+       result = laya_model.predict_choice(
+           text=context_string,
+           choices=choices,
+       )
+       -> Returns predicted Action with calibrated confidence score (e.g., Action.SUMMARY: 0.94)
+
+    3. Fast-path Guardrails:
+       Laya also acts as an ultra-fast guardrail (predict_yes_no for prompt injection / leak risks).
+
+    Note:
+    -----
+    This class is provided as an architectural stub / option specification and does not require installing
+    `laya` in the core runtime environment until activated.
+    """
+
+    def __init__(self, model_name: str = "laya/router-v1", confidence_threshold: float = 0.75):
+        self.model_name = model_name
+        self.confidence_threshold = confidence_threshold
+        self._fallback_planner = DecisionPlanner()
+
+    def next_action(
+        self,
+        question: str,
+        evidence: Evidence | None = None,
+        history: list[dict[str, str]] | None = None,
+    ) -> Action:
+        """Route to Action using Laya model if installed, otherwise fallback to deterministic rules."""
+        try:
+            # When laya is installed:
+            # from laya import Laya
+            # model = Laya(self.model_name)
+            # return self._predict_with_laya(model, question, evidence, history)
+            pass
+        except ImportError:
+            pass
+
+        return self._fallback_planner.next_action(question, evidence, history)

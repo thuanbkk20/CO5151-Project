@@ -5,7 +5,7 @@ from .eval_adapter import make_agent
 from .executor import StudentExecutionResult, StudentExecutor
 from .llm import CANARY_STRING, LLMClient
 from .memory import DecisionTrace, MemoryGate, MemoryItem
-from .planner import Action, DecisionPlanner, Evidence, Plan
+from .planner import Action, DecisionPlanner, Evidence, LayaDecisionPlanner, Plan
 from .regulations import RegulationDocument, RegulationSource, StaticRegulationSource
 
 __all__ = [
@@ -16,6 +16,7 @@ __all__ = [
     "DecisionTrace",
     "Evidence",
     "LLMClient",
+    "LayaDecisionPlanner",
     "MemoryGate",
     "MemoryItem",
     "Plan",
