@@ -1,0 +1,12 @@
+{
+  "source_documents": 5,
+  "segmented_regulation_documents": 3,
+  "segments": 68,
+  "base_articles": 14,
+  "version_relations": 19,
+  "graph_nodes": 73,
+  "graph_edges": 116,
+  "ocr_heading_label_reviews": 3,
+  "all_content_unverified": true,
+  "active_mcp_graph_updated": false
+}

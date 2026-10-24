@@ -1,0 +1,33 @@
+[
+  {
+    "id": "QD2933-2021-CL5.4",
+    "issue": "OCR heading label differs from PDF",
+    "ocr_label": "3.4",
+    "pdf_label": "5.4"
+  },
+  {
+    "id": "QD2933-2021-CL8.1",
+    "issue": "OCR heading label differs from PDF",
+    "ocr_label": "81",
+    "pdf_label": "8.1"
+  },
+  {
+    "id": "QD2933-2021-CL8.3",
+    "issue": "OCR heading label differs from PDF",
+    "ocr_label": "§.3",
+    "pdf_label": "8.3"
+  },
+  {
+    "id": "TERM-REPLACEMENT",
+    "source_provision_id": "QD1260-2026-DECISION-ART2",
+    "issue": "Review terminology replacement at clauses 4.1/4.2 and Appendix 6 together with repeal of Article 4; no automatic historical text rewrite."
+  },
+  {
+    "id": "COVERAGE",
+    "issue": "Only selected changes in the supplied documents are mapped. General regulation, other amendments and handbook/FAQ clause segmentation are not complete."
+  },
+  {
+    "id": "TRANSITION",
+    "issue": "Original Appendix 8 contains cohort/semester transitional rules; must review before resolving applicability."
+  }
+]

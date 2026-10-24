@@ -1,0 +1,203 @@
+{
+  "search_regulations": {
+    "$defs": {
+      "Context": {
+        "additionalProperties": false,
+        "properties": {
+          "program": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Program"
+          },
+          "cohort": {
+            "anyOf": [
+              {
+                "maximum": 2100,
+                "minimum": 1990,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cohort"
+          },
+          "semester": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Semester"
+          },
+          "as_of_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "As Of Date"
+          }
+        },
+        "title": "Context",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "query": {
+        "maxLength": 2000,
+        "minLength": 1,
+        "title": "Query",
+        "type": "string"
+      },
+      "top_k": {
+        "default": 3,
+        "maximum": 5,
+        "minimum": 1,
+        "title": "Top K",
+        "type": "integer"
+      },
+      "hops": {
+        "default": 2,
+        "maximum": 3,
+        "minimum": 0,
+        "title": "Hops",
+        "type": "integer"
+      },
+      "context": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Context"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "required": [
+      "query"
+    ],
+    "title": "SearchInput",
+    "type": "object"
+  },
+  "get_provision": {
+    "$defs": {
+      "Context": {
+        "additionalProperties": false,
+        "properties": {
+          "program": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Program"
+          },
+          "cohort": {
+            "anyOf": [
+              {
+                "maximum": 2100,
+                "minimum": 1990,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cohort"
+          },
+          "semester": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Semester"
+          },
+          "as_of_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "As Of Date"
+          }
+        },
+        "title": "Context",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "provision_id": {
+        "maxLength": 200,
+        "minLength": 1,
+        "title": "Provision Id",
+        "type": "string"
+      },
+      "hops": {
+        "default": 2,
+        "maximum": 3,
+        "minimum": 0,
+        "title": "Hops",
+        "type": "integer"
+      },
+      "context": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Context"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "required": [
+      "provision_id"
+    ],
+    "title": "ProvisionInput",
+    "type": "object"
+  }
+}

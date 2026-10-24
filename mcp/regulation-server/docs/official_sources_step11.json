@@ -1,0 +1,34 @@
+[
+  {
+    "file_name": "HCMUT_QD2933_2021.pdf",
+    "document_number": "2933/QĐ-ĐHBK",
+    "issue_date": "2021-09-10",
+    "source_url": "https://drive.google.com/file/d/1k68Nvfm8QUjC6Dry84PlE_ZzIeXtXmvN/view",
+    "discovery_page": "https://mybk.hcmut.edu.vn/bksi/public/vi/blog/quy-che---quy-dinh",
+    "linked_folder": "https://drive.google.com/drive/folders/1cL0f1uaKJ7hF3QXuyZZAiOlzytj6fTbE",
+    "downloaded_at_utc": "2026-10-24T14:36:59.120698+00:00",
+    "sha256": "8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb",
+    "size_bytes": 13692083,
+    "page_count": 48,
+    "pages_without_text": 48,
+    "first_page_identity_visually_checked": true,
+    "digital_signature_validated": false,
+    "all_provisions_reviewed": false
+  },
+  {
+    "file_name": "HCMUT_QD1260_2026.pdf",
+    "document_number": "1260/QĐ-ĐHBK",
+    "issue_date": "2026-03-16",
+    "source_url": "https://drive.google.com/file/d/1Qingbecnl6u4cGmayPmrELFkBIdYvVlr/view",
+    "discovery_page": "https://mybk.hcmut.edu.vn/bksi/public/vi/blog/quy-che---quy-dinh",
+    "linked_folder": "https://drive.google.com/drive/folders/1cL0f1uaKJ7hF3QXuyZZAiOlzytj6fTbE",
+    "downloaded_at_utc": "2026-10-24T14:36:59.183529+00:00",
+    "sha256": "71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "size_bytes": 1048987,
+    "page_count": 21,
+    "pages_without_text": 0,
+    "first_page_identity_visually_checked": true,
+    "digital_signature_validated": false,
+    "all_provisions_reviewed": false
+  }
+]

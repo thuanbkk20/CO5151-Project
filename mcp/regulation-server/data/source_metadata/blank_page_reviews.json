@@ -1,0 +1,12 @@
+[
+  {
+    "unit_id": "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:48",
+    "source_id": "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb",
+    "pdf_page": 48,
+    "assessment": "visually_blank",
+    "review_method": "rendered_pdf_visual_inspection",
+    "reviewer": "assistant",
+    "note": "Trang PDF 48 gần như trắng, có chữ hằn mờ/ngược từ mặt sau. Không khôi phục thành nội dung quy chế. Giữ vị trí trang và kết quả OCR rỗng; không bỏ trang khỏi kiểm kê.",
+    "legal_content_verified": false
+  }
+]
