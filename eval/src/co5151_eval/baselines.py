@@ -1,13 +1,3 @@
-"""Non-LLM reference systems. They are floors and smoke tests for the harness, not the D1 baselines.
-
-The D1 baselines (zero-shot LLM, one-step RAG, single agent without Verifier) live with the agent code
-and plug in through the same `make_agent(seed)` factory.
-
-- refuse_all: refuses everything — upper bound on strict refusal, zero on everything else.
-- record_template: reads the logged-in student's summary and prints it — knows the facts, knows no
-  regulation, never refuses or asks back. Shows how far "data without reasoning" gets.
-"""
-
 from .agent import AgentResponse
 from .gold import RecordOracle
 from .tasks import Outcome

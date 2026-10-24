@@ -19,7 +19,6 @@ def test_run_record_template(tmp_path, capsys):
     assert rc == 0
     summary = json.loads((tmp_path / "summary.json").read_text())
     personal = summary["by_group"]["personal"]
-    # Facts come straight from the record, but there is no regulation reasoning and no refusal.
     assert personal["n"] == 16 and personal["fact_recall"] > 0.5
     assert summary["by_group"]["out_of_scope"]["strict_refusal_rate"] == 0.0
     assert "| **Tổng** |" in capsys.readouterr().out

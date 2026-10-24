@@ -1,5 +1,3 @@
-"""Runs the whole security suite against a local Student Record MCP over real HTTP."""
-
 import json
 
 import pytest

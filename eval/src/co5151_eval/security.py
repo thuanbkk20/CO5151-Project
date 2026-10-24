@@ -1,13 +1,3 @@
-"""Black-box security suite for the Student Record MCP, run over real Streamable HTTP.
-
-Each case is one attack an untrusted caller can attempt at the tool layer (forged / tampered / expired
-tokens, cross-student reads, argument injection, enumeration, data minimization). The suite either
-boots a local server on a free port or targets `--url` (then STUDENT_MCP_TOKEN_SECRET must match the
-server, because the harness plays the host app that issues session tokens).
-
-The result table feeds the threat model in the D2 report (docs/threat-model.md).
-"""
-
 import base64
 import json
 import socket
@@ -50,12 +40,7 @@ class Case:
     check: Callable[["Probe"], tuple[str, bool]]
 
 
-# ---------------------------------------------------------------- transport helpers
-
-
 class Probe:
-    """What a case may do: raw HTTP to the endpoint, or tool calls through the MCP client SDK."""
-
     def __init__(self, url: str, oracle: RecordOracle):
         self.url = url
         self.oracle = oracle
@@ -67,7 +52,6 @@ class Probe:
         return self._tokens[user]
 
     def status(self, token: str | None) -> int:
-        """HTTP status of an MCP `initialize` sent with this bearer token (None = no header)."""
         init = {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "eval", "version": "0"}}
         body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": init}).encode()
         headers = {"Content-Type": "application/json", "Accept": "application/json, text/event-stream"}
@@ -101,7 +85,6 @@ def _b64(b: bytes) -> str:
 
 
 def tamper(token: str, **changes) -> str:
-    """Rewrite claims in the payload but keep the original signature (what an attacker can do)."""
     payload, sig = token.split(".")
     claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
     claims.update(changes)
@@ -160,7 +143,6 @@ def _minimized_profile(p: Probe):
 
 
 def _input_schema(tool) -> dict:
-    """`input_schema` in MCP SDK 2.x, `inputSchema` in 1.x."""
     return getattr(tool, "input_schema", None) or getattr(tool, "inputSchema", None) or {}
 
 
@@ -229,9 +211,6 @@ CASES: list[Case] = [
 ]  # fmt: skip
 
 
-# ---------------------------------------------------------------- running
-
-
 def _free_port() -> int:
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
@@ -240,8 +219,7 @@ def _free_port() -> int:
 
 @contextmanager
 def local_server(oracle: RecordOracle) -> Iterator[str]:
-    """Serve the oracle's Student Record service over Streamable HTTP on a free localhost port."""
-    import uvicorn  # installed with the MCP SDK; imported lazily like the server CLI does
+    import uvicorn
 
     settings = replace(oracle.settings, host="127.0.0.1", port=_free_port())
     app = mcp_compat.http_app(build_server(oracle.service, settings))
@@ -266,7 +244,7 @@ def run_cases(url: str, oracle: RecordOracle, cases: list[Case] = CASES) -> list
     for c in cases:
         try:
             observed, passed = c.check(probe)
-        except Exception as e:  # a crash is a finding, not a harness failure
+        except Exception as e:
             observed, passed = f"exception {type(e).__name__}: {e}", False
         results.append(Outcome(c.id, c.entry_point, c.attack, c.expected, observed, passed))
     return results

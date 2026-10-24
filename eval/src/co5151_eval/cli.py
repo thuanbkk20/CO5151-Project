@@ -1,12 +1,3 @@
-"""`co5151-eval` command line.
-
-co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2
-co5151-eval run --agent my_pkg.adapter:make_agent --only P01,O02
-co5151-eval run --agent my_pkg.adapter:make_agent --suite injection
-co5151-eval check-gold
-co5151-eval security [--url http://127.0.0.1:8102/mcp]
-"""
-
 import argparse
 import importlib
 import sys
@@ -21,7 +12,6 @@ DEFAULT_OUT = Path("eval/results")
 
 
 def load_factory(spec: str):
-    """'package.module:attr' → the agent factory."""
     module, _, attr = spec.partition(":")
     if not attr:
         raise SystemExit(f"--agent must look like package.module:factory, got {spec!r}")

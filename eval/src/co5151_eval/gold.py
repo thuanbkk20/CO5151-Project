@@ -1,10 +1,3 @@
-"""Gold facts are copied into tasks.json by hand; this module checks them against the mock records.
-
-It reads records through the Student Record service in-process — the integration path documented in
-mcp/student-server/README.md — so a regenerated mock dataset that changes a persona fails the check
-instead of silently invalidating the benchmark.
-"""
-
 import os
 from functools import cached_property
 
@@ -19,15 +12,12 @@ EVAL_SECRET = b"eval-local-secret"
 
 
 def default_settings() -> Settings:
-    """Shared secret of the deployment under test if set (tokens must verify there), else a local one."""
     if os.environ.get("STUDENT_MCP_TOKEN_SECRET"):
         return Settings.from_env()
     return Settings(token_secret=EVAL_SECRET)
 
 
 class RecordOracle:
-    """Reads the ground-truth records of each demo account and issues their session tokens (host-app role)."""
-
     def __init__(self, settings: Settings | None = None):
         self.settings = settings or default_settings()
 
@@ -45,7 +35,6 @@ class RecordOracle:
         return res.data
 
     def actual(self, user: str, field: str) -> list:
-        """All values of `field` for `user`; `warnings.<attr>` ranges over the warning history."""
         if field.startswith("warnings."):
             attr = field.removeprefix("warnings.")
             return [getattr(w, attr) for w in self._data("get_my_warnings", user).history]
@@ -53,7 +42,6 @@ class RecordOracle:
 
 
 def check_gold(tasks: list[Task], oracle: RecordOracle | None = None) -> list[str]:
-    """Return one message per fact that no longer matches the mock records (empty = all good)."""
     oracle = oracle or RecordOracle()
     problems = []
     for t in tasks:

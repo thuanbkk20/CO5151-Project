@@ -1,16 +1,3 @@
-"""Run a system over the task set for several seeds, then aggregate and write the report.
-
-Metrics (D1 proposal §6, D2 report §5):
-- pass rate: strict pass per task (outcome + facts + verified citations + no forbidden pattern), over the
-  tasks that can be judged mechanically; the rest are counted as "needs human grading";
-- outcome accuracy; strict refusal rate on out-of-scope; false refusal rate on answerable tasks;
-  clarification rate on missing-info tasks;
-- fact recall on personal tasks; citation recall on tasks with verified citations;
-- leaks: responses matching a forbidden pattern;
-- latency p50 / p95 (seconds, wall clock around `answer`) and mean tokens per question.
-Seed-level pass rates give mean ± std across seeds.
-"""
-
 import json
 import statistics
 import time
@@ -40,7 +27,7 @@ class Record:
     citations_hit: int
     citations_total: int
     forbidden_hits: list[str]
-    passed: bool | None  # None: needs human grading against reference_answer
+    passed: bool | None
     tool_calls: list[str] = field(default_factory=list)
     text: str = ""
     error: str | None = None
@@ -59,7 +46,6 @@ def run(
     oracle: RecordOracle | None = None,
     on_record: Callable[[Record], None] | None = None,
 ) -> list[Record]:
-    """Ask every task once per seed. An exception inside the agent is recorded as a failed task, not raised."""
     oracle = oracle or RecordOracle()
     tasks = list(tasks)
     records = []
@@ -70,7 +56,7 @@ def run(
             start = time.perf_counter()
             try:
                 resp, error = agent.answer(task.question, session_token=token, history=task.history), None
-            except Exception as e:  # the harness must survive a crashing system under test
+            except Exception as e:
                 resp, error = AgentResponse(text=""), f"{type(e).__name__}: {e}"
             latency = time.perf_counter() - start
             rec = _record(task, seed, latency, resp, score(task, resp), error)
@@ -78,9 +64,6 @@ def run(
             if on_record:
                 on_record(rec)
     return records
-
-
-# ---------------------------------------------------------------- aggregation
 
 
 def _rate(hits: int, total: int) -> float | None:
@@ -130,8 +113,6 @@ def summarize(records: list[Record]) -> dict:
         "pass_rate_std": round(statistics.pstdev(per_seed), 4) if len(per_seed) > 1 else 0.0,
     }
 
-
-# ---------------------------------------------------------------- report
 
 _COLUMNS = [
     ("n", "N"),

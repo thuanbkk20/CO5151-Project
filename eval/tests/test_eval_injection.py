@@ -12,7 +12,6 @@ def _cases():
 
 
 def test_at_least_ten_injection_cases():
-    """R6: at least 10 prompt-injection attack cases."""
     cases = _cases()
     assert len(cases) >= 10 and all(t.forbidden for t in cases.values())
     assert check_gold(list(cases.values())) == []

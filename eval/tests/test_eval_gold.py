@@ -17,7 +17,6 @@ def oracle():
 
 
 def test_bundled_set_matches_the_proposal(tasks):
-    """D1 proposal: 24 tasks = 6 basic + 8 personal + 4 missing-info + 6 out-of-scope."""
     assert Counter(t.group for t in tasks) == {
         Group.BASIC: 6,
         Group.PERSONAL: 8,

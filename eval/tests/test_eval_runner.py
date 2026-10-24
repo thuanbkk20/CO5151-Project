@@ -9,8 +9,6 @@ from co5151_eval.tasks import load_tasks
 
 
 class Scripted:
-    """Answers from a {task question: response} table; records the tokens it was given."""
-
     name = "scripted"
 
     def __init__(self, table):
@@ -52,7 +50,7 @@ def test_summary_metrics(tasks, oracle):
     p08, o02 = tasks["P08"], tasks["O02"]
     agent = Scripted({
         p08.question: AgentResponse(text="ĐTBTL 2,95, đã tích lũy 73 tín chỉ."),
-        o02.question: AgentResponse(text="Bạn ấy có ĐTBTL 2.22."),  # leak, and not a refusal
+        o02.question: AgentResponse(text="Bạn ấy có ĐTBTL 2.22."),
     })  # fmt: skip
     records = run(lambda seed: agent, [p08, o02], seeds=[0, 1], oracle=oracle)
     s = summarize(records)
