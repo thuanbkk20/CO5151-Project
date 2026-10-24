@@ -1,8 +1,17 @@
+import json
+import logging
+import os
 import re
 import unicodedata
+import urllib.error
+import urllib.request
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_LAYA_SERVER_URL = "http://127.0.0.1:8000/v1/systemone"
 
 
 class Action(str, Enum):
@@ -117,7 +126,7 @@ class DecisionPlanner:
 
 
 class LayaDecisionPlanner:
-    """Option: Non-autoregressive System 1 decision engine using Laya (https://github.com/NandhaKishorM/laya).
+    """Non-autoregressive System 1 decision engine using Laya (https://github.com/NandhaKishorM/laya).
 
     Design Rationale:
     -----------------
@@ -128,32 +137,29 @@ class LayaDecisionPlanner:
     How Laya is used for Decision-driven RAG routing:
     ------------------------------------------------
     1. Input Context Framing:
-       Construct a structured context string encoding:
+       Construct a structured context string/dict encoding:
        - user_query: student's question
        - evidence_state: [has_summary: bool, has_regulations: bool, has_warnings: bool]
        - privacy_flags: detected external student_id or cross-student intent
 
     2. Typed Action Decision (Single Forward Pass):
-       choices = [Action.SUMMARY, Action.WARNINGS, Action.REGULATIONS, Action.CLARIFY, Action.REFUSE, Action.RESPOND]
-       result = laya_model.predict_choice(
-           text=context_string,
-           choices=choices,
-       )
-       -> Returns predicted Action with calibrated confidence score (e.g., Action.SUMMARY: 0.94)
+       Sends POST request to Laya /v1/systemone Jev API endpoint.
+       Laya evaluates typed choices over Action enum and returns the selected action with confidence.
 
-    3. Fast-path Guardrails:
-       Laya also acts as an ultra-fast guardrail (predict_yes_no for prompt injection / leak risks).
-
-    Note:
-    -----
-    This class is provided as an architectural stub / option specification and does not require installing
-    `laya` in the core runtime environment until activated.
+    3. Fast-path Guardrails & Fallback:
+       - Instantly enforces privacy guardrails on cross-student requests.
+       - Gracefully falls back to deterministic rules if Laya server is unreachable.
     """
 
-    def __init__(self, model_name: str = "laya/router-v1", confidence_threshold: float = 0.75):
-        self.model_name = model_name
-        self.confidence_threshold = confidence_threshold
-        self._fallback_planner = DecisionPlanner()
+    def __init__(
+        self,
+        server_url: str | None = None,
+        timeout: float = 1.0,
+        fallback_planner: DecisionPlanner | None = None,
+    ):
+        self.server_url = server_url or os.environ.get("LAYA_SERVER_URL") or DEFAULT_LAYA_SERVER_URL
+        self.timeout = timeout
+        self._fallback_planner = fallback_planner or DecisionPlanner()
 
     def next_action(
         self,
@@ -161,14 +167,74 @@ class LayaDecisionPlanner:
         evidence: Evidence | None = None,
         history: list[dict[str, str]] | None = None,
     ) -> Action:
-        """Route to Action using Laya model if installed, otherwise fallback to deterministic rules."""
-        try:
-            # When laya is installed:
-            # from laya import Laya
-            # model = Laya(self.model_name)
-            # return self._predict_with_laya(model, question, evidence, history)
-            pass
-        except ImportError:
-            pass
+        """Route to Action using Laya System 1 model over HTTP, falling back to deterministic rules."""
+        # Fast-path Guardrail: refuse cross-student queries immediately
+        if any(p.search(question) for p in self._fallback_planner.REFUSE_PATTERNS):
+            return Action.REFUSE
+
+        # Sequential state transitions:
+        norm_q = _normalize(question)
+        if any(k in norm_q for k in self._fallback_planner.GRADUATION_KEYWORDS):
+            if evidence and evidence.has_academic_summary and not evidence.has_regulations:
+                return Action.REGULATIONS
+            if evidence and evidence.has_regulations:
+                return Action.RESPOND
+
+        if any(k in norm_q for k in self._fallback_planner.WARNING_KEYWORDS):
+            if evidence and evidence.has_warnings:
+                return Action.RESPOND
+
+        if any(k in norm_q for k in self._fallback_planner.SUMMARY_KEYWORDS):
+            if evidence and evidence.has_academic_summary:
+                return Action.RESPOND
+
+        # Call Laya System 1 decision engine over HTTP
+        predicted_action = self._call_laya_api(question, evidence)
+        if predicted_action is not None:
+            return predicted_action
 
         return self._fallback_planner.next_action(question, evidence, history)
+
+    def _call_laya_api(self, question: str, evidence: Evidence | None = None) -> Action | None:
+        state_data = {
+            "body": question,
+            "has_summary": bool(evidence and evidence.has_academic_summary),
+            "has_regulations": bool(evidence and evidence.has_regulations),
+            "has_warnings": bool(evidence and evidence.has_warnings),
+        }
+        payload = {
+            "state": state_data,
+            "questions": {
+                "action": {
+                    "type": "choice",
+                    "instructions": "Determine the next action for student academic advising",
+                    "criteria": {
+                        "SUMMARY": "query academic summary, credits earned, gpa",
+                        "WARNINGS": "academic warnings, probation",
+                        "REGULATIONS": "search training regulations",
+                        "CLARIFY": "vague questions needing clarification",
+                        "REFUSE": "asking about other students or disallowed requests",
+                        "RESPOND": "synthesize final answer",
+                    },
+                }
+            },
+        }
+
+        try:
+            req = urllib.request.Request(
+                self.server_url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    choice = data.get("answers", {}).get("action", {}).get("choice")
+                    if choice and choice in Action.__members__:
+                        return Action[choice]
+        except Exception as e:
+            logger.debug("Laya decision call failed (falling back): %s", e)
+            return None
+
+        return None

@@ -1,3 +1,4 @@
+import os
 import time
 from typing import Any
 
@@ -6,7 +7,7 @@ from co5151_eval.agent import AgentResponse, Outcome, Usage
 from .executor import StudentExecutor
 from .llm import CANARY_STRING, LLMClient
 from .memory import DecisionTrace, MemoryGate
-from .planner import Action, DecisionPlanner, Evidence
+from .planner import Action, DecisionPlanner, Evidence, LayaDecisionPlanner
 from .regulations import RegulationDocument, RegulationSource, StaticRegulationSource
 
 
@@ -21,13 +22,21 @@ class AdvisorAgent:
         regulation_source: RegulationSource | None = None,
         memory_gate: MemoryGate | None = None,
         llm_client: LLMClient | None = None,
+        planner: DecisionPlanner | LayaDecisionPlanner | None = None,
     ):
         self.service = service
         self.executor = StudentExecutor(service)
         self.regulation_source = regulation_source or StaticRegulationSource()
         self.memory_gate = memory_gate or MemoryGate()
         self.llm_client = llm_client
-        self.planner = DecisionPlanner()
+        if planner is not None:
+            self.planner = planner
+        else:
+            mode = os.environ.get("ADVISOR_PLANNER_MODE", "rule").strip().lower()
+            if mode == "laya":
+                self.planner = LayaDecisionPlanner()
+            else:
+                self.planner = DecisionPlanner()
         self.traces: list[DecisionTrace] = []
 
     def answer(
