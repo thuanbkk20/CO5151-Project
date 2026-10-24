@@ -8,6 +8,7 @@ dependencies = [
     "co5151-contracts",
     "co5151-student-server",
     "co5151-eval",
+    "openai>=1.0",
     "pydantic>=2",
 ]
 

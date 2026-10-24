@@ -4,6 +4,7 @@ from typing import Any
 from co5151_eval.agent import AgentResponse, Outcome, Usage
 
 from .executor import StudentExecutor
+from .llm import CANARY_STRING, LLMClient
 from .memory import DecisionTrace, MemoryGate
 from .planner import Action, DecisionPlanner, Evidence
 from .regulations import RegulationDocument, RegulationSource, StaticRegulationSource
@@ -19,11 +20,13 @@ class AdvisorAgent:
         service: Any,
         regulation_source: RegulationSource | None = None,
         memory_gate: MemoryGate | None = None,
+        llm_client: LLMClient | None = None,
     ):
         self.service = service
         self.executor = StudentExecutor(service)
         self.regulation_source = regulation_source or StaticRegulationSource()
         self.memory_gate = memory_gate or MemoryGate()
+        self.llm_client = llm_client
         self.planner = DecisionPlanner()
         self.traces: list[DecisionTrace] = []
 
@@ -135,16 +138,33 @@ class AdvisorAgent:
 
             if action == Action.RESPOND:
                 self.traces.append(DecisionTrace(action="RESPOND", sources=[], created_at=time.time()))
-                response_text = self._synthesize_response(question, evidence, matched_regulations)
+                usage = Usage(input_tokens=50, output_tokens=50)
+                response_text = ""
+
+                if self.llm_client and self.llm_client.is_available:
+                    prompt = self._build_llm_prompt(question, evidence, matched_regulations)
+                    llm_res = self.llm_client.generate(prompt, history=history)
+                    if llm_res and llm_res.text:
+                        response_text = llm_res.text
+                        usage = Usage(input_tokens=llm_res.input_tokens, output_tokens=llm_res.output_tokens)
+
+                if not response_text:
+                    response_text = self._synthesize_response(question, evidence, matched_regulations)
+
+                # Defense against canary leak (R6)
+                if CANARY_STRING in response_text:
+                    response_text = response_text.replace(CANARY_STRING, "")
+
                 # Sanitize to guarantee session token is NEVER echoed
                 if session_token and session_token in response_text:
                     response_text = response_text.replace(session_token, "[REDACTED_TOKEN]")
+
                 return AgentResponse(
                     text=response_text,
                     outcome=Outcome.ANSWER,
                     tool_calls=tool_calls,
                     citations=citations,
-                    usage=Usage(input_tokens=50, output_tokens=50),
+                    usage=usage,
                 )
 
         return AgentResponse(
@@ -153,6 +173,42 @@ class AdvisorAgent:
             tool_calls=tool_calls,
             citations=citations,
         )
+
+    def _build_llm_prompt(
+        self,
+        question: str,
+        evidence: Evidence,
+        regulations: list[RegulationDocument],
+    ) -> str:
+        prompt_parts = [f"Câu hỏi của sinh viên: {question}\n\nBằng chứng học vụ cá nhân đã xác thực:"]
+        if evidence.has_academic_summary:
+            prompt_parts.append(
+                f"- Tín chỉ tích lũy: {evidence.credits_earned}/{evidence.program_credits}\n"
+                f"- Điểm TB tích lũy (CGPA thang 4): {evidence.cgpa}\n"
+                f"- Quy chế áp dụng: {evidence.ctdt}\n"
+                f"- Đồ án chuyên ngành: {'Đã đạt' if evidence.capstone_project_passed else 'Chưa đạt'}\n"
+                f"- GDTC: {'Hoàn thành' if evidence.gdtc_completed else 'Chưa hoàn thành'}\n"
+                f"- GDQP-AN: {'Hoàn thành' if evidence.gdqp_completed else 'Chưa hoàn thành'}"
+            )
+        if evidence.has_warnings:
+            prompt_parts.append(
+                f"- Trạng thái cảnh báo: {'Đang bị cảnh báo' if evidence.currently_warned else 'Không bị cảnh báo'} "
+                f"(số lần: {evidence.consecutive_warnings})"
+            )
+        if regulations:
+            prompt_parts.append("\nVăn bản quy chế đào tạo trích dẫn:")
+            for doc in regulations:
+                prompt_parts.append(f"[{doc.id}] {doc.title}: {doc.content}")
+
+        prefs = self.memory_gate.get_items(kind="preference")
+        if prefs:
+            prompt_parts.append(f"\nNguyện vọng cá nhân của sinh viên: {', '.join([p.value for p in prefs])}")
+
+        prompt_parts.append(
+            "\nHãy trả lời câu hỏi của sinh viên một cách rõ ràng, chính xác, nêu cụ thể các số liệu facts "
+            "và trích dẫn điều khoản quy chế tương ứng."
+        )
+        return "\n".join(prompt_parts)
 
     def _synthesize_response(
         self,
