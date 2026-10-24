@@ -28,9 +28,7 @@ async def check(base, draft):
     args = [str(Path(__file__).with_name("regulation_mcp_v2.py")), "--base", str(base)]
     if draft:
         args.append("--allow-draft")
-    parameters = StdioServerParameters(
-        command=sys.executable, args=args, env={**os.environ, "PYTHONUTF8": "1"}
-    )
+    parameters = StdioServerParameters(command=sys.executable, args=args, env={**os.environ, "PYTHONUTF8": "1"})
     async with stdio_client(parameters) as (read, write):  # noqa: SIM117 - keep client lifecycle explicit
         async with ClientSession(read, write, read_timeout_seconds=30) as session:
             await session.initialize()
@@ -70,22 +68,12 @@ async def check(base, draft):
             if results["HCMUT-2749-2026-A31"]["reason"] != "graph_related":
                 raise AssertionError("Expected referenced conversion table")
             print("PASS search + graph reference", flush=True)
-            r = envelope(
-                await session.call_tool(
-                    "get_provision", {"provision_id": "HCMUT-2749-2026-A2-THESIS"}
-                )
-            )
+            r = envelope(await session.call_tool("get_provision", {"provision_id": "HCMUT-2749-2026-A2-THESIS"}))
             if not r["ok"] or r["data"]["results"][0]["citation"]["pdf_pages"] != [4]:
                 raise AssertionError("Unexpected provision citation")
             print("PASS get_provision citation", flush=True)
-            r = envelope(
-                await session.call_tool(
-                    "get_provision", {"provision_id": "QD2933-2021-CL5.5"}
-                )
-            )
-            if not r["ok"] or "QD1260-2026-CL5.5" not in {
-                x["id"] for x in r["data"]["results"]
-            }:
+            r = envelope(await session.call_tool("get_provision", {"provision_id": "QD2933-2021-CL5.5"}))
+            if not r["ok"] or "QD1260-2026-CL5.5" not in {x["id"] for x in r["data"]["results"]}:
                 raise AssertionError("Missing amendment")
             print("PASS version expansion through MCP", flush=True)
             for name, args, code in [
@@ -122,8 +110,6 @@ async def main_async(base):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--base", type=Path, default=Path(__file__).resolve().parents[2]
-    )
+    parser.add_argument("--base", type=Path, default=Path(__file__).resolve().parents[2])
     options = parser.parse_args()
     anyio.run(main_async, options.base.resolve())

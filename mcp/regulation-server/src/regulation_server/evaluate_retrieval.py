@@ -22,12 +22,8 @@ def main():
     p.add_argument("--top-k", type=int, default=1, choices=range(1, 6))
     a = p.parse_args()
     base = a.base.resolve()
-    dataset = json.loads(
-        (base / "data/evaluation/retrieval_cases_v1.json").read_text(encoding="utf-8")
-    )
-    engine = RegulationRetriever(
-        base / "data/processed/language_structured/evidence_graph.json"
-    )
+    dataset = json.loads((base / "data/evaluation/retrieval_cases_v1.json").read_text(encoding="utf-8"))
+    engine = RegulationRetriever(base / "data/processed/language_structured/evidence_graph.json")
     ids = [c["id"] for c in dataset["cases"]]
     if len(set(ids)) != len(ids):
         p.error("Duplicate case IDs")
@@ -62,9 +58,7 @@ def main():
             "expanded_hit": bool(gold & after) if gold else None,
             "related_before": len(related & before),
             "related_after": len(related & after),
-            "no_evidence_pass": expanded["status"] == "no_evidence"
-            if negative
-            else None,
+            "no_evidence_pass": expanded["status"] == "no_evidence" if negative else None,
             "local_lexical_ms": lexical_ms,
             "local_graph_ms": graph_ms,
         }
@@ -79,27 +73,13 @@ def main():
     metrics = {
         "positive_cases": len(positives),
         "negative_cases": len(negatives),
-        "lexical_hit_at_k": ratio(
-            sum(r["lexical_hit"] for r in positives), len(positives)
-        ),
-        "expanded_evidence_hit": ratio(
-            sum(r["expanded_hit"] for r in positives), len(positives)
-        ),
-        "related_evidence_recall_before": ratio(
-            sum(r["related_before"] for r in records), related_count
-        ),
-        "related_evidence_recall_after": ratio(
-            sum(r["related_after"] for r in records), related_count
-        ),
-        "no_evidence_rate_on_negative_cases": ratio(
-            sum(r["no_evidence_pass"] for r in negatives), len(negatives)
-        ),
+        "lexical_hit_at_k": ratio(sum(r["lexical_hit"] for r in positives), len(positives)),
+        "expanded_evidence_hit": ratio(sum(r["expanded_hit"] for r in positives), len(positives)),
+        "related_evidence_recall_before": ratio(sum(r["related_before"] for r in records), related_count),
+        "related_evidence_recall_after": ratio(sum(r["related_after"] for r in records), related_count),
+        "no_evidence_rate_on_negative_cases": ratio(sum(r["no_evidence_pass"] for r in negatives), len(negatives)),
         "local_graph_p50_ms": statistics.median(durations) if durations else None,
-        "local_graph_p95_ms": sorted(durations)[
-            max(0, math.ceil(0.95 * len(durations)) - 1)
-        ]
-        if durations
-        else None,
+        "local_graph_p95_ms": sorted(durations)[max(0, math.ceil(0.95 * len(durations)) - 1)] if durations else None,
     }
     report = {
         "dataset_version": dataset["dataset_version"],
@@ -143,13 +123,8 @@ def main():
         "| Case | Lexical hit | Expanded hit | Negative pass |",
         "|---|---|---|---|",
     ]
-    lines += [
-        f"| {r['id']} | {r['lexical_hit']} | {r['expanded_hit']} | {r['no_evidence_pass']} |"
-        for r in records
-    ]
-    lines += ["", "## Limitations", ""] + [
-        "- " + note for note in report["limitations"]
-    ]
+    lines += [f"| {r['id']} | {r['lexical_hit']} | {r['expanded_hit']} | {r['no_evidence_pass']} |" for r in records]
+    lines += ["", "## Limitations", ""] + ["- " + note for note in report["limitations"]]
     atomic(out / (prefix + ".md"), "\n".join(lines) + "\n")
     print(json.dumps(metrics, indent=2))
     print("Reports:", out / (prefix + ".json"), out / (prefix + ".md"))

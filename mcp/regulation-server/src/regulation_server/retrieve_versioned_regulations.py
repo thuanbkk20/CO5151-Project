@@ -28,10 +28,7 @@ def retrieve(folder, provision_id, *, allow_draft=False):
     if provision_id not in provisions:
         return {"status": "not_found", "provision_id": provision_id, "evidence": []}
     related = [
-        e
-        for e in relations
-        if e["relation"] in VERSION_RELATIONS
-        and provision_id in (e["source"], e["target"])
+        e for e in relations if e["relation"] in VERSION_RELATIONS and provision_id in (e["source"], e["target"])
     ]
     selected = {provision_id}
     for edge in related:
@@ -54,9 +51,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--provision-id", required=True)
     parser.add_argument("--allow-draft", action="store_true")
-    parser.add_argument(
-        "--base", type=Path, default=Path(__file__).resolve().parents[2]
-    )
+    parser.add_argument("--base", type=Path, default=Path(__file__).resolve().parents[2])
     args = parser.parse_args()
     try:
         result = retrieve(

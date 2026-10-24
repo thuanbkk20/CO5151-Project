@@ -32,20 +32,15 @@ def merge(base):
     folder = base / "data/processed"
     metadata = base / "data/source_metadata"
     blank_reviews = (
-        read(metadata / "blank_page_reviews.json")
-        if (metadata / "blank_page_reviews.json").exists()
-        else []
+        read(metadata / "blank_page_reviews.json") if (metadata / "blank_page_reviews.json").exists() else []
     )
     blank = {
         r["unit_id"]: r
         for r in blank_reviews
-        if r.get("assessment") == "visually_blank"
-        and r.get("review_method") == "rendered_pdf_visual_inspection"
+        if r.get("assessment") == "visually_blank" and r.get("review_method") == "rendered_pdf_visual_inspection"
     }
     provenance = (
-        read(metadata / "official_sources_step11.json")
-        if (metadata / "official_sources_step11.json").exists()
-        else []
+        read(metadata / "official_sources_step11.json") if (metadata / "official_sources_step11.json").exists() else []
     )
     provenance = {r["sha256"]: r for r in provenance}
     sources, result = {}, {}
@@ -79,9 +74,7 @@ def merge(base):
             if s.get("page_count") is not None:
                 pages = [r["pdf_page"] for r in records]
                 if sorted(pages) != list(range(1, s["page_count"] + 1)):
-                    errors.append(
-                        f"{label}: missing or duplicate PDF pages: {s['file_name']}"
-                    )
+                    errors.append(f"{label}: missing or duplicate PDF pages: {s['file_name']}")
             s = dict(s, ingestion_batch=label, verified=False)
             if s["sha256"] in provenance:
                 s["provenance"] = provenance[s["sha256"]]
@@ -96,14 +89,9 @@ def merge(base):
                 u = expected.get(key)
                 if u is None or u["status"] != "needs_ocr":
                     raise ValueError("unexpected OCR record")
-                if any(
-                    r.get(k) != u[k] for k in ("source_id", "file_name", "pdf_page")
-                ):
+                if any(r.get(k) != u[k] for k in ("source_id", "file_name", "pdf_page")):
                     raise ValueError("OCR metadata mismatch")
-                if (
-                    r.get("ocr_completed") is not True
-                    or r.get("extraction_method") != "ocr"
-                ):
+                if r.get("ocr_completed") is not True or r.get("extraction_method") != "ocr":
                     raise ValueError("incomplete OCR record")
                 ocr[key] = r
             except (ValueError, KeyError, OSError) as exc:
@@ -166,9 +154,7 @@ def merge(base):
         "batch_counts": batch_counts,
         "methods": dict(Counter(r["extraction_method"] for r in rows)),
         "reviewed_blank_pages": [
-            {"unit_id": r["unit_id"], "pdf_page": r.get("pdf_page")}
-            for r in rows
-            if "blank_page_review" in r
+            {"unit_id": r["unit_id"], "pdf_page": r.get("pdf_page")} for r in rows if "blank_page_review" in r
         ],
         "all_content_unverified": True,
         "ready_for_content_review": True,
@@ -179,9 +165,7 @@ def merge(base):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--base", type=Path, default=Path(__file__).resolve().parents[2]
-    )
+    parser.add_argument("--base", type=Path, default=Path(__file__).resolve().parents[2])
     a = parser.parse_args()
     base = a.base.resolve()
     out = base / "data/processed/corpus_expanded"
@@ -194,15 +178,9 @@ def main():
     if corpus is not None:
         candidates = []
         for record in corpus:
-            if (
-                record["extraction_method"] != "native"
-                or record["unit_type"] != "pdf_page"
-            ):
+            if record["extraction_method"] != "native" or record["unit_type"] != "pdf_page":
                 continue
-            if (
-                record["ingestion_batch"] != "additional"
-                and "2749" not in record["text"]
-            ):
+            if record["ingestion_batch"] != "additional" and "2749" not in record["text"]:
                 continue
             for line in record["text"].splitlines():
                 if re.search(r"Sửa đổi, bổ sung|[Tt]hay thế|[Bb]ãi bỏ", line):
@@ -218,7 +196,10 @@ def main():
                             "target_provision_id": None,
                             "review_status": "candidate_only",
                             "verified": False,
-                            "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets.",
+                            "note": (
+                                "Line may be a heading/citation; inspect full page and continuation. "
+                                "Article numbers mentioned are not automatically amendment targets."
+                            ),
                         }
                     )
         for name, value in [

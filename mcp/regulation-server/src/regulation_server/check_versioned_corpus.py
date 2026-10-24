@@ -12,18 +12,10 @@ def main():
     p.add_argument("--base", type=Path, default=Path(__file__).resolve().parents[2])
     a = p.parse_args()
     folder = a.base.resolve() / "data/processed"
-    raw = json.loads(
-        (folder / "corpus_expanded/corpus.json").read_text(encoding="utf-8")
-    )
+    raw = json.loads((folder / "corpus_expanded/corpus.json").read_text(encoding="utf-8"))
     pages = {r["unit_id"]: r for r in raw}
-    items = json.loads(
-        (folder / "versioned_regulations/provisions.json").read_text(encoding="utf-8")
-    )
-    graph = json.loads(
-        (folder / "versioned_regulations/version_graph.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    items = json.loads((folder / "versioned_regulations/provisions.json").read_text(encoding="utf-8"))
+    graph = json.loads((folder / "versioned_regulations/version_graph.json").read_text(encoding="utf-8"))
     errors = []
     ids = {r["provision_id"] for r in items}
     if len(ids) != len(items):
@@ -37,21 +29,12 @@ def main():
                 errors.append(r["provision_id"] + ": missing source unit")
                 continue
             lo, hi = fragment["start_char"], fragment["end_char"]
-            if (
-                not (0 <= lo < hi <= len(original["text"]))
-                or original["text"][lo:hi] != fragment["text"]
-            ):
+            if not (0 <= lo < hi <= len(original["text"])) or original["text"][lo:hi] != fragment["text"]:
                 errors.append(r["provision_id"] + ": source substring mismatch")
-            if (
-                original["source_id"] != r["source_id"]
-                or original["pdf_page"] != fragment["pdf_page"]
-            ):
+            if original["source_id"] != r["source_id"] or original["pdf_page"] != fragment["pdf_page"]:
                 errors.append(r["provision_id"] + ": citation mismatch")
         combined = "\n".join(f["text"] for f in r["fragments"])
-        if (
-            combined != r["source_text"]
-            or hashlib.sha256(combined.encode()).hexdigest() != r["source_text_sha256"]
-        ):
+        if combined != r["source_text"] or hashlib.sha256(combined.encode()).hexdigest() != r["source_text_sha256"]:
             errors.append(r["provision_id"] + ": joined text/hash mismatch")
         if r["verified"] is not False:
             errors.append(r["provision_id"] + ": unexpected approval")

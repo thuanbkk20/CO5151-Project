@@ -4,7 +4,7 @@ from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BASE / "src/regulation_server"))
-from regulation_service_v2 import INPUTS, RegulationServiceV2
+from regulation_service_v2 import INPUTS, RegulationServiceV2  # noqa: E402 - bootstrap local src path before import
 
 
 class HandoffTests(unittest.TestCase):
@@ -21,9 +21,7 @@ class HandoffTests(unittest.TestCase):
         return {r["id"] for r in result["results"]}
 
     def test_default_denies(self):
-        r = RegulationServiceV2(BASE).call(
-            "get_provision", {"provision_id": "QD2933-2021-CL5.5"}
-        )
+        r = RegulationServiceV2(BASE).call("get_provision", {"provision_id": "QD2933-2021-CL5.5"})
         self.assertEqual(r.error.code, "FORBIDDEN")
 
     def test_schema_closed(self):
@@ -64,9 +62,7 @@ class HandoffTests(unittest.TestCase):
 
     def test_multihop_replacement(self):
         r = self.data("get_provision", {"provision_id": "QD1260-2026-APP1", "hops": 3})
-        self.assertTrue(
-            {"QD2933-2021-APP1", "QD1260-2026-APP1", "QD2749-2026-APP1"} <= self.ids(r)
-        )
+        self.assertTrue({"QD2933-2021-APP1", "QD1260-2026-APP1", "QD2749-2026-APP1"} <= self.ids(r))
         self.assertEqual(len(r["results"]), len(self.ids(r)))
 
     def test_repeal_has_source(self):
@@ -94,10 +90,7 @@ class HandoffTests(unittest.TestCase):
             "search_regulations",
             {"query": "Điều kiện đăng ký khóa luận tốt nghiệp", "top_k": 1},
         )
-        self.assertTrue(
-            {"HCMUT-2749-2026-A2-THESIS", "QD1260-2026-CL5.5", "QD2933-2021-CL5.5"}
-            <= self.ids(r)
-        )
+        self.assertTrue({"HCMUT-2749-2026-A2-THESIS", "QD1260-2026-CL5.5", "QD2933-2021-CL5.5"} <= self.ids(r))
 
     def test_context_is_not_approval(self):
         r = self.data(
@@ -128,11 +121,7 @@ class HandoffTests(unittest.TestCase):
         self.assertFalse(x["verified"])
 
     def test_handbook_and_faq_indexed(self):
-        supplemental = [
-            p
-            for p in self.s.engine.nodes.values()
-            if p["evidence_role"] == "supplemental"
-        ]
+        supplemental = [p for p in self.s.engine.nodes.values() if p["evidence_role"] == "supplemental"]
         self.assertEqual(len(supplemental), 118)
         faq = next(p for p in supplemental if p.get("block_index"))
         r = self.data("get_provision", {"provision_id": faq["provision_id"], "hops": 0})

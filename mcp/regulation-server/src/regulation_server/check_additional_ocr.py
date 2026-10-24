@@ -25,9 +25,7 @@ def main():
                 and review.get("review_method") == "rendered_pdf_visual_inspection"
             ):
                 blank_reviews[review["unit_id"]] = review
-    units = json.loads(
-        (folder / "additional_extraction/text_units.json").read_text(encoding="utf-8")
-    )
+    units = json.loads((folder / "additional_extraction/text_units.json").read_text(encoding="utf-8"))
     expected = {u["unit_id"]: u for u in units if u["status"] == "needs_ocr"}
     if not expected:
         p.error("No pages requiring OCR in the additional extraction batch")
@@ -40,19 +38,11 @@ def main():
             if key in seen:
                 raise ValueError("Duplicate unit_id")
             if key not in expected:
-                raise ValueError(
-                    "Unexpected OCR unit; stale source or wrong output directory"
-                )
+                raise ValueError("Unexpected OCR unit; stale source or wrong output directory")
             original = expected[key]
-            if any(
-                record.get(k) != original[k]
-                for k in ("source_id", "file_name", "pdf_page")
-            ):
+            if any(record.get(k) != original[k] for k in ("source_id", "file_name", "pdf_page")):
                 raise ValueError("OCR metadata does not match extraction")
-            if (
-                record.get("ocr_completed") is not True
-                or record.get("extraction_method") != "ocr"
-            ):
+            if record.get("ocr_completed") is not True or record.get("extraction_method") != "ocr":
                 raise ValueError("OCR is not marked completed")
             if not isinstance(record.get("text"), str):
                 raise TypeError("Invalid text field")

@@ -49,10 +49,7 @@ def main():
                 p.error("Missing OCR models. Run again with --download-models")
             print("Downloading language model: " + lang, flush=True)
             # Official Tesseract fast models; model hashes are recorded in outputs.
-            url = (
-                "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/"
-                + target.name
-            )
+            url = "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/" + target.name
             temporary = target.with_suffix(".part")
             try:
                 with (
@@ -71,9 +68,7 @@ def main():
         "language": "vie+eng",
         "pymupdf": fitz.VersionBind,
         "text_order": "ocr_engine",
-        "model_sha256": {
-            lang: sha(models / (lang + ".traineddata")) for lang in ("vie", "eng")
-        },
+        "model_sha256": {lang: sha(models / (lang + ".traineddata")) for lang in ("vie", "eng")},
     }
     chosen = None
     if a.pages:
@@ -81,25 +76,13 @@ def main():
         try:
             for part in a.pages.split(","):
                 limits = [int(x) for x in part.split("-")]
-                if (
-                    len(limits) not in (1, 2)
-                    or min(limits) < 1
-                    or limits[-1] < limits[0]
-                ):
+                if len(limits) not in (1, 2) or min(limits) < 1 or limits[-1] < limits[0]:
                     raise ValueError()
                 chosen.update(range(limits[0], limits[-1] + 1))
         except ValueError:
             p.error("Invalid --pages; use 10-12 or 10,12")
-    units = json.loads(
-        (base / "data/processed/additional_extraction/text_units.json").read_text(
-            encoding="utf-8"
-        )
-    )
-    pending = [
-        u
-        for u in units
-        if u["status"] == "needs_ocr" and (chosen is None or u["pdf_page"] in chosen)
-    ]
+    units = json.loads((base / "data/processed/additional_extraction/text_units.json").read_text(encoding="utf-8"))
+    pending = [u for u in units if u["status"] == "needs_ocr" and (chosen is None or u["pdf_page"] in chosen)]
     if not pending:
         p.error("No matching needs_ocr pages")
     output = base / "data/processed/additional_ocr"
@@ -139,9 +122,7 @@ def main():
                 )
             with fitz.open(source) as document:
                 page = document[page_number - 1]
-                tp = page.get_textpage_ocr(
-                    language="vie+eng", dpi=a.dpi, full=True, tessdata=str(models)
-                )
+                tp = page.get_textpage_ocr(language="vie+eng", dpi=a.dpi, full=True, tessdata=str(models))
                 text = page.get_text("text", textpage=tp, sort=False)
             record = dict(unit)
             record.update(
@@ -162,9 +143,7 @@ def main():
         except Exception as exc:  # noqa: BLE001 - retain per-document failure reports
             errors.append({"unit_id": unit["unit_id"], "error": str(exc)})
             print(f"ERROR page {page_number}: {exc}", flush=True)
-            if isinstance(exc, OSError) and (
-                exc.errno == errno.ENOSPC or getattr(exc, "winerror", None) == 112
-            ):
+            if isinstance(exc, OSError) and (exc.errno == errno.ENOSPC or getattr(exc, "winerror", None) == 112):
                 disk_full = True
                 print(
                     "STOP: storage limit reached; completed page files are preserved.",
@@ -188,9 +167,7 @@ def main():
             flush=True,
         )
         return 1
-    print(
-        f"Completed={completed}, skipped={skipped}, errors={len(errors)}; output={output}"
-    )
+    print(f"Completed={completed}, skipped={skipped}, errors={len(errors)}; output={output}")
     return int(bool(errors))
 
 

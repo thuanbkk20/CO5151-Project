@@ -79,9 +79,7 @@ class Builder:
             "valid_to": None,
             "warning": "Original source version; not a consolidated or approved rule.",
         }
-        value["source_text_sha256"] = hashlib.sha256(
-            value["source_text"].encode()
-        ).hexdigest()
+        value["source_text_sha256"] = hashlib.sha256(value["source_text"].encode()).hexdigest()
         self.items[pid] = value
         return value
 
@@ -90,11 +88,7 @@ class Builder:
         return self.add(pid, key, kind, text, spans, title=title)
 
     def relation(self, source, relation, target, evidence_id, note=""):
-        if (
-            source not in self.items
-            or target not in self.items
-            or evidence_id not in self.items
-        ):
+        if source not in self.items or target not in self.items or evidence_id not in self.items:
             raise ValueError("Unresolved edge: " + source + " -> " + target)
         e = self.items[evidence_id]
         self.edges.append(
@@ -119,15 +113,11 @@ class Builder:
         for index, match in enumerate(headings):
             article = int(match[1])
             start = match.start()
-            end = (
-                headings[index + 1].start() if index + 1 < len(headings) else len(text)
-            )
+            end = headings[index + 1].start() if index + 1 < len(headings) else len(text)
             pid = f"QD2933-2021-ART{article}"
             self.add(pid, "2933", "article", text, spans, start, end, match[0].strip())
             markers = []
-            for m in re.finditer(
-                r"(?m)^[ \t]*(\d{1,2}\.\d+|81|§\.3)\b", text[start:end]
-            ):
+            for m in re.finditer(r"(?m)^[ \t]*(\d{1,2}\.\d+|81|§\.3)\b", text[start:end]):
                 raw = m[1]
                 canonical = raw
                 if article == 5 and raw == "3.4":
@@ -142,9 +132,7 @@ class Builder:
             for pos, (left, label, raw) in enumerate(markers):
                 right = markers[pos + 1][0] if pos + 1 < len(markers) else end
                 cid = f"QD2933-2021-CL{label}"
-                record = self.add(
-                    cid, "2933", "clause", text, spans, left, right, "Khoản " + label
-                )
+                record = self.add(cid, "2933", "clause", text, spans, left, right, "Khoản " + label)
                 if raw != label:
                     record["heading_label_review"] = {
                         "ocr_label": raw,
@@ -244,13 +232,9 @@ class Builder:
                 last,
                 "Phụ lục " + str(number) + " bản 1260",
             )
-            self.relation(
-                pid, "REPLACES", f"QD2933-2021-APP{number}", admin["provision_id"]
-            )
+            self.relation(pid, "REPLACES", f"QD2933-2021-APP{number}", admin["provision_id"])
         for target in ["QD2933-2021-ART4", "QD2933-2021-CL5.4", "QD2933-2021-APP2"]:
-            self.relation(
-                admin["provision_id"], "REPEALS", target, admin["provision_id"]
-            )
+            self.relation(admin["provision_id"], "REPEALS", target, admin["provision_id"])
         text, spans = self.joined("2749", 1, 1)
         start = text.index("Điều 1.")
         end = text.index("Điều 2.", start)
@@ -264,32 +248,38 @@ class Builder:
             end,
             "Quyết định: Điều 1 thay thế Phụ lục 1",
         )
-        self.page_block(
-            "QD2749-2026-APP1", "2749", "appendix", 2, 6, "Phụ lục 1 bản 2749"
-        )
+        self.page_block("QD2749-2026-APP1", "2749", "appendix", 2, 6, "Phụ lục 1 bản 2749")
         for target in ["QD2933-2021-APP1", "QD1260-2026-APP1"]:
-            self.relation(
-                "QD2749-2026-APP1", "REPLACES", target, "QD2749-2026-DECISION-ART1"
-            )
+            self.relation("QD2749-2026-APP1", "REPLACES", target, "QD2749-2026-DECISION-ART1")
         # Source declarations also mention term replacement. Flag it separately;
         # do not rewrite historical source text or ignore the simultaneous repeal.
         self.issues.append(
             {
                 "id": "TERM-REPLACEMENT",
                 "source_provision_id": admin["provision_id"],
-                "issue": "Review terminology replacement at clauses 4.1/4.2 and Appendix 6 together with repeal of Article 4; no automatic historical text rewrite.",
+                "issue": (
+                    "Review terminology replacement at clauses 4.1/4.2 and Appendix 6 together "
+                    "with repeal of Article 4; no automatic historical text rewrite."
+                ),
             }
         )
         self.issues.append(
             {
                 "id": "COVERAGE",
-                "issue": "Only selected changes in the supplied documents are mapped. General regulation, other amendments and handbook/FAQ clause segmentation are not complete.",
+                "issue": (
+                    "Only selected changes in the supplied documents are mapped. General "
+                    "regulation, other amendments and handbook/FAQ clause segmentation are not "
+                    "complete."
+                ),
             }
         )
         self.issues.append(
             {
                 "id": "TRANSITION",
-                "issue": "Original Appendix 8 contains cohort/semester transitional rules; must review before resolving applicability.",
+                "issue": (
+                    "Original Appendix 8 contains cohort/semester transitional rules; must "
+                    "review before resolving applicability."
+                ),
             }
         )
         return list(self.items.values()), self.edges, self.issues
@@ -300,20 +290,13 @@ def main():
     p.add_argument("--base", type=Path, default=Path(__file__).resolve().parents[2])
     a = p.parse_args()
     folder = a.base.resolve() / "data/processed"
-    corpus = json.loads(
-        (folder / "corpus_expanded/corpus.json").read_text(encoding="utf-8")
-    )
-    manifest = json.loads(
-        (folder / "corpus_expanded/source_manifest.json").read_text(encoding="utf-8")
-    )
+    corpus = json.loads((folder / "corpus_expanded/corpus.json").read_text(encoding="utf-8"))
+    manifest = json.loads((folder / "corpus_expanded/source_manifest.json").read_text(encoding="utf-8"))
     try:
         items, relations, issues = Builder(corpus).build()
     except (ValueError, KeyError) as exc:
         p.error(str(exc))
-    nodes = [
-        {"id": s["source_id"], "type": "Document", "data": s, "verified": False}
-        for s in manifest
-    ]
+    nodes = [{"id": s["source_id"], "type": "Document", "data": s, "verified": False} for s in manifest]
     nodes += [{"id": r["provision_id"], "type": "Provision", "data": r} for r in items]
     edges = [
         {
@@ -332,17 +315,13 @@ def main():
         "edges": edges,
     }
     ids = {n["id"] for n in nodes}
-    assert len(ids) == len(nodes) and all(
-        e["source"] in ids and e["target"] in ids for e in edges
-    )
+    assert len(ids) == len(nodes) and all(e["source"] in ids and e["target"] in ids for e in edges)
     report = {
         "source_documents": len(manifest),
         "segmented_regulation_documents": 3,
         "segments": len(items),
         "base_articles": 14,
-        "version_relations": sum(
-            e["relation"] in ["AMENDS", "REPLACES", "REPEALS"] for e in relations
-        ),
+        "version_relations": sum(e["relation"] in ["AMENDS", "REPLACES", "REPEALS"] for e in relations),
         "graph_nodes": len(nodes),
         "graph_edges": len(edges),
         "ocr_heading_label_reviews": sum("heading_label_review" in r for r in items),

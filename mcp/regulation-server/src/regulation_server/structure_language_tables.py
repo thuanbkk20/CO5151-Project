@@ -206,19 +206,15 @@ def graduation_rows():
         ),
         ("PFIEV", ["<=2018", "2019", ">=2020"], ["600", "650", "700"], "245"),
     ]:
-        for cohort, score in zip(cohorts, scores):
+        for cohort, score in zip(cohorts, scores, strict=False):
             rows.append(
                 {
                     "program_label": program,
                     "cohort_expression": cohort,
                     "toeic_listening_reading": score,
                     "toeic_speaking_writing": sw,
-                    "other_certificate_text": "DELF B1; TCF B1 (tiếng Pháp)"
-                    if program == "PFIEV"
-                    else "",
-                    "combination_logic": "unresolved_from_table"
-                    if program == "PFIEV"
-                    else "see_source_and_exceptions",
+                    "other_certificate_text": "DELF B1; TCF B1 (tiếng Pháp)" if program == "PFIEV" else "",
+                    "combination_logic": "unresolved_from_table" if program == "PFIEV" else "see_source_and_exceptions",
                 }
             )
     rows.append(
@@ -229,9 +225,7 @@ def graduation_rows():
             "other_certificate_text": "JLPT N3 (tiếng Nhật)",
         }
     )
-    for cohort, score in zip(
-        ["<=2017", "2018", "2019", ">=2020"], ["400", "450", "500", "600"]
-    ):
+    for cohort, score in zip(["<=2017", "2018", "2019", ">=2020"], ["400", "450", "500", "600"], strict=False):
         rows.append(
             {
                 "program_label": "Vừa làm vừa học, Đào tạo từ xa",
@@ -253,30 +247,21 @@ def graduation_rows():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--base", type=Path, default=Path(__file__).resolve().parents[2]
-    )
+    parser.add_argument("--base", type=Path, default=Path(__file__).resolve().parents[2])
     args = parser.parse_args()
     folder = args.base.resolve() / "data/processed"
-    seed = json.loads(
-        (folder / "language_seed/language_seed.json").read_text(encoding="utf-8")
-    )
+    seed = json.loads((folder / "language_seed/language_seed.json").read_text(encoding="utf-8"))
     corpus = json.loads((folder / "corpus/corpus.json").read_text(encoding="utf-8"))
     by_id = {r["unit_id"]: r for r in corpus}
     for provision in seed["provisions"]:
         if provision["source_text"] not in by_id[provision["unit_id"]]["text"]:
-            parser.error(
-                "Seed excerpt does not match corpus: " + provision["provision_id"]
-            )
+            parser.error("Seed excerpt does not match corpus: " + provision["provision_id"])
     tables = {r["table_id"]: r for r in seed["tables"]}
     graduation = tables["HCMUT-2749-2026-A2"]
     conversion = tables["HCMUT-2749-2026-A31"]
     for table in (graduation, conversion):
         source = by_id[table["unit_id"]]
-        if (
-            table["raw_page_text"] != source["text"]
-            or table["source_id"] != seed["source_id"]
-        ):
+        if table["raw_page_text"] != source["text"] or table["source_id"] != seed["source_id"]:
             parser.error("Table source mismatch; inspect input")
         table.update(
             review_status="transcribed_pending_human_review",
@@ -291,7 +276,10 @@ def main():
     graduation["required_related_evidence"] = [
         {
             "pdf_page": 2,
-            "note": "Exemption for Lao/Cambodian international students in the stated Vietnamese-taught standard program; course requirements remain.",
+            "note": (
+                "Exemption for Lao/Cambodian international students in the stated "
+                "Vietnamese-taught standard program; course requirements remain."
+            ),
         },
         {
             "pdf_page": 3,
@@ -299,11 +287,14 @@ def main():
         },
         {
             "pdf_page": 4,
-            "note": "Thesis registration language rule differs from graduation; certificate conversion and recognition window",
+            "note": (
+                "Thesis registration language rule differs from graduation; certificate "
+                "conversion and recognition window"
+            ),
         },
     ]
     conversion["columns"] = CONVERSION_COLUMNS
-    conversion["rows"] = [dict(zip(CONVERSION_COLUMNS, row)) for row in CONVERSION_ROWS]
+    conversion["rows"] = [dict(zip(CONVERSION_COLUMNS, row, strict=False)) for row in CONVERSION_ROWS]
     conversion["interpretation_notes"] = [
         "Keep duplicate IELTS values across source rows; no unique IELTS-to-TOEIC function is inferred.",
         "Source marks X and - have not been semantically resolved.",
@@ -357,9 +348,7 @@ def main():
         ("evidence_graph.json", graph),
     ]:
         atomic(out / name, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
-    print(
-        f"Graduation rows: {len(graduation['rows'])}; conversion rows: {len(conversion['rows'])}"
-    )
+    print(f"Graduation rows: {len(graduation['rows'])}; conversion rows: {len(conversion['rows'])}")
     print(f"Graph nodes: {len(nodes)}; edges: {len(edges)}")
     print(
         "Draft only; program/cohort filtering and retrieval are not implemented. Output:",

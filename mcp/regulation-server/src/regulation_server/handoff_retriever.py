@@ -48,9 +48,7 @@ class HandoffRetriever:
             data / "language_structured/evidence_graph.json",
             data / "corpus_expanded/corpus.json",
         ]
-        self.version = hashlib.sha256(
-            b"".join(p.read_bytes() for p in paths)
-        ).hexdigest()
+        self.version = hashlib.sha256(b"".join(p.read_bytes() for p in paths)).hexdigest()
         corpus = read(paths[3])
         units = {u["unit_id"]: u for u in corpus}
         if len(units) != len(corpus):
@@ -60,10 +58,7 @@ class HandoffRetriever:
             if digest and hashlib.sha256(u["text"].encode()).hexdigest() != digest:
                 raise ValueError("Corpus text hash mismatch")
         for p in read(paths[0]):
-            if (
-                hashlib.sha256(p["source_text"].encode()).hexdigest()
-                != p["source_text_sha256"]
-            ):
+            if hashlib.sha256(p["source_text"].encode()).hexdigest() != p["source_text_sha256"]:
                 raise ValueError("Provision hash mismatch")
             for f in p["fragments"]:
                 u = units[f["unit_id"]]
@@ -80,10 +75,7 @@ class HandoffRetriever:
             p = dict(n["data"])
             p["pdf_pages"] = [p["pdf_page"]]
             # Language seed excerpts are exact source substrings; table rows are manual derivatives.
-            if (
-                n["type"] == "Provision"
-                and p["source_text"] not in units[p["unit_id"]]["text"]
-            ):
+            if n["type"] == "Provision" and p["source_text"] not in units[p["unit_id"]]["text"]:
                 raise ValueError("Language excerpt mismatch")
             self.add(
                 n["id"],
@@ -110,10 +102,7 @@ class HandoffRetriever:
             }
         )
         for u in corpus:
-            if (
-                u.get("unit_type", "").startswith("docx")
-                or "HANDBOOK" in u["file_name"].upper()
-            ):
+            if u.get("unit_type", "").startswith("docx") or "HANDBOOK" in u["file_name"].upper():
                 if not u["text"].strip():
                     continue
                 p = dict(u)
@@ -127,10 +116,7 @@ class HandoffRetriever:
         for e in self.edges:
             if e["source"] not in self.nodes or e["target"] not in self.nodes:
                 raise ValueError("Dangling evidence edge")
-            if (
-                e.get("evidence_provision_id")
-                and e["evidence_provision_id"] not in self.nodes
-            ):
+            if e.get("evidence_provision_id") and e["evidence_provision_id"] not in self.nodes:
                 raise ValueError("Missing relation evidence")
         self.index = {
             k: Counter(
@@ -171,11 +157,7 @@ class HandoffRetriever:
                 other = (
                     e["target"]
                     if e["source"] == key
-                    else (
-                        e["source"]
-                        if e["target"] == key and e["relation"] != "REFERENCES"
-                        else None
-                    )
+                    else (e["source"] if e["target"] == key and e["relation"] != "REFERENCES" else None)
                 )
                 if other is None:
                     continue
@@ -225,9 +207,7 @@ class HandoffRetriever:
             "provided_context": context or {},
             "applicability_resolved": False,
             "missing_context": [
-                k
-                for k in ("program", "cohort", "semester", "as_of_date")
-                if not (context or {}).get(k)
+                k for k in ("program", "cohort", "semester", "as_of_date") if not (context or {}).get(k)
             ],
             "answer": None,
             "eligibility_decision": None,
@@ -249,9 +229,7 @@ class HandoffRetriever:
         if query in self.nodes:
             return self.get(query, hops, context)
         normalized = " " + " ".join(tokens(query)) + " "
-        topic = bool(scope_matches(query)) or any(
-            " " + p + " " in normalized for p in TOPICS
-        )
+        topic = bool(scope_matches(query)) or any(" " + p + " " in normalized for p in TOPICS)
         if not topic:
             return self.bundle([], hops, context)
         terms = set(tokens(query))
@@ -261,19 +239,8 @@ class HandoffRetriever:
             for t in terms:
                 f = tf[t]
                 if f:
-                    idf = math.log(
-                        1 + (len(self.index) - self.df[t] + 0.5) / (self.df[t] + 0.5)
-                    )
-                    score += (
-                        idf
-                        * f
-                        * 2.5
-                        / (
-                            f
-                            + 1.5
-                            * (0.25 + 0.75 * self.lengths[key] / (self.avg_length or 1))
-                        )
-                    )
+                    idf = math.log(1 + (len(self.index) - self.df[t] + 0.5) / (self.df[t] + 0.5))
+                    score += idf * f * 2.5 / (f + 1.5 * (0.25 + 0.75 * self.lengths[key] / (self.avg_length or 1)))
             if score > 0:
                 # Supplemental sources are returned explicitly as such, not treated as binding rules.
                 scores[key] = score

@@ -54,13 +54,7 @@ def extract(path, digest):
                 text = page.get_text("text", sort=True)
                 count = len("".join(text.split()))
                 # Heuristic only: not a quality or OCR accuracy assessment.
-                status = (
-                    "needs_ocr"
-                    if count == 0
-                    else "needs_review"
-                    if count < 30
-                    else "extracted"
-                )
+                status = "needs_ocr" if count == 0 else "needs_review" if count < 30 else "extracted"
                 records.append(
                     {
                         "source_id": source_id,
@@ -81,26 +75,17 @@ def extract(path, digest):
         if body is None:
             raise ValueError("DOCX has no document body")
         info["page_count"] = None
-        info["page_note"] = (
-            "DOCX pagination is not inferred; block order follows document.xml"
-        )
+        info["page_note"] = "DOCX pagination is not inferred; block order follows document.xml"
         for index, element in enumerate(body, 1):
             if element.tag not in {W + "p", W + "tbl"}:
                 continue
             table = element.tag == W + "tbl"
             rows = (
-                [
-                    [word_text(cell) for cell in row.findall(W + "tc")]
-                    for row in element.findall(W + "tr")
-                ]
+                [[word_text(cell) for cell in row.findall(W + "tc")] for row in element.findall(W + "tr")]
                 if table
                 else None
             )
-            text = (
-                "\n".join(" | ".join(row) for row in rows)
-                if table
-                else word_text(element)
-            )
+            text = "\n".join(" | ".join(row) for row in rows) if table else word_text(element)
             if not text.strip():
                 continue
             record = {
@@ -121,8 +106,7 @@ def extract(path, digest):
         raise ValueError("No text units found")
     info["unit_count"] = len(records)
     info["status_counts"] = {
-        s: sum(r["status"] == s for r in records)
-        for s in ("extracted", "needs_review", "needs_ocr")
+        s: sum(r["status"] == s for r in records) for s in ("extracted", "needs_review", "needs_ocr")
     }
     return info, records
 
@@ -131,9 +115,7 @@ def main():
     base = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw", type=Path, default=base / "data" / "raw")
-    parser.add_argument(
-        "--out", type=Path, default=base / "data" / "processed" / "extraction"
-    )
+    parser.add_argument("--out", type=Path, default=base / "data" / "processed" / "extraction")
     args = parser.parse_args()
     raw, out = args.raw.resolve(), args.out.resolve()
     if not raw.is_dir():
@@ -143,9 +125,7 @@ def main():
     files = sorted(
         p
         for p in raw.iterdir()
-        if p.is_file()
-        and p.suffix.lower() in {".pdf", ".docx"}
-        and not p.name.startswith("~$")
+        if p.is_file() and p.suffix.lower() in {".pdf", ".docx"} and not p.name.startswith("~$")
     )
     if not files:
         parser.error("No PDF/DOCX input files found")
@@ -163,9 +143,7 @@ def main():
             units.extend(records)
             print(f"OK {path.name}: {len(records)} units; {info['status_counts']}")
         except Exception as exc:  # noqa: BLE001 - retain per-document failure reports
-            errors.append(
-                {"file_name": path.name, "error": f"{type(exc).__name__}: {exc}"}
-            )
+            errors.append({"file_name": path.name, "error": f"{type(exc).__name__}: {exc}"})
             print(f"ERROR {path.name}: {type(exc).__name__}: {exc}")
     report = {
         "input_files": len(files),
@@ -173,9 +151,7 @@ def main():
         "errors": errors,
         "unit_count": len(units),
         "needs_ocr_pdf_pages": [
-            {"file_name": r["file_name"], "pdf_page": r["pdf_page"]}
-            for r in units
-            if r["status"] == "needs_ocr"
+            {"file_name": r["file_name"], "pdf_page": r["pdf_page"]} for r in units if r["status"] == "needs_ocr"
         ],
         "limitations": [
             "No OCR performed",

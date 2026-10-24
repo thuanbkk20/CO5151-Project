@@ -91,10 +91,7 @@ class RegulationRetriever:
         if len(self.nodes) != len(nodes):
             raise ValueError("Duplicate graph node IDs")
         self.edges = self.graph["edges"]
-        if any(
-            e["source"] not in self.nodes or e["target"] not in self.nodes
-            for e in self.edges
-        ):
+        if any(e["source"] not in self.nodes or e["target"] not in self.nodes for e in self.edges):
             raise ValueError("Graph has dangling edges")
         self.docs = {}
         for n in nodes:
@@ -112,12 +109,7 @@ class RegulationRetriever:
     def search(self, query, top_k=3, hops=1, allow_draft=False):
         if not isinstance(query, str) or not query.strip() or len(query) > 2000:
             raise ValueError("Query must contain 1-2000 characters")
-        if (
-            type(top_k) is not int
-            or not 1 <= top_k <= 5
-            or type(hops) is not int
-            or not 0 <= hops <= 2
-        ):
+        if type(top_k) is not int or not 1 <= top_k <= 5 or type(hops) is not int or not 0 <= hops <= 2:
             raise ValueError("top_k must be 1-5; hops must be 0-2")
         out = {
             "status": "draft_blocked",
@@ -165,19 +157,11 @@ class RegulationRetriever:
                     continue
                 df = sum(term in doc for doc in self.docs.values())
                 idf = math.log(1 + (count - df + 0.5) / (df + 0.5))
-                score += (
-                    idf
-                    * freq
-                    * 2.5
-                    / (freq + 1.5 * (0.25 + 0.75 * lengths[key] / (avg or 1)))
-                )
+                score += idf * freq * 2.5 / (freq + 1.5 * (0.25 + 0.75 * lengths[key] / (avg or 1)))
             if score > 0:
                 scores[key] = score
         selected = sorted(scores, key=lambda k: (-scores[k], k))[:top_k]
-        chosen = {
-            key: {"reason": "lexical_match", "score": round(scores[key], 6)}
-            for key in selected
-        }
+        chosen = {key: {"reason": "lexical_match", "score": round(scores[key], 6)} for key in selected}
         frontier = selected
         for _ in range(hops):
             following = []
@@ -224,9 +208,7 @@ def main():
     p.add_argument("--out", type=Path)
     a = p.parse_args()
     try:
-        engine = RegulationRetriever(
-            a.base / "data/processed/language_structured/evidence_graph.json"
-        )
+        engine = RegulationRetriever(a.base / "data/processed/language_structured/evidence_graph.json")
         result = engine.search(a.query, a.top_k, a.hops, a.allow_draft)
     except (ValueError, OSError, KeyError) as exc:
         p.error(str(exc))

@@ -8,9 +8,10 @@ import argparse
 import json
 from pathlib import Path
 
-from co5151_contracts.envelope import ErrorCode, err, ok
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, ValidationError
 from retrieve_regulations import RegulationRetriever
+
+from co5151_contracts.envelope import ErrorCode, err, ok
 
 
 class SearchInput(BaseModel):
@@ -66,11 +67,7 @@ class RegulationService:
             )
         try:
             if name == "search_regulations":
-                return ok(
-                    self.engine.search(
-                        parsed.query, parsed.top_k, parsed.hops, allow_draft=True
-                    )
-                )
+                return ok(self.engine.search(parsed.query, parsed.top_k, parsed.hops, allow_draft=True))
             node = self.engine.nodes.get(parsed.provision_id)
             if node is None or node["type"] != "Provision":
                 return err(ErrorCode.NOT_FOUND, "Không tìm thấy điều khoản.")
@@ -88,9 +85,7 @@ class RegulationService:
                         "pdf_page": d["pdf_page"],
                     },
                     "eligibility_decision": None,
-                    "warnings": [
-                        "Unapproved evidence; program/cohort/date scope has not been resolved."
-                    ],
+                    "warnings": ["Unapproved evidence; program/cohort/date scope has not been resolved."],
                 }
             )
         except Exception:  # noqa: BLE001 - redact errors at the tool boundary
@@ -107,19 +102,17 @@ def main():
     group.add_argument("--provision-id")
     group.add_argument("--describe", action="store_true")
     a = p.parse_args()
-    service = RegulationService(
-        a.base / "data/processed/language_structured/evidence_graph.json", a.allow_draft
-    )
+    service = RegulationService(a.base / "data/processed/language_structured/evidence_graph.json", a.allow_draft)
     if a.describe:
         result = service.describe()
     elif a.query is not None:
-        result = service.call(
-            "search_regulations", {"query": a.query, "top_k": 1}
-        ).model_dump(mode="json", exclude_none=True)
+        result = service.call("search_regulations", {"query": a.query, "top_k": 1}).model_dump(
+            mode="json", exclude_none=True
+        )
     else:
-        result = service.call(
-            "get_provision", {"provision_id": a.provision_id}
-        ).model_dump(mode="json", exclude_none=True)
+        result = service.call("get_provision", {"provision_id": a.provision_id}).model_dump(
+            mode="json", exclude_none=True
+        )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

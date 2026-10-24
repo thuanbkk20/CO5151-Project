@@ -22,7 +22,10 @@ from mcp.types import (
 from regulation_service import INPUTS, RegulationService
 
 DESCRIPTIONS = {
-    "search_regulations": "Tra cứu bằng chứng quy chế ngoại ngữ và mở rộng dẫn chiếu. Bản nháp; chưa lọc chương trình, khóa hoặc hiệu lực; không kết luận đạt chuẩn.",
+    "search_regulations": (
+        "Tra cứu bằng chứng quy chế ngoại ngữ và mở rộng dẫn chiếu. Bản nháp; chưa "
+        "lọc chương trình, khóa hoặc hiệu lực; không kết luận đạt chuẩn."
+    ),
     "get_provision": "Lấy nguyên văn điều khoản theo mã cùng vị trí nguồn. Bản nháp chưa được phê duyệt.",
 }
 
@@ -47,14 +50,10 @@ def build_server(service):
         )
 
     async def call_tool(context, params):
-        result = service.call(
-            params.name, params.arguments if params.arguments is not None else {}
-        )
+        result = service.call(params.name, params.arguments if params.arguments is not None else {})
         body = result.model_dump(mode="json", exclude_none=True)
         return CallToolResult(
-            content=[
-                TextContent(type="text", text=json.dumps(body, ensure_ascii=False))
-            ],
+            content=[TextContent(type="text", text=json.dumps(body, ensure_ascii=False))],
             structuredContent=body,
             isError=not result.ok,
         )
@@ -62,16 +61,17 @@ def build_server(service):
     return Server(
         "regulation-mcp",
         version="0.1.0",
-        instructions="Read-only draft foreign-language evidence. Never infer student eligibility. Check envelope ok and evidence verification state.",
+        instructions=(
+            "Read-only draft foreign-language evidence. Never infer student "
+            "eligibility. Check envelope ok and evidence verification state."
+        ),
         on_list_tools=list_tools,
         on_call_tool=call_tool,
     )
 
 
 async def serve(base, allow_draft=False):
-    service = RegulationService(
-        base / "data/processed/language_structured/evidence_graph.json", allow_draft
-    )
+    service = RegulationService(base / "data/processed/language_structured/evidence_graph.json", allow_draft)
     server = build_server(service)
     async with stdio_server() as (read, write):
         await server.run(read, write, server.create_initialization_options())

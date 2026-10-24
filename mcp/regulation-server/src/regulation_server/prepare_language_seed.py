@@ -20,21 +20,13 @@ def main():
     base = a.base.resolve()
     folder = base / "data/processed"
     corpus = json.loads((folder / "corpus/corpus.json").read_text(encoding="utf-8"))
-    manifest = json.loads(
-        (folder / "extraction/source_manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = json.loads((folder / "extraction/source_manifest.json").read_text(encoding="utf-8"))
     # Identify by content, never by the ambiguous filename number 2933.
     matches = [
-        r
-        for r in corpus
-        if r.get("pdf_page") == 1
-        and "2749" in r["text"]
-        and "27 tháng 5 năm 2026" in r["text"]
+        r for r in corpus if r.get("pdf_page") == 1 and "2749" in r["text"] and "27 tháng 5 năm 2026" in r["text"]
     ]
     if len(matches) != 1:
-        p.error(
-            "Expected exactly one QD 2749 dated 2026-05-27; inspect source metadata"
-        )
+        p.error("Expected exactly one QD 2749 dated 2026-05-27; inspect source metadata")
     sid = matches[0]["source_id"]
     pages = {r["pdf_page"]: r for r in corpus if r["source_id"] == sid}
     if set(pages) != set(range(1, 7)):
@@ -60,7 +52,10 @@ def main():
                 "scope_note": scope,
                 "purpose": purpose,
                 "effective_from_candidate": "2026-05-27",
-                "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+                "applicability_note": (
+                    "Check cohort-specific and semester-specific provisions; decision date "
+                    "alone does not resolve scope."
+                ),
                 "review_status": "candidate",
                 "verified": False,
                 "approval_required_before_advising": True,
@@ -155,7 +150,10 @@ def main():
             "title": "Quy doi chung chi tieng Anh",
             "pdf_page": 4,
             "purpose": "certificate_conversion",
-            "required_review": "Preserve every row, column, X, dash and footnote. Same IELTS score occurs in multiple rows; do not collapse to a single TOEIC value.",
+            "required_review": (
+                "Preserve every row, column, X, dash and footnote. Same IELTS score occurs "
+                "in multiple rows; do not collapse to a single TOEIC value."
+            ),
         },
     ]
     for table in tables:
@@ -187,19 +185,26 @@ def main():
     duplicate = defaultdict(list)
     for r in corpus:
         if r["text"].strip():
-            duplicate[
-                (r["source_id"], hashlib.sha256(r["text"].encode()).hexdigest())
-            ].append(r["unit_id"])
+            duplicate[(r["source_id"], hashlib.sha256(r["text"].encode()).hexdigest())].append(r["unit_id"])
     issues = [
         {
             "id": "R01",
             "priority": "high",
-            "note": "Handbook PDF page 23 (printed 21) must be reconciled with decision A.4.1 on placement versus end-of-semester test. Keep as unresolved; do not automatically overwrite either source.",
+            "note": (
+                "Handbook PDF page 23 (printed 21) must be reconciled with decision A.4.1 "
+                "on placement versus end-of-semester test. Keep as unresolved; do not "
+                "automatically overwrite either source."
+            ),
         },
         {
             "id": "R02",
             "priority": "high",
-            "note": "Handbook PDF page 27 (printed 25) summarizes graduation-course conditions; decision PDF page 4 distinguishes thesis language requirements from graduation. Do not apply the four-skill graduation rule automatically to thesis registration.",
+            "note": (
+                "Handbook PDF page 27 (printed 25) summarizes graduation-course conditions; "
+                "decision PDF page 4 distinguishes thesis language requirements from "
+                "graduation. Do not apply the four-skill graduation rule automatically to "
+                "thesis registration."
+            ),
         },
         {
             "id": "R03",
@@ -209,12 +214,18 @@ def main():
         {
             "id": "R04",
             "priority": "high",
-            "note": "Confirm exact program within chinh quy tap trung; do not map every regular student to chuong trinh tieu chuan.",
+            "note": (
+                "Confirm exact program within chinh quy tap trung; do not map every regular "
+                "student to chuong trinh tieu chuan."
+            ),
         },
         {
             "id": "R05",
             "priority": "medium",
-            "note": "Physical PDF pages differ from printed handbook pages. Confirm printed labels per cited page; do not assume a universal offset.",
+            "note": (
+                "Physical PDF pages differ from printed handbook pages. Confirm printed "
+                "labels per cited page; do not assume a universal offset."
+            ),
         },
     ]
     for ids in duplicate.values():

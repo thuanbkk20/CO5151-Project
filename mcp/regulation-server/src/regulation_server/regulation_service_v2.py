@@ -2,7 +2,6 @@
 
 from datetime import date
 
-from co5151_contracts.envelope import ErrorCode, err, ok
 from handoff_retriever import HandoffRetriever
 from pydantic import (
     BaseModel,
@@ -13,6 +12,8 @@ from pydantic import (
     ValidationError,
     field_validator,
 )
+
+from co5151_contracts.envelope import ErrorCode, err, ok
 
 
 class Context(BaseModel):
@@ -58,9 +59,7 @@ class RegulationServiceV2:
             return err(ErrorCode.NOT_FOUND, "Không tìm thấy công cụ.")
         try:
             p = INPUTS[name].model_validate(arguments)
-            if not (
-                p.query if name == "search_regulations" else p.provision_id
-            ).strip():
+            if not (p.query if name == "search_regulations" else p.provision_id).strip():
                 raise ValueError("empty input")
         except (ValidationError, ValueError):
             return err(ErrorCode.INVALID_ARGUMENT, "Tham số không hợp lệ.")

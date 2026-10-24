@@ -64,20 +64,13 @@ def main():
                     raise ValueError("Duplicate OCR unit_id")
                 original = by_id.get(key)
                 if original is None:
-                    raise ValueError(
-                        "OCR has no matching extraction unit; stale source?"
-                    )
+                    raise ValueError("OCR has no matching extraction unit; stale source?")
                 for field in ("source_id", "file_name", "pdf_page"):
                     if r[field] != original[field]:
                         raise ValueError("OCR metadata mismatch: " + field)
-                if (
-                    original["status"] != "needs_ocr"
-                    or r.get("extraction_method") != "ocr"
-                ):
+                if original["status"] != "needs_ocr" or r.get("extraction_method") != "ocr":
                     raise ValueError("Unexpected OCR record")
-                if r.get("ocr_completed") is not True or not isinstance(
-                    r.get("text"), str
-                ):
+                if r.get("ocr_completed") is not True or not isinstance(r.get("text"), str):
                     raise ValueError("Incomplete OCR record")
                 ocr[key] = r
             except Exception as exc:  # noqa: BLE001 - retain per-document failure reports
@@ -92,9 +85,7 @@ def main():
             needed = u["status"] == "needs_ocr"
             if needed and u["unit_id"] in ocr:
                 r = dict(ocr[u["unit_id"]])
-            r["extraction_method"] = r.get(
-                "extraction_method", "pending_ocr" if needed else "native"
-            )
+            r["extraction_method"] = r.get("extraction_method", "pending_ocr" if needed else "native")
             if not isinstance(r.get("text"), str):
                 errors.append("Invalid text: " + u["unit_id"])
                 continue
@@ -141,9 +132,7 @@ def main():
         errors = report["structural_errors"]
         missing = []
     if not errors:
-        atomic(
-            out / "corpus.json", json.dumps(corpus, ensure_ascii=False, indent=2) + "\n"
-        )
+        atomic(out / "corpus.json", json.dumps(corpus, ensure_ascii=False, indent=2) + "\n")
         table = io.StringIO(newline="")
         fields = [
             "unit_id",
