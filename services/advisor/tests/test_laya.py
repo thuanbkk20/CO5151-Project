@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 from co5151_advisor.agent import AdvisorAgent
-from co5151_advisor.planner import Action, DecisionPlanner, LayaDecisionPlanner
+from co5151_advisor.planner import Action, DecisionPlanner, LayaDecisionPlanner, LLMDecisionPlanner
 
 
 def test_laya_planner_guardrail_refuse():
@@ -20,12 +20,12 @@ def test_laya_planner_fallback_on_unreachable_server():
 def test_advisor_agent_mode_switch(monkeypatch):
     mock_svc = MagicMock()
 
-    # Default mode is rule
+    # Default mode is now llm (Mô hình 1)
     monkeypatch.delenv("ADVISOR_PLANNER_MODE", raising=False)
     agent_default = AdvisorAgent(mock_svc)
-    assert isinstance(agent_default.planner, DecisionPlanner)
+    assert isinstance(agent_default.planner, LLMDecisionPlanner)
 
-    # Set mode to laya
+    # Set mode to laya (Mô hình 2)
     monkeypatch.setenv("ADVISOR_PLANNER_MODE", "laya")
     agent_laya = AdvisorAgent(mock_svc)
     assert isinstance(agent_laya.planner, LayaDecisionPlanner)

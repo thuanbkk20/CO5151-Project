@@ -32,13 +32,13 @@ class AdvisorAgent:
         if planner is not None:
             self.planner = planner
         else:
-            mode = os.environ.get("ADVISOR_PLANNER_MODE", "rule").strip().lower()
+            mode = os.environ.get("ADVISOR_PLANNER_MODE", "llm").strip().lower()
             if mode == "laya":
                 self.planner = LayaDecisionPlanner()
-            elif mode == "llm":
-                self.planner = LLMDecisionPlanner(llm_client=self.llm_client)
-            else:
+            elif mode == "rule":
                 self.planner = DecisionPlanner()
+            else:
+                self.planner = LLMDecisionPlanner(llm_client=self.llm_client)
         self.traces: list[DecisionTrace] = []
 
     def answer(
