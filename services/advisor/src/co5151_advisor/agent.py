@@ -7,7 +7,7 @@ from co5151_eval.agent import AgentResponse, Outcome, Usage
 from .executor import StudentExecutor
 from .llm import CANARY_STRING, LLMClient
 from .memory import DecisionTrace, MemoryGate
-from .planner import Action, DecisionPlanner, Evidence, LayaDecisionPlanner
+from .planner import Action, DecisionPlanner, Evidence, LayaDecisionPlanner, LLMDecisionPlanner
 from .regulations import RegulationDocument, RegulationSource, StaticRegulationSource
 
 
@@ -22,7 +22,7 @@ class AdvisorAgent:
         regulation_source: RegulationSource | None = None,
         memory_gate: MemoryGate | None = None,
         llm_client: LLMClient | None = None,
-        planner: DecisionPlanner | LayaDecisionPlanner | None = None,
+        planner: DecisionPlanner | LayaDecisionPlanner | LLMDecisionPlanner | None = None,
     ):
         self.service = service
         self.executor = StudentExecutor(service)
@@ -35,6 +35,8 @@ class AdvisorAgent:
             mode = os.environ.get("ADVISOR_PLANNER_MODE", "rule").strip().lower()
             if mode == "laya":
                 self.planner = LayaDecisionPlanner()
+            elif mode == "llm":
+                self.planner = LLMDecisionPlanner(llm_client=self.llm_client)
             else:
                 self.planner = DecisionPlanner()
         self.traces: list[DecisionTrace] = []

@@ -6,6 +6,7 @@ import unicodedata
 import urllib.error
 import urllib.request
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -238,3 +239,67 @@ class LayaDecisionPlanner:
             return None
 
         return None
+
+
+class LLMDecisionPlanner:
+    """LLM-driven Decision Planner that uses an autoregressive LLM (e.g. GPT/Kimi)
+    to dynamically reason about the next action instead of relying on a deterministic State Machine.
+    """
+
+    def __init__(
+        self,
+        llm_client: Any | None = None,
+        fallback_planner: DecisionPlanner | None = None,
+    ):
+        if llm_client is None:
+            from .llm import LLMClient
+
+            self.llm_client = LLMClient()
+        else:
+            self.llm_client = llm_client
+        self.fallback = fallback_planner or DecisionPlanner()
+
+    def next_action(
+        self,
+        question: str,
+        evidence: Evidence | None = None,
+        history: list[dict[str, str]] | None = None,
+    ) -> Action:
+        # Fast-path guardrail: Privacy violation (cross-student queries)
+        if any(p.search(question) for p in DecisionPlanner.REFUSE_PATTERNS):
+            return Action.REFUSE
+
+        if not getattr(self.llm_client, "is_available", False):
+            return self.fallback.next_action(question, evidence, history)
+
+        evidence_state = {
+            "has_academic_summary": bool(evidence and evidence.has_academic_summary),
+            "has_warnings": bool(evidence and evidence.has_warnings),
+            "has_regulations": bool(evidence and evidence.has_regulations),
+        }
+
+        prompt = (
+            "You are the Decision Planner for an Academic Advisor Agent in a university.\n"
+            f"Student Question: {question}\n"
+            f"Evidence collected so far: {evidence_state}\n\n"
+            "Choose the single NEXT best action from:\n"
+            "- SUMMARY: if student asks about credits/GPA/graduation and summary is not yet collected.\n"
+            "- WARNINGS: if student asks about warnings/probation and warnings are not yet checked.\n"
+            "- REGULATIONS: if student asks about graduation/policies and regulations are not yet checked.\n"
+            "- RESPOND: if all required evidence has been gathered to formulate an answer.\n"
+            "- CLARIFY: if question is vague or greetings.\n"
+            "- REFUSE: if asking about other students' records.\n\n"
+            "Output ONLY the uppercase action token (e.g. SUMMARY, WARNINGS, REGULATIONS, RESPOND, CLARIFY, REFUSE)."
+        )
+
+        res = self.llm_client.generate(
+            prompt=prompt,
+            system_prompt="You are a strict next-action router. Output only the single chosen action token.",
+        )
+        if res and res.text:
+            text = res.text.strip().upper()
+            for action in Action:
+                if action.value in text:
+                    return action
+
+        return self.fallback.next_action(question, evidence, history)

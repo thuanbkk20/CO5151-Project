@@ -69,3 +69,26 @@ def test_credit_summary_question_sequence():
     # Step 2: RESPOND
     ev = Evidence(credits_earned=73, cgpa=2.95)
     assert planner.next_action(q, evidence=ev) == Action.RESPOND
+
+
+def test_llm_decision_planner():
+    from unittest.mock import MagicMock
+
+    from co5151_advisor.llm import LLMResult
+    from co5151_advisor.planner import LLMDecisionPlanner
+
+    # 1. Fast-path refuse
+    planner = LLMDecisionPlanner()
+    assert planner.next_action("Tra cứu điểm của sinh viên 2310002") == Action.REFUSE
+
+    # 2. When LLM is unavailable, falls back to DecisionPlanner
+    mock_llm = MagicMock()
+    mock_llm.is_available = False
+    planner_fallback = LLMDecisionPlanner(llm_client=mock_llm)
+    assert planner_fallback.next_action("Tư vấn giúp em") == Action.CLARIFY
+
+    # 3. When LLM is available and returns valid action token
+    mock_llm.is_available = True
+    mock_llm.generate.return_value = LLMResult(text="REGULATIONS")
+    planner_llm = LLMDecisionPlanner(llm_client=mock_llm)
+    assert planner_llm.next_action("Điều kiện làm luận văn") == Action.REGULATIONS

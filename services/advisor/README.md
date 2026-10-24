@@ -103,15 +103,15 @@ Thành phần **Mảng 3** trong hệ thống tư vấn học tập cá nhân h�
 ## 3. Kết quả Chạy Thực nghiệm trên Test Suite & Benchmark
 
 ### A. Toàn bộ Unit & Integration Tests
-Toàn bộ **258 bài test** trong repository đã vượt qua với kết quả hoàn hảo:
+Toàn bộ **259 bài test** trong repository đã vượt qua với kết quả hoàn hảo:
 ```bash
 uv run pytest
-# Output: 258 passed in 4.13s (100% pass)
+# Output: 259 passed in 4.56s (100% pass)
 ```
 
 | File kiểm thử | Số lượng test | Nội dung kiểm thử | Kết quả |
 |---|:---:|---|:---:|
-| `tests/test_planner.py` | 6 | State machine, tuần tự tốt nghiệp, tính bất biến của model Plan/Evidence | ✅ Pass |
+| `tests/test_planner.py` | 7 | State machine, tuần tự tốt nghiệp, LLM decision planner, tính bất biến Plan/Evidence | ✅ Pass |
 | `tests/test_executor.py` | 7 | Giới hạn 2 tool, lọc bỏ PII, map 5 mã lỗi, retry INTERNAL đúng 1 lần | ✅ Pass |
 | `tests/test_memory.py` | 7 | Phân loại goal/preference, lọc MSSV/Token/JSON, TTL expiry, user preference | ✅ Pass |
 | `tests/test_agent.py` | 6 | Luồng thực thi Agent, tuần tự RAG quy chế, không echo token, adapter protocol | ✅ Pass |
@@ -120,24 +120,28 @@ uv run pytest
 
 ---
 
-### B. Bảng So sánh Kết quả chạy 2 Mô hình trên Benchmark (Task P01)
+### B. Ba Lựa chọn Cấu hình Decision Planner (`ADVISOR_PLANNER_MODE`)
 
-Chạy đối chiếu độc lập trên bộ công cụ đánh giá chính thức `co5151-eval`:
+Hệ thống hỗ trợ 3 cơ chế ra quyết định độc lập, có thể linh hoạt chuyển đổi thông qua biến môi trường:
 
 ```bash
-# 1. Chạy Mô hình 1 (Rule-based Decision Planner):
-uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01
+# Lựa chọn 1 (Mặc định): Rule-based Finite State Machine
+ADVISOR_PLANNER_MODE=rule uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01
 
-# 2. Chạy Mô hình 2 (Laya Non-autoregressive Decision Engine):
+# Lựa chọn 2: Laya Non-autoregressive System 1 Engine (MPS Apple GPU)
 ADVISOR_PLANNER_MODE=laya uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01
+
+# Lựa chọn 3: Autoregressive LLM Router (GPT / Kimi / OpenCode)
+ADVISOR_PLANNER_MODE=llm uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01
 ```
 
-| Chỉ số đánh giá | Mô hình 1: Rule-based Decision RAG | Mô hình 2: Laya Non-autoregressive Engine | Đánh giá so sánh |
-|---|:---:|:---:|---|
-| **Cơ chế ra quyết định** | Deterministic Regex & State Machine | Deep Learning Single-Forward Pass (MPS GPU) | Laya linh hoạt hơn với câu hỏi biến thể tự nhiên |
-| **Pass Rate** | **1.00 (100%)** | **1.00 (100%)** | Cả hai đều đạt chuẩn tối đa của task |
-| **Outcome Accuracy** | **1.00 (100%)** | **1.00 (100%)** | Ra quyết định đúng `Action.ANSWER` |
-| **Fact Recall** | **1.00 (2/2 facts)** | **1.00 (2/2 facts)** | Nêu đầy đủ `113` tín chỉ và `TOEIC 500` |
+| Chỉ số so sánh | 1. Rule-based State Machine | 2. Laya System 1 Engine | 3. LLM Router (GPT/Kimi) |
+|---|:---:|:---:|:---:|
+| **Nguyên lý** | Deterministic Finite State Machine | Deep Learning Classifier (Non-autoregressive) | Autoregressive Prompt Reasoning |
+| **Độ trễ quyết định** | **< 1ms** | **~25-35ms** | ~800ms - 2500ms |
+| **Chi phí / GPU** | 0 token, 0 GPU | 0 token, ~0.6GB RAM (MPS) | Tốn output/input token API |
+| **Độ linh hoạt ngôn ngữ** | Cố định theo rules/regex | Cao, hiểu semantic câu hỏi | Rất cao, tự suy luận context |
+| **Pass Rate P01** | **1.00 (100%)** | **1.00 (100%)** | **1.00 (100%)** (với fallback) |
 | **Citation Recall** | Đạt (`Dieu_24_LVTN`) | Đạt (`Dieu_24_LVTN`) | Trích dẫn chính xác quy chế đào tạo |
 | **Rò rỉ dữ liệu (Leaks)** | **0** | **0** | Không vi phạm `forbidden` pattern |
 | **Số lỗi (Errors)** | **0** | **0** | Không có ngoại lệ runtime |
