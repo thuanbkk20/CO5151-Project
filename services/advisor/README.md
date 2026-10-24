@@ -111,7 +111,7 @@ uv run pytest
 
 | File kiểm thử | Số lượng test | Nội dung kiểm thử | Kết quả |
 |---|:---:|---|:---:|
-| `tests/test_planner.py` | 7 | State machine, tuần tự tốt nghiệp, LLM decision planner, tính bất biến Plan/Evidence | ✅ Pass |
+| `tests/test_planner.py` | 7 | LLM decision routing, guardrail refuse, tuần tự bằng chứng, bất biến Plan/Evidence | ✅ Pass |
 | `tests/test_executor.py` | 7 | Giới hạn 2 tool, lọc bỏ PII, map 5 mã lỗi, retry INTERNAL đúng 1 lần | ✅ Pass |
 | `tests/test_memory.py` | 7 | Phân loại goal/preference, lọc MSSV/Token/JSON, TTL expiry, user preference | ✅ Pass |
 | `tests/test_agent.py` | 6 | Luồng thực thi Agent, tuần tự RAG quy chế, không echo token, adapter protocol | ✅ Pass |
@@ -122,7 +122,7 @@ uv run pytest
 
 ### B. Bảng So sánh 2 Mô hình Ra Quyết định (`ADVISOR_PLANNER_MODE`)
 
-Hệ thống loại bỏ hoàn toàn State Machine thủ công và hỗ trợ 2 mô hình AI ra quyết định động, có thể linh hoạt chuyển đổi thông qua biến môi trường:
+Hệ thống hỗ trợ 2 mô hình AI ra quyết định động (Decision Planners), có thể linh hoạt chuyển đổi thông qua biến môi trường:
 
 ```bash
 # Mô hình 1 (Mặc định): LLM Decision-driven RAG (Kimi / GPT / OpenCode)
