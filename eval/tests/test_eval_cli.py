@@ -44,3 +44,35 @@ def test_env_file_is_loaded_before_the_command(tmp_path, monkeypatch):
     assert main(["--env-file", str(env), "check-gold"]) == 0
     assert os.environ["CO5151_EVAL_ENV_PROBE"] == "1"
     monkeypatch.delenv("CO5151_EVAL_ENV_PROBE")
+
+
+def test_run_writes_an_html_report_and_records_the_commit(tmp_path):
+    assert main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--group", "out_of_scope",
+                 "--out", str(tmp_path / "refuse_all")]) == 0  # fmt: skip
+    assert (tmp_path / "refuse_all" / "report.html").exists()
+    assert "commit" in json.loads((tmp_path / "refuse_all" / "summary.json").read_text())
+
+
+def test_report_command_compares_runs(tmp_path, capsys):
+    for agent in ("refuse_all", "record_template"):
+        main(["run", "--agent", f"co5151_eval.baselines:{agent}", "--group", "out_of_scope",
+              "--out", str(tmp_path / agent)])  # fmt: skip
+    capsys.readouterr()
+    assert main(["report", str(tmp_path / "refuse_all"), str(tmp_path / "record_template")]) == 0
+    html = (tmp_path / "report.html").read_text("utf-8")
+    assert "refuse_all" in html and "record_template" in html
+
+
+def lookup_for_test(question):
+    return ["QD-TEST-1"]
+
+
+def test_report_command_accepts_a_regulation_lookup(tmp_path):
+    out = tmp_path / "advisor"
+    main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--only", "P01", "--out", str(out)])
+    summary = json.loads((out / "summary.json").read_text())
+    summary["agent_config"] = {"regulation_source": "ToolRegulationSource"}
+    (out / "summary.json").write_text(json.dumps(summary))
+    assert main(["report", str(out), "-o", str(tmp_path / "r.html"),
+                 "--regulation-lookup", "test_eval_cli:lookup_for_test"]) == 0  # fmt: skip
+    assert "QD-TEST-1" in (tmp_path / "r.html").read_text("utf-8")

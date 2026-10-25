@@ -162,6 +162,7 @@ class AdvisorAgent:
                 self.traces.append(
                     DecisionTrace(action="REGULATIONS", sources=["regulation_source"], created_at=time.time())
                 )
+                tool_calls.append("search_regulations")
                 docs = self.regulation_source.search(question, ctdt=evidence.ctdt)
                 if not docs:
                     return AgentResponse(

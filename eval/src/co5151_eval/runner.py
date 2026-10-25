@@ -31,12 +31,13 @@ class Record:
     tool_calls: list[str] = field(default_factory=list)
     text: str = ""
     error: str | None = None
+    citations: list[str] = field(default_factory=list)
 
 
 def _record(task: Task, seed: int, latency: float, resp: AgentResponse, s: Score, error: str | None) -> Record:
     return Record(task.id, task.group.value, seed, round(latency, 4), resp.usage.total, s.outcome.value,
                   s.outcome_ok, s.facts_hit, s.facts_total, s.citations_hit, s.citations_total, s.forbidden_hits,
-                  False if error else s.passed, resp.tool_calls, resp.text, error)  # fmt: skip
+                  False if error else s.passed, resp.tool_calls, resp.text, error, resp.citations)  # fmt: skip
 
 
 def run(
@@ -50,8 +51,8 @@ def run(
     tasks = list(tasks)
     records = []
     for seed in seeds:
-        agent = make_agent(seed)
         for task in tasks:
+            agent = make_agent(seed)
             token = oracle.token(task.user) if task.user else None
             start = time.perf_counter()
             try:
