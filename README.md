@@ -12,7 +12,7 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 | `mcp/regulation-server` | **Regulation MCP**: Knowledge Graph + GraphRAG tra cứu quy chế | 1. Data & GraphRAG & MCP |
 | `services/advisor` | Advisor Agent, decision-driven RAG, short-term & audit memory | 3. Advisor Agent & Memory |
 | `verifier` | Compliance Verifier, reflection & grounding loop, strict refusal | 4. Verifier & Security |
-| `apps/web` | Giao diện chat demo | — |
+| `apps/web` | **Giao diện chat** Chainlit: đăng nhập tài khoản demo, chọn LLM, chat nhiều lượt | 5. Kiểm thử & đánh giá |
 | `eval` | **Evaluation**: bộ 24 task, metric, baseline, kiểm thử bảo mật & prompt injection | 5. Kiểm thử & đánh giá |
 | `docs` | Tài liệu kiến trúc, báo cáo | — |
 
@@ -72,7 +72,16 @@ uv run student-mcp issue-token sv001     # token cho tài khoản demo (mật kh
 uv run regulation-mcp --allow-draft      # stdio; dữ liệu quy chế hiện là bản nháp
 ```
 
-Chưa có giao diện chat (`apps/web`); Advisor hiện được gọi qua `co5151-eval`.
+### Giao diện chat
+
+```bash
+uv run co5151-web          # http://localhost:8000
+```
+
+Đăng nhập bằng tài khoản demo `sv001` … `sv008` (mật khẩu `demo`), hoặc `khach` để hỏi quy chế chung không cần hồ
+sơ. Nút cài đặt cạnh ô nhập cho chọn nhà cung cấp LLM (chỉ những bên đã có key trong `.env`) và model. Dưới mỗi câu
+trả lời có mục "Chi tiết xử lý": tool đã gọi, trích dẫn, token, thời gian, model. Cần `CHAINLIT_AUTH_SECRET` trong
+`.env`; đổi cổng bằng `CHAINLIT_PORT` hoặc `--port`. Xem [apps/web/README.md](apps/web/README.md).
 
 Quy ước khi thêm code (biến môi trường, package, tool mới) nằm trong [CLAUDE.md](CLAUDE.md).
 
