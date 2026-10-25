@@ -23,10 +23,9 @@ class Provider:
 PROVIDERS: dict[str, Provider] = {
     "gemini": Provider(
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash-lite",
         key_env="GEMINI_API_KEY",
         sends_seed=False,
-        reasoning_effort="none",
     ),
     "openai": Provider(base_url="https://api.openai.com/v1", model="gpt-4.1-mini", key_env="OPENAI_API_KEY"),
     "kimi": Provider(base_url="https://opencode.ai/inference/openai/v1", model="kimi-k3", key_env="OPENCODE_API_KEY"),

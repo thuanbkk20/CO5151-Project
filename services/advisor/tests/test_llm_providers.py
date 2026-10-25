@@ -27,13 +27,13 @@ def test_gemini_is_the_default_and_never_sends_seed(monkeypatch):
     client = LLMClient()
     assert client.describe() == {
         "provider": "gemini",
-        "model": "gemini-2.5-flash",
+        "model": "gemini-3.5-flash-lite",
         "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
     }
     assert client.is_available
     sent = _sent_options(client, seed=7)
     assert "seed" not in sent
-    assert sent["reasoning_effort"] == "none"
+    assert "reasoning_effort" not in sent
 
 
 def test_openai_reads_its_own_key_and_sends_seed(monkeypatch):
@@ -72,7 +72,7 @@ def test_empty_values_in_env_fall_back_to_the_profile(monkeypatch):
     for name in LLM_ENV:
         monkeypatch.setenv(name, "")
     client = LLMClient()
-    assert (client.provider, client.model, client.timeout) == ("gemini", "gemini-2.5-flash", 60.0)
+    assert (client.provider, client.model, client.timeout) == ("gemini", "gemini-3.5-flash-lite", 60.0)
     assert not client.is_available
 
 
