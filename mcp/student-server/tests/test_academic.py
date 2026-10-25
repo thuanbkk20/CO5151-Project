@@ -43,17 +43,24 @@ def test_gpa4_weighted_by_credits():
 @pytest.mark.parametrize(
     "mssv, expected",
     [
-        ("2310001", {"credits_earned": 113, "toeic": 500, "capstone_project_passed": True, "currently_warned": False}),
+        ("2310001", {"credits_earned": 102, "toeic": 500, "capstone_project_passed": False, "currently_warned": False}),
         ("2310002", {"capstone_project_passed": False, "english_cert": None}),
         ("2310003", {"currently_warned": True, "consecutive_warnings": 1}),
-        ("2210004", {"ctdt": "2019", "credits_earned": 108}),
-        ("2210005", {"gdtc_completed": False, "toeic": 650}),
+        ("2210004", {"ctdt": "2019", "credits_earned": 100}),
+        ("2210005", {"gdtc_completed": False, "toeic": 650, "capstone_project_passed": True}),
         ("2310007", {"english_cert": "IELTS 6.5", "toeic": 785}),
     ],
 )
 def test_persona_summaries(db, mssv, expected):
     s = summary(db, mssv).model_dump()
     assert {k: s[k] for k in expected} == expected
+
+
+def test_program_follows_real_curriculum(db):
+    for ctdt in ("2019", "2023"):
+        program = db.ref["ctdt"][ctdt]
+        assert db.ref["program_credits"][ctdt] == sum(c[3] for c in program) == 128
+        assert [c[1] for c in program if c[4] in ("capstone", "thesis")] == ["CO4029", "CO4337"]
 
 
 def test_retakes_are_counted(db):

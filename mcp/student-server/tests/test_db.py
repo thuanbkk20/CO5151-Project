@@ -7,7 +7,7 @@ from student_server.db import StudentDB
 
 def test_raw_payloads_round_trip(db):
     assert db.raw_profile("2310001")["hoVaTen"] == "Nguyễn Văn An"
-    assert len(db.raw_transcript("2310001")) == 43
+    assert len(db.raw_transcript("2310001")) == 40
     sems = db.raw_semesters("2310001")
     assert [s["maNamHocHocKy"] for s in sems] == sorted((s["maNamHocHocKy"] for s in sems), reverse=True)
     assert [d["yearSemesterCode"] for d in db.raw_decisions("2310003")] == ["20252"]

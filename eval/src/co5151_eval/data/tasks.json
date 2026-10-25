@@ -47,10 +47,10 @@
     "question": "Với bảng điểm hiện tại em có đủ điều kiện đăng ký làm luận văn tốt nghiệp kỳ tới không?",
     "expected": "answer",
     "facts": [
-      {"field": "credits_earned", "value": 113, "mention": ["113"]},
+      {"field": "credits_earned", "value": 102, "mention": ["102"]},
       {"field": "toeic", "value": 500, "mention": ["500"]}
     ],
-    "reference_answer": "Đủ điều kiện: 113 TC tích lũy, ĐTBTL 2.52, đã đạt Đồ án chuyên ngành, TOEIC 500.",
+    "reference_answer": "102 TC tích lũy, ĐTBTL 2.51, TOEIC 500; HK 20261 đã được giao đề tài, đang học Đồ án chuyên ngành và Học kỳ thực tập doanh nghiệp (tiên quyết của Đồ án tốt nghiệp) — đạt cả hai thì kỳ tới đủ điều kiện làm Đồ án tốt nghiệp.",
     "notes": "Persona sv001 trong MOCK_DATA.md: đủ ĐK LVTN."
   },
   {
@@ -60,11 +60,11 @@
     "question": "Với bảng điểm hiện tại em có đủ điều kiện đăng ký làm luận văn tốt nghiệp kỳ tới không?",
     "expected": "answer",
     "facts": [
-      {"field": "credits_earned", "value": 99, "mention": ["99"]},
+      {"field": "credits_earned", "value": 92, "mention": ["92"]},
       {"field": "capstone_project_passed", "value": false, "mention": ["đồ án chuyên ngành", "Đồ án chuyên ngành", "ĐACN"]}
     ],
     "forbidden": ["(?<!chưa )(?<!không )đủ điều kiện (đăng ký |làm )?(luận văn|LVTN)"],
-    "reference_answer": "Chưa đủ: 99 TC, chưa đạt Đồ án chuyên ngành, chưa nộp chứng chỉ ngoại ngữ.",
+    "reference_answer": "Chưa đủ: 92 TC, chưa đạt Đồ án chuyên ngành, rớt Đồ án tổng hợp, chưa nộp chứng chỉ ngoại ngữ.",
     "notes": "Cùng câu hỏi với P01, khác người dùng: kiểm tra agent đọc đúng hồ sơ của phiên."
   },
   {
@@ -87,9 +87,9 @@
     "expected": "answer",
     "facts": [
       {"field": "ctdt", "value": "2019", "mention": ["2019"]},
-      {"field": "credits_earned", "value": 108, "mention": ["108"]}
+      {"field": "credits_earned", "value": 100, "mention": ["100"]}
     ],
-    "reference_answer": "Áp dụng QC2019 (khóa 2022); 108 TC, đủ ĐK LVTN theo QC2019.",
+    "reference_answer": "Áp dụng QC2019 (khóa 2022); 100 TC, đủ ĐK LVTN theo QC2019.",
     "notes": "Bẫy lấy nhầm quy chế khóa khác (QC2023)."
   },
   {
@@ -99,10 +99,10 @@
     "question": "Em còn thiếu những gì để được xét tốt nghiệp?",
     "expected": "answer",
     "facts": [
-      {"field": "credits_earned", "value": 126, "mention": ["126", "4 tín chỉ", "4 TC"]},
+      {"field": "credits_earned", "value": 124, "mention": ["124", "4 tín chỉ", "4 TC"]},
       {"field": "gdtc_completed", "value": false, "mention": ["giáo dục thể chất", "Giáo dục thể chất", "GDTC"]}
     ],
-    "reference_answer": "Thiếu 4 TC (126/130) và chưa hoàn thành GDTC (Giáo dục thể chất 3 đang hoãn thi)."
+    "reference_answer": "Thiếu 4 TC (124/128: Thực tập ngoài trường, Pháp luật Việt Nam đại cương) và chưa hoàn thành GDTC (Giáo dục thể chất 3 đang hoãn thi)."
   },
   {
     "id": "P06",
@@ -111,9 +111,9 @@
     "question": "Học kỳ tới em được đăng ký tối đa bao nhiêu tín chỉ?",
     "expected": "answer",
     "facts": [
-      {"field": "cgpa", "value": 3.89, "mention": ["3.89", "3,89"]}
+      {"field": "cgpa", "value": 3.9, "mention": ["3.9", "3,9"]}
     ],
-    "reference_answer": "ĐTBTL 3.89 nên được đăng ký tối đa 28 TC (theo persona trong MOCK_DATA.md).",
+    "reference_answer": "ĐTBTL 3.90 nên được đăng ký tối đa 28 TC (theo persona trong MOCK_DATA.md).",
     "notes": "Ngưỡng 28 TC cần người phụ trách quy chế xác nhận."
   },
   {
@@ -135,10 +135,10 @@
     "question": "Điểm trung bình tích lũy hiện tại của em là bao nhiêu và em đã tích lũy được bao nhiêu tín chỉ?",
     "expected": "answer",
     "facts": [
-      {"field": "cgpa", "value": 2.95, "mention": ["2.95", "2,95"]},
-      {"field": "credits_earned", "value": 73, "mention": ["73"]}
+      {"field": "cgpa", "value": 2.85, "mention": ["2.85", "2,85"]},
+      {"field": "credits_earned", "value": 66, "mention": ["66"]}
     ],
-    "reference_answer": "ĐTBTL 2.95 (thang 4), 73 TC tích lũy.",
+    "reference_answer": "ĐTBTL 2.85 (thang 4), 66 TC tích lũy.",
     "notes": "Câu dễ, chỉ cần Student Record MCP; dùng để đo độ trễ tối thiểu."
   },
   {

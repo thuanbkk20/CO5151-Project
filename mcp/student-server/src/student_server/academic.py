@@ -140,9 +140,14 @@ def summary(
     latest = sem_rows[0] if sem_rows else {}
     program = ref["ctdt"][ctdt]
 
+    def passed(code: str) -> bool:
+        return any(r["maMonHoc"] == code and r["diemDat"] == "1" for r in rows)
+
     def all_passed(kind: str) -> bool:
-        codes = [c[1] for c in program if c[4] == kind]
-        return all(any(r["maMonHoc"] == code and r["diemDat"] == "1" for r in rows) for code in codes)
+        return all(passed(c[1]) for c in program if c[4] == kind)
+
+    def any_passed(kind: str) -> bool:
+        return any(passed(c[1]) for c in program if c[4] == kind)
 
     cert, toeic = english_certificate(rows, ref["cert_to_toeic"])
 
@@ -161,7 +166,7 @@ def summary(
         credits_earned=int(latest.get("soTCTLChung", 0)),  # nguồn: bảng điểm học kỳ (API)
         cgpa=gpa4(best),  # thang 4, tính từ điểm chữ (QC Điều 12)
         cgpa10=float(latest.get("diemTBTLChung", 0) or 0),  # nguồn: bảng điểm học kỳ (API)
-        capstone_project_passed=any(r["maMonHoc"] == "CO3101" and r["diemDat"] == "1" for r in rows),
+        capstone_project_passed=any_passed("capstone"),
         toeic=toeic,
         english_cert=cert,
         gdtc_completed=all_passed("gdtc"),

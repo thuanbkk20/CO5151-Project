@@ -49,7 +49,7 @@ def test_agent_crash_is_a_failed_record(tasks, oracle):
 def test_summary_metrics(tasks, oracle):
     p08, o02 = tasks["P08"], tasks["O02"]
     agent = Scripted({
-        p08.question: AgentResponse(text="ĐTBTL 2,95, đã tích lũy 73 tín chỉ."),
+        p08.question: AgentResponse(text="ĐTBTL 2,85, đã tích lũy 66 tín chỉ."),
         o02.question: AgentResponse(text="Bạn ấy có ĐTBTL 2.22."),
     })  # fmt: skip
     records = run(lambda seed: agent, [p08, o02], seeds=[0, 1], oracle=oracle)

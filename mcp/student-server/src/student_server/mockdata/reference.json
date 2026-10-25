@@ -1,5 +1,5 @@
 {
-  "_note": "Dữ liệu tham chiếu MÔ PHỎNG cho mock API. Mã môn/CTĐT mang tính minh họa — đối chiếu CTĐT thật trước D3.",
+  "_note": "Dữ liệu tham chiếu cho mock API. CTĐT theo CTĐT ngành KHMT khóa 2019 và 2026 (chuyên ngành KHMT); môn tự chọn là một lựa chọn cụ thể, học kỳ khuyến nghị theo Kế hoạch giảng dạy CTĐT 2026.",
   "today_semester": "20261",
   "ctdt": {
     "2019": [
@@ -8,42 +8,35 @@
         "MT1003",
         "Giải tích 1",
         4,
-        "core"
+        "math_science"
       ],
       [
         1,
         "PH1003",
         "Vật lý 1",
         4,
-        "core"
+        "math_science"
       ],
       [
         1,
         "CO1005",
         "Nhập môn điện toán",
         3,
-        "core"
+        "general"
       ],
       [
         1,
         "CO1023",
         "Hệ thống số",
         3,
-        "core"
+        "foundation"
       ],
       [
         1,
         "LA1003",
         "Anh văn 1",
         2,
-        "av"
-      ],
-      [
-        1,
-        "SP1031",
-        "Triết học Mác - Lênin",
-        3,
-        "core"
+        "english"
       ],
       [
         1,
@@ -53,53 +46,53 @@
         "gdtc"
       ],
       [
-        1,
-        "MI1003",
-        "Giáo dục quốc phòng - an ninh",
-        0,
-        "gdqp"
-      ],
-      [
         2,
         "MT1005",
         "Giải tích 2",
         4,
-        "core"
+        "math_science"
       ],
       [
         2,
         "MT1007",
         "Đại số tuyến tính",
         3,
-        "core"
+        "math_science"
       ],
       [
         2,
         "CO1007",
         "Cấu trúc rời rạc cho khoa học máy tính",
         4,
-        "core"
+        "math_science"
       ],
       [
         2,
         "CO1027",
         "Kỹ thuật lập trình",
         3,
-        "core"
+        "foundation"
+      ],
+      [
+        2,
+        "PH1007",
+        "Thí nghiệm vật lý",
+        1,
+        "math_science"
       ],
       [
         2,
         "LA1005",
         "Anh văn 2",
         2,
-        "av"
+        "english"
       ],
       [
         2,
-        "SP1033",
-        "Kinh tế chính trị Mác - Lênin",
-        2,
-        "core"
+        "MI1003",
+        "Giáo dục quốc phòng",
+        0,
+        "gdqp"
       ],
       [
         2,
@@ -113,42 +106,35 @@
         "CO2003",
         "Cấu trúc dữ liệu và giải thuật",
         4,
-        "core"
+        "foundation"
       ],
       [
         3,
         "CO2007",
         "Kiến trúc máy tính",
         4,
-        "core"
-      ],
-      [
-        3,
-        "MT2013",
-        "Xác suất và thống kê",
-        4,
-        "core"
+        "foundation"
       ],
       [
         3,
         "CO2011",
         "Mô hình hóa toán học",
         3,
-        "core"
+        "math_science"
+      ],
+      [
+        3,
+        "SP1031",
+        "Triết học Mác - Lênin",
+        3,
+        "general"
       ],
       [
         3,
         "LA1007",
         "Anh văn 3",
         2,
-        "av"
-      ],
-      [
-        3,
-        "SP1035",
-        "Chủ nghĩa xã hội khoa học",
-        2,
-        "core"
+        "english"
       ],
       [
         3,
@@ -159,493 +145,528 @@
       ],
       [
         4,
-        "CO2013",
-        "Hệ cơ sở dữ liệu",
-        4,
-        "core"
-      ],
-      [
-        4,
         "CO2017",
         "Hệ điều hành",
         3,
-        "core"
+        "major"
       ],
       [
         4,
         "CO2039",
         "Lập trình nâng cao",
         3,
-        "core"
+        "foundation"
       ],
       [
         4,
-        "CO2001",
-        "Kỹ năng chuyên nghiệp cho kỹ sư",
-        3,
-        "core"
+        "MT2013",
+        "Xác suất và thống kê",
+        4,
+        "math_science"
+      ],
+      [
+        4,
+        "SP1033",
+        "Kinh tế chính trị Mác - Lênin",
+        2,
+        "general"
       ],
       [
         4,
         "LA1009",
         "Anh văn 4",
         2,
-        "av"
+        "english"
       ],
       [
         4,
-        "SP1037",
-        "Tư tưởng Hồ Chí Minh",
-        2,
-        "core"
-      ],
-      [
-        5,
-        "CO3001",
-        "Công nghệ phần mềm",
+        "CO3061",
+        "Nhập môn trí tuệ nhân tạo",
         3,
-        "core"
+        "speciality_elective"
       ],
       [
         5,
-        "CO3005",
-        "Nguyên lý ngôn ngữ lập trình",
+        "CO2013",
+        "Hệ cơ sở dữ liệu",
         4,
-        "core"
+        "foundation"
       ],
       [
         5,
         "CO3093",
         "Mạng máy tính",
         3,
-        "core"
+        "major"
       ],
       [
         5,
-        "CO3011",
-        "Quản lý dự án phần mềm",
+        "CO3001",
+        "Công nghệ phần mềm",
         3,
-        "core"
+        "major"
       ],
       [
         5,
-        "CO3015",
-        "Kiểm thử phần mềm",
+        "CH1003",
+        "Hóa đại cương",
         3,
-        "core"
+        "math_science"
       ],
       [
         5,
+        "SP1035",
+        "Chủ nghĩa xã hội khoa học",
+        2,
+        "general"
+      ],
+      [
+        5,
+        "CO3101",
+        "Đồ án tổng hợp - hướng trí tuệ nhân tạo",
+        1,
+        "major_elective"
+      ],
+      [
+        6,
+        "CO3005",
+        "Nguyên lý ngôn ngữ lập trình",
+        4,
+        "major"
+      ],
+      [
+        6,
+        "CO2001",
+        "Kỹ năng chuyên nghiệp cho kỹ sư",
+        3,
+        "general"
+      ],
+      [
+        6,
+        "SP1037",
+        "Tư tưởng Hồ Chí Minh",
+        2,
+        "general"
+      ],
+      [
+        6,
         "SP1039",
         "Lịch sử Đảng Cộng sản Việt Nam",
         2,
-        "core"
+        "general"
       ],
       [
         6,
-        "CO3013",
-        "Xây dựng chương trình dịch",
-        4,
-        "core"
-      ],
-      [
-        6,
-        "CO3061",
-        "Nhập môn trí tuệ nhân tạo",
+        "IM1013",
+        "Kinh tế học đại cương",
         3,
-        "core"
+        "management"
       ],
       [
         6,
-        "CO3101",
-        "Đồ án chuyên ngành",
-        2,
-        "capstone"
-      ],
-      [
-        6,
-        "CO3021",
-        "Hệ quản trị cơ sở dữ liệu",
-        3,
-        "core"
+        "CO3107",
+        "Thực tập đồ án môn học đa ngành - hướng trí tuệ nhân tạo",
+        1,
+        "major_elective"
       ],
       [
         6,
         "CO3029",
         "Khai phá dữ liệu",
         3,
-        "core"
-      ],
-      [
-        6,
-        "SP1007",
-        "Pháp luật Việt Nam đại cương",
-        2,
-        "core"
+        "speciality_elective"
       ],
       [
         7,
         "CO3335",
         "Thực tập ngoài trường",
         2,
-        "intern"
+        "internship"
       ],
       [
         7,
-        "CO3065",
-        "Công nghệ phần mềm nâng cao",
-        3,
-        "core"
+        "CO4029",
+        "Đồ án chuyên ngành",
+        2,
+        "capstone"
+      ],
+      [
+        7,
+        "SP1007",
+        "Pháp luật Việt Nam đại cương",
+        2,
+        "general"
       ],
       [
         7,
         "CO3117",
         "Học máy",
         3,
-        "core"
+        "speciality_elective"
       ],
       [
         7,
-        "CO4031",
-        "Kho dữ liệu và hệ hỗ trợ quyết định",
+        "CO3021",
+        "Hệ quản trị cơ sở dữ liệu",
         3,
-        "core"
+        "speciality_elective"
+      ],
+      [
+        7,
+        "CO3049",
+        "Lập trình web",
+        3,
+        "free_elective"
       ],
       [
         8,
         "CO4337",
-        "Luận văn tốt nghiệp",
-        9,
+        "Đồ án tốt nghiệp (Khoa học Máy tính)",
+        4,
         "thesis"
       ],
       [
-        7,
-        "CO3103",
-        "Đồ án tổng hợp",
-        2,
-        "core"
+        8,
+        "CO4031",
+        "Kho dữ liệu và hệ hỗ trợ quyết định",
+        3,
+        "speciality_elective"
+      ],
+      [
+        8,
+        "CO3015",
+        "Kiểm tra phần mềm",
+        3,
+        "free_elective"
+      ],
+      [
+        8,
+        "CO3011",
+        "Quản lý dự án phần mềm",
+        3,
+        "free_elective"
       ]
     ],
     "2023": [
       [
         1,
+        "LA1003",
+        "Anh văn 1",
+        2,
+        "english"
+      ],
+      [
+        1,
         "MT1003",
         "Giải tích 1",
         4,
-        "core"
+        "math_science"
       ],
       [
         1,
         "PH1003",
         "Vật lý 1",
         4,
-        "core"
+        "math_science"
       ],
       [
         1,
         "CO1005",
         "Nhập môn điện toán",
         3,
-        "core"
+        "general"
       ],
       [
         1,
         "CO1023",
         "Hệ thống số",
         3,
-        "core"
+        "foundation"
       ],
       [
         1,
-        "LA1003",
-        "Anh văn 1",
-        2,
-        "av"
-      ],
-      [
-        1,
-        "SP1031",
-        "Triết học Mác - Lênin",
-        3,
-        "core"
-      ],
-      [
-        1,
-        "PE1003",
-        "Giáo dục thể chất 1",
+        "PE1001",
+        "Giáo dục thể chất (học phần 1)",
         0,
         "gdtc"
-      ],
-      [
-        1,
-        "MI1003",
-        "Giáo dục quốc phòng - an ninh",
-        0,
-        "gdqp"
-      ],
-      [
-        2,
-        "MT1005",
-        "Giải tích 2",
-        4,
-        "core"
-      ],
-      [
-        2,
-        "MT1007",
-        "Đại số tuyến tính",
-        3,
-        "core"
-      ],
-      [
-        2,
-        "CO1007",
-        "Cấu trúc rời rạc cho khoa học máy tính",
-        4,
-        "core"
-      ],
-      [
-        2,
-        "CO1027",
-        "Kỹ thuật lập trình",
-        3,
-        "core"
       ],
       [
         2,
         "LA1005",
         "Anh văn 2",
         2,
-        "av"
+        "english"
       ],
       [
         2,
-        "SP1033",
-        "Kinh tế chính trị Mác - Lênin",
-        2,
-        "core"
+        "MT1005",
+        "Giải tích 2",
+        4,
+        "math_science"
       ],
       [
         2,
-        "PE1005",
-        "Giáo dục thể chất 2",
+        "MT1007",
+        "Đại số tuyến tính",
+        3,
+        "math_science"
+      ],
+      [
+        2,
+        "CO1007",
+        "Cấu trúc rời rạc cho khoa học máy tính",
+        4,
+        "math_science"
+      ],
+      [
+        2,
+        "CO1027",
+        "Kỹ thuật lập trình",
+        3,
+        "foundation"
+      ],
+      [
+        2,
+        "PH1007",
+        "Thí nghiệm vật lý",
+        1,
+        "math_science"
+      ],
+      [
+        2,
+        "MI1003",
+        "Giáo dục quốc phòng",
+        0,
+        "gdqp"
+      ],
+      [
+        2,
+        "PE1002",
+        "Giáo dục thể chất (học phần 2)",
         0,
         "gdtc"
-      ],
-      [
-        3,
-        "CO2003",
-        "Cấu trúc dữ liệu và giải thuật",
-        4,
-        "core"
-      ],
-      [
-        3,
-        "CO2007",
-        "Kiến trúc máy tính",
-        4,
-        "core"
-      ],
-      [
-        3,
-        "MT2013",
-        "Xác suất và thống kê",
-        4,
-        "core"
-      ],
-      [
-        3,
-        "CO2011",
-        "Mô hình hóa toán học",
-        3,
-        "core"
       ],
       [
         3,
         "LA1007",
         "Anh văn 3",
         2,
-        "av"
+        "english"
       ],
       [
         3,
-        "SP1035",
-        "Chủ nghĩa xã hội khoa học",
-        2,
-        "core"
+        "SP1031",
+        "Triết học Mác - Lênin",
+        3,
+        "general"
       ],
       [
         3,
-        "PE1007",
-        "Giáo dục thể chất 3",
-        0,
-        "gdtc"
+        "CO2007",
+        "Kiến trúc máy tính",
+        4,
+        "foundation"
       ],
       [
-        4,
-        "CO2013",
-        "Hệ cơ sở dữ liệu",
-        4,
-        "core"
-      ],
-      [
-        4,
-        "CO2017",
-        "Hệ điều hành",
         3,
-        "core"
+        "CO2011",
+        "Mô hình hóa toán học",
+        3,
+        "math_science"
       ],
       [
-        4,
-        "CO2039",
-        "Lập trình nâng cao",
         3,
-        "core"
-      ],
-      [
+        "CO2003",
+        "Cấu trúc dữ liệu và giải thuật",
         4,
-        "CO2001",
-        "Kỹ năng chuyên nghiệp cho kỹ sư",
-        3,
-        "core"
+        "foundation"
       ],
       [
         4,
         "LA1009",
         "Anh văn 4",
         2,
-        "av"
+        "english"
       ],
       [
         4,
-        "SP1037",
-        "Tư tưởng Hồ Chí Minh",
+        "SP1033",
+        "Kinh tế chính trị Mác - Lênin",
         2,
-        "core"
+        "general"
       ],
       [
-        5,
-        "CO3001",
-        "Công nghệ phần mềm",
-        3,
-        "core"
-      ],
-      [
-        5,
-        "CO3005",
-        "Nguyên lý ngôn ngữ lập trình",
         4,
-        "core"
+        "CO2017",
+        "Hệ điều hành",
+        3,
+        "major"
+      ],
+      [
+        4,
+        "CO2039",
+        "Lập trình nâng cao",
+        3,
+        "foundation"
+      ],
+      [
+        4,
+        "MT2013",
+        "Xác suất và thống kê",
+        4,
+        "math_science"
+      ],
+      [
+        4,
+        "CO3061",
+        "Nhập môn trí tuệ nhân tạo",
+        3,
+        "speciality_elective"
+      ],
+      [
+        5,
+        "SP1035",
+        "Chủ nghĩa xã hội khoa học",
+        2,
+        "general"
       ],
       [
         5,
         "CO3093",
         "Mạng máy tính",
         3,
-        "core"
+        "major"
       ],
       [
         5,
-        "CO3011",
-        "Quản lý dự án phần mềm",
+        "CO2013",
+        "Hệ cơ sở dữ liệu",
+        4,
+        "foundation"
+      ],
+      [
+        5,
+        "CO3001",
+        "Công nghệ phần mềm",
         3,
-        "core"
+        "major"
       ],
       [
         5,
-        "CO3015",
-        "Kiểm thử phần mềm",
+        "CH1003",
+        "Hóa đại cương",
         3,
-        "core"
+        "math_science"
       ],
       [
         5,
+        "CO3101",
+        "Đồ án tổng hợp - hướng trí tuệ nhân tạo",
+        1,
+        "major_elective"
+      ],
+      [
+        6,
         "SP1039",
         "Lịch sử Đảng Cộng sản Việt Nam",
         2,
-        "core"
+        "general"
       ],
       [
         6,
-        "CO3013",
-        "Xây dựng chương trình dịch",
-        4,
-        "core"
-      ],
-      [
-        6,
-        "CO3061",
-        "Nhập môn trí tuệ nhân tạo",
+        "CO2001",
+        "Kỹ năng chuyên nghiệp cho kỹ sư",
         3,
-        "core"
+        "general"
       ],
       [
         6,
-        "CO3101",
-        "Đồ án chuyên ngành",
+        "CO3019",
+        "Nguyên lý ngôn ngữ lập trình",
+        3,
+        "major"
+      ],
+      [
+        6,
+        "SP1037",
+        "Tư tưởng Hồ Chí Minh",
         2,
-        "capstone"
+        "general"
       ],
       [
         6,
-        "CO3021",
-        "Hệ quản trị cơ sở dữ liệu",
+        "IM1013",
+        "Kinh tế học đại cương",
         3,
-        "core"
+        "management"
+      ],
+      [
+        6,
+        "CO3107",
+        "Thực tập đồ án môn học đa ngành - hướng trí tuệ nhân tạo",
+        1,
+        "major_elective"
       ],
       [
         6,
         "CO3029",
         "Khai phá dữ liệu",
         3,
-        "core"
+        "speciality_elective"
       ],
       [
-        6,
-        "SP1007",
-        "Pháp luật Việt Nam đại cương",
+        7,
+        "CO4029",
+        "Đồ án chuyên ngành",
         2,
-        "core"
+        "capstone"
       ],
       [
         7,
-        "CO3335",
-        "Thực tập ngoài trường",
-        2,
-        "intern"
+        "CO4359",
+        "Học kỳ thực tập doanh nghiệp",
+        11,
+        "internship"
       ],
       [
-        7,
-        "CO3065",
-        "Công nghệ phần mềm nâng cao",
+        8,
+        "SP1073",
+        "Pháp luật đại cương",
         3,
-        "core"
-      ],
-      [
-        7,
-        "CO3117",
-        "Học máy",
-        3,
-        "core"
-      ],
-      [
-        7,
-        "CO4031",
-        "Kho dữ liệu và hệ hỗ trợ quyết định",
-        3,
-        "core"
+        "general"
       ],
       [
         8,
         "CO4337",
-        "Luận văn tốt nghiệp",
-        9,
+        "Đồ án tốt nghiệp (Khoa học Máy tính)",
+        4,
         "thesis"
+      ],
+      [
+        8,
+        "CO3117",
+        "Học máy",
+        3,
+        "speciality_elective"
+      ],
+      [
+        8,
+        "CO3021",
+        "Hệ quản trị cơ sở dữ liệu",
+        3,
+        "speciality_elective"
+      ],
+      [
+        8,
+        "CO4031",
+        "Kho dữ liệu và hệ hỗ trợ quyết định",
+        3,
+        "speciality_elective"
       ]
     ]
   },
   "program_credits": {
-    "2019": 130,
+    "2019": 128,
     "2023": 128
   },
   "special_codes": {
