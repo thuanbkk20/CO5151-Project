@@ -41,6 +41,13 @@ class AdvisorAgent:
                 self.planner = LLMDecisionPlanner(llm_client=self.llm_client)
         self.traces: list[DecisionTrace] = []
 
+    def describe(self) -> dict[str, Any]:
+        return {
+            "llm": self.llm_client.describe() if self.llm_client else None,
+            "planner": type(self.planner).__name__,
+            "regulation_source": type(self.regulation_source).__name__,
+        }
+
     def answer(
         self,
         question: str,

@@ -1,5 +1,6 @@
 import logging
 import os
+from dataclasses import dataclass
 from typing import Any
 
 from openai import OpenAI
@@ -8,8 +9,36 @@ from pydantic import BaseModel, ConfigDict
 logger = logging.getLogger(__name__)
 
 CANARY_STRING = "G3-CANARY-7F3A"
-DEFAULT_BASE_URL = "https://opencode.ai/inference/openai/v1"
-DEFAULT_MODEL = "kimi-k3"
+
+
+@dataclass(frozen=True)
+class Provider:
+    base_url: str
+    model: str
+    key_env: str
+    sends_seed: bool = True
+    reasoning_effort: str | None = None
+
+
+PROVIDERS: dict[str, Provider] = {
+    "gemini": Provider(
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        model="gemini-2.5-flash",
+        key_env="GEMINI_API_KEY",
+        sends_seed=False,
+        reasoning_effort="none",
+    ),
+    "openai": Provider(base_url="https://api.openai.com/v1", model="gpt-4.1-mini", key_env="OPENAI_API_KEY"),
+    "kimi": Provider(base_url="https://opencode.ai/inference/openai/v1", model="kimi-k3", key_env="OPENCODE_API_KEY"),
+}
+DEFAULT_PROVIDER = "gemini"
+DEFAULT_TIMEOUT_S = 60.0
+MAX_RETRIES = 1
+
+
+def _env(name: str) -> str | None:
+    return os.environ.get(name, "").strip() or None
+
 
 ADVISOR_SYSTEM_PROMPT = (
     f"Bạn là Cố vấn học tập học vụ AI của Trường Đại học Bách Khoa. "
@@ -29,33 +58,42 @@ class LLMResult(BaseModel):
 
 
 class LLMClient:
-    """OpenAI-compatible LLM client supporting OpenCode / Kimi and OpenAI endpoints."""
-
     def __init__(
         self,
         base_url: str | None = None,
         api_key: str | None = None,
         model: str | None = None,
+        provider: str | None = None,
     ):
-        self.base_url = (
-            base_url or os.environ.get("OPENCODE_BASE_URL") or os.environ.get("OPENAI_BASE_URL") or DEFAULT_BASE_URL
-        )
-        self.api_key = api_key or os.environ.get("OPENCODE_API_KEY") or os.environ.get("OPENAI_API_KEY")
-        self.model = model or os.environ.get("OPENCODE_MODEL") or os.environ.get("LLM_MODEL") or DEFAULT_MODEL
+        self.provider = (provider or _env("LLM_PROVIDER") or DEFAULT_PROVIDER).lower()
+        if self.provider not in PROVIDERS:
+            raise ValueError(f"Unknown LLM provider {self.provider!r}; choose one of {sorted(PROVIDERS)}")
+        profile = PROVIDERS[self.provider]
+        self.base_url = base_url or _env("LLM_BASE_URL") or profile.base_url
+        self.api_key = api_key or _env("LLM_API_KEY") or _env(profile.key_env)
+        self.model = model or _env("LLM_MODEL") or profile.model
+        self.reasoning_effort = _env("LLM_REASONING_EFFORT") or profile.reasoning_effort
+        self.sends_seed = profile.sends_seed
+        self.timeout = float(_env("LLM_TIMEOUT") or DEFAULT_TIMEOUT_S)
         self._client: Any = None
         if self.api_key:
-            self._client = OpenAI(base_url=self.base_url, api_key=self.api_key)
+            self._client = OpenAI(
+                base_url=self.base_url, api_key=self.api_key, timeout=self.timeout, max_retries=MAX_RETRIES
+            )
 
     @property
     def is_available(self) -> bool:
         return bool(self._client and self.api_key)
+
+    def describe(self) -> dict[str, Any]:
+        return {"provider": self.provider, "model": self.model, "base_url": self.base_url}
 
     def generate(
         self,
         prompt: str,
         system_prompt: str | None = None,
         history: list[dict[str, str]] | None = None,
-        seed: int = 0,
+        seed: int | None = None,
     ) -> LLMResult | None:
         if not self.is_available:
             return None
@@ -71,13 +109,13 @@ class LLMClient:
 
         messages.append({"role": "user", "content": prompt})
 
+        options: dict[str, Any] = {"temperature": 0.0}
+        if seed is not None and self.sends_seed:
+            options["seed"] = seed
+        if self.reasoning_effort:
+            options["reasoning_effort"] = self.reasoning_effort
         try:
-            response = self._client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=0.0,
-                seed=seed,
-            )
+            response = self._client.chat.completions.create(model=self.model, messages=messages, **options)
             choice = response.choices[0]
             text = choice.message.content or ""
 

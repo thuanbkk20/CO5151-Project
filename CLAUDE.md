@@ -21,7 +21,8 @@ uv run pytest
 Cả app dùng **một** file `.env` ở gốc repo và **một** cơ chế đọc: `co5151_contracts.env`.
 
 1. Thêm biến vào [.env.example](.env.example), đặt trong nhóm của thành phần, có một dòng ghi chú ý nghĩa và giá
-   trị hợp lệ. Giá trị mẫu phải chạy được ngay, trừ secret/key thì để trống.
+   trị hợp lệ. Giá trị mẫu phải chạy được ngay, trừ secret/key thì để trống. Ghi chú đặt trên **dòng riêng**: loader
+   không cắt ghi chú cuối dòng, `KEY=value  # ghi chú` sẽ thành giá trị `value  # ghi chú`.
 2. Trong code chỉ đọc bằng `os.environ.get("TEN_BIEN", <mặc định>)`. Không tự viết hàm đọc `.env` khác, không
    dùng thêm `python-dotenv`.
 3. Entry point mới (CLI, server, UI) gọi `load_env_file(a.env_file or find_env_file())` một lần lúc khởi động,
@@ -31,8 +32,13 @@ Cả app dùng **một** file `.env` ở gốc repo và **một** cơ chế đ�
    bằng key thật.
 5. Biến làm thay đổi cách chạy app thì ghi thêm vào mục "Chạy ứng dụng" của README.
 
-Tham số gửi lên LLM mà không phải nhà cung cấp nào cũng hỗ trợ (`seed`, `reasoning_effort`, ...) chỉ gửi khi được
-cấu hình; nhà cung cấp OpenAI-compatible có thể trả 400 cho tham số lạ.
+## LLM provider mới
+
+Thêm một `Provider` vào `PROVIDERS` trong `services/advisor/src/co5151_advisor/llm.py` (base URL, model mặc định,
+tên biến chứa key, có nhận `seed` không, `reasoning_effort` mặc định), thêm biến key vào `.env.example` và một test
+trong `services/advisor/tests/test_llm.py`. Tham số mà không phải provider nào cũng hỗ trợ (`seed`,
+`reasoning_effort`, ...) chỉ gửi khi profile hoặc biến môi trường bật; provider OpenAI-compatible có thể trả 400
+cho tham số lạ.
 
 ## Package mới
 

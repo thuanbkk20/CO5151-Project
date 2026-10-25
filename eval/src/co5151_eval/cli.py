@@ -42,8 +42,11 @@ def cmd_run(a) -> int:
         mark = "ERR " if r.error else {True: "PASS", False: "fail", None: "hand"}[r.passed]
         print(f"  [seed {r.seed}] {r.task_id} {mark} {r.outcome:<7} {r.latency_s:.2f}s", file=sys.stderr)
 
+    probe = factory(a.seeds[0])
+    config = probe.describe() if callable(getattr(probe, "describe", None)) else None
     records = run(factory, tasks, a.seeds, on_record=progress if a.verbose else None)
-    meta = {"agent": a.agent, "tasks": len(tasks), "started": time.strftime("%Y-%m-%d %H:%M:%S")}
+    meta = {"agent": a.agent, "agent_config": config, "tasks": len(tasks),
+            "started": time.strftime("%Y-%m-%d %H:%M:%S")}  # fmt: skip
     summary = write_report(records, out, f"Kết quả: {name}", meta)
     print((out / "summary.md").read_text("utf-8"))
     print(f"Chi tiết: {out}/results.jsonl", file=sys.stderr)

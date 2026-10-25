@@ -142,6 +142,8 @@ def to_markdown(summary: dict, title: str) -> str:
     rows = [*summary["by_group"].items(), ("**Tổng**", summary["overall"])]
     for name, block in rows:
         lines.append(f"| {name} | " + " | ".join(_cell(block[k]) for k, _ in _COLUMNS) + " |")
+    if summary.get("agent_config"):
+        lines += ["", f"Cấu hình: `{json.dumps(summary['agent_config'], ensure_ascii=False)}`"]
     lines += ["", f"Seeds: {summary['seeds']} · pass rate {summary['pass_rate_mean']} ± {summary['pass_rate_std']}",
               "", "`–`: không áp dụng. Chấm tay: câu chưa có đáp án kiểm được tự động (chưa có trích dẫn đã xác nhận),",
               "so với `reference_answer`; không tính vào Pass."]  # fmt: skip

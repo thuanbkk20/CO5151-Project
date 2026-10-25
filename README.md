@@ -34,11 +34,22 @@ Yêu cầu: Python ≥ 3.10, [uv](https://docs.astral.sh/uv/) ≥ 0.5.
 
 ## Chạy ứng dụng
 
-Chỉ cần điền `OPENCODE_API_KEY` trong `.env`; các biến khác đã có giá trị mặc định chạy được. Danh sách đầy đủ và ý
-nghĩa từng biến nằm trong [.env.example](.env.example).
+Chỉ cần điền key của provider LLM đang chọn trong `.env` (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`);
+các biến khác đã có giá trị mặc định chạy được. Danh sách đầy đủ và ý nghĩa từng biến nằm trong
+[.env.example](.env.example).
+
+Đổi provider cho một lần chạy mà không sửa `.env` (biến trong shell được ưu tiên):
 
 ```bash
-# Advisor end-to-end trên 1 câu: Student Record + Regulation chạy in-process, LLM qua OPENCODE_*
+LLM_PROVIDER=openai uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01 -v
+```
+
+Provider OpenAI-compatible khác dùng được ngay bằng `LLM_BASE_URL`, `LLM_API_KEY` và `LLM_MODEL`. Muốn có tên riêng
+thì thêm một dòng vào `PROVIDERS` trong `services/advisor/src/co5151_advisor/llm.py`. Provider, model và cấu hình
+Advisor của mỗi lần chạy được ghi vào `summary.json` / `summary.md` (`agent_config`).
+
+```bash
+# Advisor end-to-end trên 1 câu: Student Record + Regulation chạy in-process, LLM theo LLM_PROVIDER
 uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01 -v
 
 # Cả bộ 24 câu, 3 seed; so với hệ thống không dùng LLM

@@ -166,10 +166,16 @@ export LAYA_SERVER_URL=http://127.0.0.1:8000/v1/systemone
 ```
 
 ### C. Cấu hình LLM Client (Mô hình 1)
-```bash
-export OPENCODE_API_KEY="your-opencode-or-openai-api-key"
-export OPENCODE_BASE_URL="https://opencode.ai/inference/openai/v1"
-export OPENCODE_MODEL="kimi-k3"
+Cấu hình trong file `.env` ở gốc repo (xem `.env.example`):
+
 ```
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=...
+```
+
+`LLM_PROVIDER` nhận `gemini`, `openai` hoặc `kimi`.
+
+Base URL, model mặc định và tham số mỗi provider hỗ trợ nằm trong `PROVIDERS` của `llm.py`; `LLM_MODEL`,
+`LLM_BASE_URL`, `LLM_API_KEY` đè lên mặc định.
 *(Nếu không đặt API Key hoặc tài khoản hết credit, hệ thống tự động kích hoạt bộ fallback an toàn mà không làm gián đoạn bài test).*
 
