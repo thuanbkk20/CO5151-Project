@@ -16,8 +16,13 @@ uv run co5151-eval check-gold
 uv run co5151-eval security --json security.json
 uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2 --out <thư mục>/record_template
 uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --seeds 0 1 2 --out <thư mục>/advisor
-uv run co5151-eval report <thư mục>/advisor <thư mục>/record_template -o <thư mục>/report.html
+uv run co5151-eval report <thư mục>/advisor <thư mục>/record_template -o docs/eval-d2-report.html \
+  --regulation-lookup co5151_advisor.eval_adapter:regulation_ids
 ```
+
+`--regulation-lookup` cần cho lần chạy này vì Advisor lúc đó chưa ghi `search_regulations` vào danh sách tool (đã sửa ở
+`783ab62`): report tra lại Regulation MCP với đúng câu hỏi (tìm kiếm theo từ khóa, tất định, mã và dữ liệu không đổi từ
+lúc chạy) và ghi nhãn "tra lại sau khi chạy". Lần chạy sau không cần tùy chọn này.
 
 Chất lượng dữ liệu: đáp án facts khớp mock data; 72/72 lượt Advisor không lỗi; 0 câu trả lời bằng template (không câu
 nào 100 token, không có dòng `LLM generation failed`); không còn nhiễm bộ nhớ giữa các câu (xem mục cuối). Kiểm thử bảo
@@ -68,7 +73,9 @@ Các lượt còn lại giữ nguyên kết quả máy chấm.
 
 Lỗi của Advisor (thật, giữ là trượt):
 
-- **Từ chối khi không tra được quy chế** (B01, M01, M02, M04, P03; cả 3 seed): khi Regulation MCP không trả đoạn nào,
+- **Từ chối khi không tra được quy chế** (B01, M01, M02, M04, P03; cả 3 seed): Regulation MCP trả 0 đoạn cho đúng 5
+  câu này (`status: no_evidence`). Bộ tìm kiếm theo từ khóa có lọc chủ đề: "Thời gian tối đa để hoàn thành chương
+  trình…" không khớp, còn "thời gian đào tạo tối đa" trả 5 đoạn. Khi Regulation MCP không trả đoạn nào,
   Advisor trả "Tôi chưa có nguồn quy chế đáng tin cậy để kết luận điều kiện này." P03 đã đọc được hồ sơ cảnh báo
   nhưng vẫn từ chối; M01–M04 đáng ra phải hỏi lại. Gốc: độ phủ của bộ truy xuất và chính sách "không có quy chế thì từ
   chối" của Advisor.
