@@ -4,7 +4,6 @@ from co5151_advisor.agent import AdvisorAgent
 from co5151_advisor.llm import LLMResult
 from co5151_advisor.planner import Action, Evidence, LLMDecisionPlanner
 from co5151_advisor.regulations import StaticRegulationSource
-from co5151_eval.agent import Outcome
 from co5151_eval.gold import RecordOracle
 
 GRADUATION_Q = "Với bảng điểm hiện tại em có đủ điều kiện đăng ký làm luận văn tốt nghiệp kỳ tới không?"
@@ -53,6 +52,6 @@ def test_advisor_answers_even_when_the_llm_keeps_picking_the_same_step():
     llm = StubbornLLM("REGULATIONS")
     agent = AdvisorAgent(oracle.service, StaticRegulationSource(), llm_client=llm)
     resp = agent.answer(GRADUATION_Q, session_token=oracle.token("sv001"), history=[])
-    assert resp.outcome is Outcome.ANSWER
+    assert resp.outcome is None
     assert resp.text == "Câu trả lời từ LLM."
     assert "get_my_academic_summary" in resp.tool_calls

@@ -40,6 +40,8 @@ class Evidence(BaseModel):
     remaining_credits: int | None = None
     cgpa: float | None = None
     capstone_project_passed: bool | None = None
+    toeic: int | None = None
+    english_cert: str | None = None
     gdtc_completed: bool | None = None
     gdqp_completed: bool | None = None
     currently_warned: bool | None = None
@@ -270,6 +272,8 @@ class LLMDecisionPlanner:
         else:
             self.llm_client = llm_client
         self.fallback = fallback_planner or DecisionPlanner()
+        self.input_tokens = 0
+        self.output_tokens = 0
 
     def next_action(
         self,
@@ -310,6 +314,9 @@ class LLMDecisionPlanner:
             prompt=prompt,
             system_prompt="You are a strict next-action router. Output only the single chosen action token.",
         )
+        if res:
+            self.input_tokens += res.input_tokens
+            self.output_tokens += res.output_tokens
         if res and res.text:
             text = res.text.strip().upper()
             for action in Action:

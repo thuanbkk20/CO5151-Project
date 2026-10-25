@@ -58,6 +58,8 @@ class StudentExecutor:
                 remaining_credits=remaining,
                 cgpa=data.cgpa,
                 capstone_project_passed=data.capstone_project_passed,
+                toeic=data.toeic,
+                english_cert=data.english_cert,
                 gdtc_completed=data.gdtc_completed,
                 gdqp_completed=data.gdqp_completed,
             )

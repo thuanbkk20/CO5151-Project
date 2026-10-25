@@ -59,10 +59,13 @@ def test_academic_summary_exposes_only_required_fields():
     assert ev.gdtc_completed is True
     assert ev.gdqp_completed is True
 
+    assert ev.toeic == 500
+    assert ev.english_cert is None
+
     dumped = ev.model_dump()
     assert "student_id" not in dumped
     assert "secret-token-123" not in str(dumped)
-    assert "toeic" not in dumped
+    assert "retake_credits" not in dumped
 
 
 def test_internal_error_retries_once_and_succeeds():

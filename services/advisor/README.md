@@ -44,7 +44,7 @@ Thành phần **Mảng 3** trong hệ thống tư vấn học tập cá nhân h�
 │   │ • Chỉ gọi 2 tool:                    │      │ • Nhận `ctdt` từ evidence; nguồn static lọc theo `ctdt`,  │   │
 │   │   - get_my_academic_summary          │      │   Regulation MCP chưa dùng `ctdt` để lọc hiệu lực         │   │
 │   │   - get_my_academic_decisions        │      │ • `ToolRegulationSource` (mặc định): gọi Regulation MCP   │   │
-│   │ • Chiếu đúng 8 trường an toàn        │      │ • `StaticRegulationSource`: 4 điều viết tay, cho test     │   │
+│   │ • Chiếu đúng 10 trường cần cho tư vấn│      │ • `StaticRegulationSource`: 4 điều viết tay, cho test     │   │
 │   │ • Giấu MSSV, CCCD, Token, Transcript │      └───────────────────────────────────────────────────────────┘   │
 │   │ • Tự động retry INTERNAL đúng 1 lần  │                                                                      │
 │   └──────────────────────────────────────┘                                                                      │
