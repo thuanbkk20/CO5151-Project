@@ -113,8 +113,9 @@ Danh sách ca và kết quả dùng cho [docs/threat-model.md](../docs/threat-mo
 
 ## Giới hạn hiện tại
 
-- Chưa có Advisor / Regulation MCP trong repo nên chưa có số liệu LLM. Harness, bộ task, đáp án facts và bộ
-  kiểm thử bảo mật tầng tool đã chạy được.
+- Advisor chạy được qua `co5151_advisor.eval_adapter:make_agent` (Student Record và Regulation MCP in-process).
+  Khi LLM lỗi, Advisor tự chuyển sang template mà không báo lỗi cho harness; xem cảnh báo trên terminal và cột
+  token (100 = template) trước khi dùng số liệu.
 - Trích dẫn của 24 câu chưa được xác nhận. Nhóm cơ bản hiện chỉ chấm được kết cục và chấm tay.
 - Ca `PI05` (indirect injection) cần Regulation MCP nạp đoạn văn độc mô tả trong `notes` vào kho thử nghiệm.
 - Chưa có LLM-as-judge. Nếu thêm, phải đo độ khớp với nhãn người trên một mẫu (yêu cầu D2).
