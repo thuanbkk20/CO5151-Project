@@ -138,7 +138,8 @@ COURSE = {c[1]: c for c in CTDT_2019 + CTDT_2026}
 
 # ---------------------------------------------------------------- bảng mã đặc biệt & quy đổi
 # diemSo > 10 là MÃ, không phải điểm
-# CT = Cấm thi, VT = Vắng thi, CH = Chưa có điểm, RT = Rút môn học, KD = Không đạt, VP = Vắng thi có phép, DT = Điểm đạt, HT = Hoãn thi, MT = Miễn thi.
+# CT = Cấm thi, VT = Vắng thi, CH = Chưa có điểm, RT = Rút môn học, KD = Không đạt,
+# VP = Vắng thi có phép, DT = Điểm đạt, HT = Hoãn thi, MT = Miễn thi.
 SPECIAL = {
     "11": {
         "diemChu": "CT",
@@ -206,10 +207,17 @@ LETTERS = [
     (4.0, "D", 1.0),
     (0.0, "F", 0.0),
 ]  # khớp QC2023-D12.2 (bản mô phỏng)
-CERT_TO_TOEIC = {  # quy đổi tương đương — MÔ PHỎNG, thay bằng quy định chuẩn ngoại ngữ thật
-    "TOEIC": [[450, 450], [500, 500], [600, 600], [650, 650], [785, 785]],
-    "IELTS": [[4.5, 450], [5.0, 500], [5.5, 600], [6.0, 650], [6.5, 785]],
-    "VSTEP": [[4.0, 450], [5.0, 500], [6.0, 600], [7.0, 650], [8.5, 785]],
+# Quy đổi chứng chỉ tiếng Anh quốc tế → mức TOEIC Listening & Reading tương đương (quy định chuẩn ngoại ngữ, mục 3).
+# Thang điểm số: [[điểm tối thiểu, mức TOEIC], ...]; chứng chỉ xếp loại: {xếp loại: mức TOEIC}.
+# Ô trống trong bảng gốc (ví dụ IELTS ở mức 500, 700) không có dòng tương ứng. Chứng chỉ có hiệu lực 02 năm từ ngày cấp.
+CERT_TO_TOEIC = {
+    "TOEIC": [[400, 400], [450, 450], [500, 500], [550, 550], [600, 600], [650, 650], [700, 700], [750, 750]],
+    "TOEFL ITP": [[433, 400], [463, 450], [480, 500], [497, 550], [510, 600], [527, 650], [550, 700], [570, 750]],
+    "TOEFL IBT": [[40, 400], [49, 450], [54, 500], [59, 550], [64, 600], [70, 650], [79, 700], [85, 750]],
+    "IELTS": [[3.5, 400], [4.0, 450], [4.5, 550], [5.0, 600], [5.5, 650], [6.0, 750]],
+    "PET": {"PASS": 450, "MERIT": 500, "DISTINCTION": 650},
+    "FCE": {"GRADE C": 700, "GRADE B": 750, "GRADE A": 750},
+    "CAE": {"LEVEL B2": 700, "GRADE C": 750, "GRADE B": 750, "GRADE A": 750},
 }
 
 SEM_ID = {}  # maHocKy -> namHocHocKyId

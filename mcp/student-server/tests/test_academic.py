@@ -48,7 +48,7 @@ def test_gpa4_weighted_by_credits():
         ("2310003", {"currently_warned": True, "consecutive_warnings": 1}),
         ("2210004", {"ctdt": "2019", "credits_earned": 100}),
         ("2210005", {"gdtc_completed": False, "toeic": 650, "capstone_project_passed": True}),
-        ("2310007", {"english_cert": "IELTS 6.5", "toeic": 785}),
+        ("2310007", {"english_cert": "IELTS 6.5", "toeic": 750}),
     ],
 )
 def test_persona_summaries(db, mssv, expected):
@@ -61,6 +61,33 @@ def test_program_follows_real_curriculum(db):
         program = db.ref["ctdt"][ctdt]
         assert db.ref["program_credits"][ctdt] == sum(c[3] for c in program) == 128
         assert [c[1] for c in program if c[4] in ("capstone", "thesis")] == ["CO4029", "CO4337"]
+
+
+@pytest.mark.parametrize(
+    "kind, score, toeic",
+    [
+        ("IELTS", 3.0, None),
+        ("IELTS", 4.5, 550),
+        ("IELTS", 6.5, 750),
+        ("TOEFL ITP", 500, 550),
+        ("TOEFL iBT", 79, 700),
+        ("PET", "Merit", 500),
+        ("FCE", "grade b", 750),
+        ("CAE", "Level B2", 700),
+        ("VSTEP", 8.0, None),
+    ],
+)
+def test_toeic_equivalent_follows_conversion_table(db, kind, score, toeic):
+    assert academic.toeic_equivalent(kind, score, db.ref["cert_to_toeic"]) == toeic
+
+
+def test_english_certificate_picks_best_passed(db):
+    rows = [
+        {"ghiChu": "PET Distinction", "diemDat": "1"},
+        {"ghiChu": "TOEFL  iBT 80", "diemDat": "1"},
+        {"ghiChu": "CAE Grade A", "diemDat": "0"},
+    ]
+    assert academic.english_certificate(rows, db.ref["cert_to_toeic"]) == ("TOEFL iBT 80", 700)
 
 
 def test_retakes_are_counted(db):

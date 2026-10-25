@@ -24,7 +24,11 @@ from co5151_contracts.student import (
 )
 
 LETTER4 = {"A+": 4.0, "A": 4.0, "B+": 3.5, "B": 3.0, "C+": 2.5, "C": 2.0, "D+": 1.5, "D": 1.0, "F": 0.0}
-CERT_RE = re.compile(r"\b(TOEIC|IELTS|VSTEP)\s*([0-9]+(?:\.[0-9]+)?)", re.I)
+CERT_RE = re.compile(
+    r"\b(TOEIC|TOEFL\s+ITP|TOEFL\s+iBT|IELTS|PET|FCE|CAE)\s+"
+    r"([0-9]+(?:\.[0-9]+)?|Pass|Merit|Distinction|Grade\s+[ABC]|Level\s+B2)\b",
+    re.I,
+)
 RetakePolicy = Literal["last", "max"]
 
 
@@ -92,10 +96,18 @@ def consecutive_warnings(rows: list[dict], decision_rows: list[dict]) -> int:
     return n
 
 
-def toeic_equivalent(cert_type: str, score: float, table: dict) -> int | None:
+def _norm(text: str) -> str:
+    return " ".join(text.split()).upper()
+
+
+def toeic_equivalent(cert_type: str, score: float | str, table: dict) -> int | None:
+    """Score bands (TOEIC, TOEFL, IELTS) map by threshold; graded certificates (PET, FCE, CAE) by grade."""
+    rule = table.get(_norm(cert_type))
+    if isinstance(rule, dict):
+        return rule.get(_norm(str(score)))
     best = None
-    for lo, toeic in table.get(cert_type.upper(), []):
-        if score >= lo:
+    for lo, toeic in rule or []:
+        if float(score) >= lo:
             best = toeic
     return best
 
@@ -107,10 +119,10 @@ def english_certificate(rows: list[dict], table: dict) -> tuple[str | None, int 
         m = CERT_RE.search(r.get("ghiChu") or "")
         if not (m and r["diemDat"] == "1"):
             continue
-        kind, score = m.group(1).upper(), float(m.group(2))
+        kind, score = m.group(1), m.group(2)
         eq = toeic_equivalent(kind, score, table)
         if eq is not None and (toeic is None or eq > toeic):
-            label, toeic = f"{kind} {m.group(2)}", int(score) if kind == "TOEIC" else eq
+            label, toeic = f"{' '.join(kind.split())} {score}", int(float(score)) if _norm(kind) == "TOEIC" else eq
     return label, toeic
 
 

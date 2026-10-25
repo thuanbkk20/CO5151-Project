@@ -37,7 +37,7 @@ với nhóm tự chọn, mock chọn sẵn một tổ hợp hợp lệ (ví dụ
 | Mã điểm đặc biệt (`diemSo` > 10) | 12 = MT Miễn (xác nhận từ mẫu); 11 = CT Cấm thi, 13 = VT Vắng thi, 14 = HT Hoãn thi (giả định) |
 | `diemKhongIn = "1"` | Học phần không tính vào ĐTB (GDTC, GDQP-AN) |
 | Khóa tuyển sinh | `2000 + int(MSSV[:2])` (profile không có trường khóa) |
-| Chứng chỉ ngoại ngữ | Dòng `MT` có `ghiChu` dạng `TOEIC 500` / `IELTS 6.5` / `VSTEP 7.5`, quy đổi TOEIC theo `reference.json` |
+| Chứng chỉ ngoại ngữ | Dòng `MT` có `ghiChu` dạng `TOEIC 500` / `IELTS 6.5` / `TOEFL iBT 79` / `PET Merit` / `FCE Grade B` / `CAE Level B2`; quy đổi về mức TOEIC theo bảng "Quy đổi các bằng cấp và chứng chỉ ngoại ngữ" (`cert_to_toeic` trong `reference.json`). Chưa kiểm tra thời hạn 02 năm vì bảng điểm không có ngày cấp |
 | Quyết định cảnh báo | `type` hoặc `decisionContent` chứa "Cảnh báo học tập"; số lần liên tiếp = số HK chính liền nhau (tính ngược từ HK chính gần nhất có điểm) có quyết định cảnh báo |
 | Email, CCCD | Domain `example.edu.vn`, CCCD dạng `0000000000NN` — cố ý không trùng dữ liệu thật |
 
