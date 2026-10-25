@@ -29,3 +29,6 @@ htmlcov/
 
 # Evaluation runs (regenerate with co5151-eval run)
 eval/results/
+
+# environment files
+.env
