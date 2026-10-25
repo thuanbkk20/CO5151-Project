@@ -61,9 +61,12 @@
     "expected": "answer",
     "facts": [
       {"field": "credits_earned", "value": 92, "mention": ["92"]},
-      {"field": "capstone_project_passed", "value": false, "mention": ["đồ án chuyên ngành", "Đồ án chuyên ngành", "ĐACN"]}
+      {"field": "capstone_project_passed", "value": false, "mention": ["đồ án chuyên ngành", "ĐACN"]}
     ],
-    "forbidden": ["(?<!chưa )(?<!không )đủ điều kiện (đăng ký |làm )?(luận văn|LVTN)"],
+    "forbidden": [
+      "(?<!chưa )(?<!không )đủ điều kiện (đăng ký |làm )?(luận văn|LVTN)",
+      "(?i)đã (đạt|qua|hoàn thành) (môn )?(đồ án chuyên ngành|ĐACN)"
+    ],
     "reference_answer": "Chưa đủ: 92 TC, chưa đạt Đồ án chuyên ngành, rớt Đồ án tổng hợp, chưa nộp chứng chỉ ngoại ngữ.",
     "notes": "Cùng câu hỏi với P01, khác người dùng: kiểm tra agent đọc đúng hồ sơ của phiên."
   },
@@ -76,6 +79,10 @@
     "facts": [
       {"field": "currently_warned", "value": true, "mention": ["đang bị cảnh báo", "bị cảnh báo"]},
       {"field": "decisions.semester", "value": "20252", "mention": ["20252", "học kỳ 2 năm học 2025"]}
+    ],
+    "forbidden": [
+      "(?i)(em|bạn) (hiện )?(không|chưa) (còn )?(đang )?(bị|trong diện) cảnh báo",
+      "(?i)(em|bạn) đã thoát"
     ],
     "reference_answer": "Đang bị cảnh báo lần 1 (HK 20252). Bị cảnh báo tiếp có nguy cơ bị buộc thôi học theo quy chế."
   },
@@ -100,8 +107,9 @@
     "expected": "answer",
     "facts": [
       {"field": "credits_earned", "value": 124, "mention": ["124", "4 tín chỉ", "4 TC"]},
-      {"field": "gdtc_completed", "value": false, "mention": ["giáo dục thể chất", "Giáo dục thể chất", "GDTC"]}
+      {"field": "gdtc_completed", "value": false, "mention": ["giáo dục thể chất", "GDTC"]}
     ],
+    "forbidden": ["(?i)(em|bạn) đã hoàn thành (đủ |hết )?(các môn |chương trình )?(giáo dục thể chất|GDTC)(?! ?\\d)"],
     "reference_answer": "Thiếu 4 TC (124/128: Thực tập ngoài trường, Pháp luật Việt Nam đại cương) và chưa hoàn thành GDTC (Giáo dục thể chất 3 đang hoãn thi)."
   },
   {
@@ -125,6 +133,10 @@
     "facts": [
       {"field": "currently_warned", "value": false, "mention": ["đã thoát", "không còn bị cảnh báo", "không bị cảnh báo"]},
       {"field": "decisions.semester", "value": "20251", "mention": ["20251", "học kỳ 1 năm học 2025"]}
+    ],
+    "forbidden": [
+      "(?i)(em|bạn) (vẫn|hiện vẫn|vẫn còn) (đang )?(bị|trong diện) cảnh báo",
+      "(?i)chưa thoát"
     ],
     "reference_answer": "Bị cảnh báo HK 20251; HK 20252 đã thoát cảnh báo."
   },

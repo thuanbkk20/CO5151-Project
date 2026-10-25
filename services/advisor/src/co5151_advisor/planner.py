@@ -40,6 +40,8 @@ class Evidence(BaseModel):
     remaining_credits: int | None = None
     cgpa: float | None = None
     capstone_project_passed: bool | None = None
+    toeic: int | None = None
+    english_cert: str | None = None
     gdtc_completed: bool | None = None
     gdqp_completed: bool | None = None
     currently_warned: bool | None = None
@@ -59,6 +61,18 @@ class Evidence(BaseModel):
     @property
     def has_regulations(self) -> bool:
         return self.regulations_checked
+
+
+EVIDENCE_OF_ACTION = {
+    Action.SUMMARY: "has_academic_summary",
+    Action.WARNINGS: "has_warnings",
+    Action.REGULATIONS: "has_regulations",
+}
+
+
+def already_collected(action: Action, evidence: Evidence | None) -> bool:
+    attr = EVIDENCE_OF_ACTION.get(action)
+    return bool(attr and evidence is not None and getattr(evidence, attr))
 
 
 def _normalize(text: str) -> str:
@@ -258,6 +272,8 @@ class LLMDecisionPlanner:
         else:
             self.llm_client = llm_client
         self.fallback = fallback_planner or DecisionPlanner()
+        self.input_tokens = 0
+        self.output_tokens = 0
 
     def next_action(
         self,
@@ -277,11 +293,13 @@ class LLMDecisionPlanner:
             "has_warnings": bool(evidence and evidence.has_warnings),
             "has_regulations": bool(evidence and evidence.has_regulations),
         }
+        done = [a.value for a in EVIDENCE_OF_ACTION if already_collected(a, evidence)]
 
         prompt = (
             "You are the Decision Planner for an Academic Advisor Agent in a university.\n"
             f"Student Question: {question}\n"
-            f"Evidence collected so far: {evidence_state}\n\n"
+            f"Evidence collected so far: {evidence_state}\n"
+            f"Already completed, never choose again: {', '.join(done) or 'none'}\n\n"
             "Choose the single NEXT best action from:\n"
             "- SUMMARY: if student asks about credits/GPA/graduation and summary is not yet collected.\n"
             "- WARNINGS: if student asks about warnings/probation and warnings are not yet checked.\n"
@@ -296,10 +314,27 @@ class LLMDecisionPlanner:
             prompt=prompt,
             system_prompt="You are a strict next-action router. Output only the single chosen action token.",
         )
+        if res:
+            self.input_tokens += res.input_tokens
+            self.output_tokens += res.output_tokens
         if res and res.text:
             text = res.text.strip().upper()
             for action in Action:
                 if action.value in text:
-                    return action
+                    return self._unless_repeated(action, question, evidence, history)
 
         return self.fallback.next_action(question, evidence, history)
+
+    def _unless_repeated(
+        self,
+        action: Action,
+        question: str,
+        evidence: Evidence | None,
+        history: list[dict[str, str]] | None,
+    ) -> Action:
+        if not already_collected(action, evidence):
+            return action
+        rule = self.fallback.next_action(question, evidence, history)
+        if rule is Action.CLARIFY or already_collected(rule, evidence):
+            return Action.RESPOND
+        return rule

@@ -41,7 +41,36 @@ class AdvisorAgent:
                 self.planner = LLMDecisionPlanner(llm_client=self.llm_client)
         self.traces: list[DecisionTrace] = []
 
+    def describe(self) -> dict[str, Any]:
+        return {
+            "llm": self.llm_client.describe() if self.llm_client else None,
+            "planner": type(self.planner).__name__,
+            "regulation_source": type(self.regulation_source).__name__,
+        }
+
     def answer(
+        self,
+        question: str,
+        *,
+        session_token: str | None,
+        history: list[dict[str, str]],
+    ) -> AgentResponse:
+        in_before, out_before = self._planner_tokens()
+        resp = self._answer(question, session_token=session_token, history=history)
+        in_after, out_after = self._planner_tokens()
+        planner_in, planner_out = in_after - in_before, out_after - out_before
+        if not planner_in and not planner_out:
+            return resp
+        usage = Usage(
+            input_tokens=resp.usage.input_tokens + planner_in,
+            output_tokens=resp.usage.output_tokens + planner_out,
+        )
+        return resp.model_copy(update={"usage": usage})
+
+    def _planner_tokens(self) -> tuple[int, int]:
+        return getattr(self.planner, "input_tokens", 0), getattr(self.planner, "output_tokens", 0)
+
+    def _answer(
         self,
         question: str,
         *,
@@ -60,6 +89,8 @@ class AdvisorAgent:
         max_steps = 5
         for _ in range(max_steps):
             action = self.planner.next_action(question, evidence, history)
+            if session_token is None and action in (Action.SUMMARY, Action.WARNINGS):
+                action = Action.RESPOND if evidence.has_regulations else Action.REGULATIONS
 
             if action == Action.REFUSE:
                 self.traces.append(DecisionTrace(action="REFUSE", sources=[], created_at=time.time()))
@@ -102,8 +133,8 @@ class AdvisorAgent:
 
             if action == Action.WARNINGS:
                 self.traces.append(DecisionTrace(action="WARNINGS", sources=["student_mcp"], created_at=time.time()))
-                tool_calls.append("get_my_warnings")
-                res = self.executor.call("get_my_warnings", token=session_token)
+                tool_calls.append("get_my_academic_decisions")
+                res = self.executor.call("get_my_academic_decisions", token=session_token)
                 if not res.ok:
                     return AgentResponse(
                         text=res.error or "Không thể đọc dữ liệu cảnh báo.",
@@ -118,6 +149,8 @@ class AdvisorAgent:
                         "remaining_credits": evidence.remaining_credits,
                         "cgpa": evidence.cgpa,
                         "capstone_project_passed": evidence.capstone_project_passed,
+                        "toeic": evidence.toeic,
+                        "english_cert": evidence.english_cert,
                         "gdtc_completed": evidence.gdtc_completed,
                         "gdqp_completed": evidence.gdqp_completed,
                         "ctdt": evidence.ctdt,
@@ -151,12 +184,16 @@ class AdvisorAgent:
                 self.traces.append(DecisionTrace(action="RESPOND", sources=[], created_at=time.time()))
                 usage = Usage(input_tokens=50, output_tokens=50)
                 response_text = ""
+                outcome: Outcome | None = Outcome.ANSWER
 
                 if self.llm_client and self.llm_client.is_available:
-                    prompt = self._build_llm_prompt(question, evidence, matched_regulations)
+                    prompt = self._build_llm_prompt(
+                        question, evidence, matched_regulations, logged_in=session_token is not None
+                    )
                     llm_res = self.llm_client.generate(prompt, history=history)
                     if llm_res and llm_res.text:
                         response_text = llm_res.text
+                        outcome = None
                         usage = Usage(input_tokens=llm_res.input_tokens, output_tokens=llm_res.output_tokens)
 
                 if not response_text:
@@ -172,7 +209,7 @@ class AdvisorAgent:
 
                 return AgentResponse(
                     text=response_text,
-                    outcome=Outcome.ANSWER,
+                    outcome=outcome,
                     tool_calls=tool_calls,
                     citations=citations,
                     usage=usage,
@@ -190,8 +227,14 @@ class AdvisorAgent:
         question: str,
         evidence: Evidence,
         regulations: list[RegulationDocument],
+        logged_in: bool = True,
     ) -> str:
         prompt_parts = [f"Câu hỏi của sinh viên: {question}\n\nBằng chứng học vụ cá nhân đã xác thực:"]
+        if not logged_in:
+            prompt_parts.append(
+                "- Người hỏi chưa đăng nhập nên không có hồ sơ cá nhân. Nếu câu trả lời phụ thuộc khóa, chương trình "
+                "hoặc quy chế áp dụng mà câu hỏi không nêu, hãy hỏi lại thông tin đó thay vì đoán."
+            )
         if evidence.has_academic_summary:
             prompt_parts.append(
                 f"- Tín chỉ tích lũy: {evidence.credits_earned}/{evidence.program_credits}\n"
@@ -199,7 +242,8 @@ class AdvisorAgent:
                 f"- Quy chế áp dụng: {evidence.ctdt}\n"
                 f"- Đồ án chuyên ngành: {'Đã đạt' if evidence.capstone_project_passed else 'Chưa đạt'}\n"
                 f"- GDTC: {'Hoàn thành' if evidence.gdtc_completed else 'Chưa hoàn thành'}\n"
-                f"- GDQP-AN: {'Hoàn thành' if evidence.gdqp_completed else 'Chưa hoàn thành'}"
+                f"- GDQP-AN: {'Hoàn thành' if evidence.gdqp_completed else 'Chưa hoàn thành'}\n"
+                f"- Chuẩn ngoại ngữ: {_english_status(evidence)}"
             )
         if evidence.has_warnings:
             prompt_parts.append(
@@ -239,7 +283,8 @@ class AdvisorAgent:
             capstone_status = "đã đạt" if evidence.capstone_project_passed else "chưa đạt"
             parts.append(
                 f"Hồ sơ học vụ của bạn: Đã tích lũy {evidence.credits_earned}/{evidence.program_credits} tín chỉ, "
-                f"ĐTBTL {evidence.cgpa}, {capstone_status} Đồ án chuyên ngành, quy chế {evidence.ctdt}."
+                f"ĐTBTL {evidence.cgpa}, {capstone_status} Đồ án chuyên ngành, quy chế {evidence.ctdt}, "
+                f"ngoại ngữ: {_english_status(evidence)}."
             )
 
         if regulations:
@@ -254,3 +299,10 @@ class AdvisorAgent:
             parts.insert(0, f"{verdict}:")
 
         return " ".join(parts) if parts else "Đã hoàn thành tra cứu thông tin học vụ theo yêu cầu của bạn."
+
+
+def _english_status(evidence: Evidence) -> str:
+    if evidence.toeic is None and not evidence.english_cert:
+        return "chưa nộp chứng chỉ"
+    parts = [f"TOEIC {evidence.toeic}" if evidence.toeic is not None else None, evidence.english_cert]
+    return ", ".join(p for p in parts if p)

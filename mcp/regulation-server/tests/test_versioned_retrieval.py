@@ -1,11 +1,9 @@
 import json
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src/regulation_server"))
-from retrieve_versioned_regulations import retrieve
+from regulation_server.retrieve_versioned_regulations import retrieve
 
 
 class VersionRetrievalTests(unittest.TestCase):

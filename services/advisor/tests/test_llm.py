@@ -71,10 +71,12 @@ def test_advisor_agent_uses_llm_when_available():
     q = "Em có đủ điều kiện làm luận văn không?"
     resp = agent.answer(q, session_token="tok", history=[])
 
-    assert resp.outcome == Outcome.ANSWER
+    assert resp.outcome is None
     assert "113 tín chỉ và đủ điều kiện" in resp.text
-    assert resp.usage.input_tokens == 150
-    assert resp.usage.output_tokens == 60
+    calls = mock_llm.generate.call_count
+    assert calls > 1
+    assert resp.usage.input_tokens == 150 * calls
+    assert resp.usage.output_tokens == 60 * calls
 
 
 def test_advisor_agent_falls_back_when_llm_fails():

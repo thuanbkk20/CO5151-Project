@@ -41,10 +41,10 @@ Thành phần **Mảng 3** trong hệ thống tư vấn học tập cá nhân h�
 │   │ 2. Scoped Student Evidence Adapter   │      │ 3. Regulation Interface Layer                             │   │
 │   │    (`StudentExecutor`)               │      │    (`RegulationSource`)                                   │   │
 │   │ • Bọc API StudentRecordService.call  │      │ • Protocol chuẩn hóa tra cứu quy chế                      │   │
-│   │ • Chỉ gọi 2 tool:                    │      │ • Dynamic Search: nhận tham số `ctdt` từ evidence sinh    │   │
-│   │   - get_my_academic_summary          │      │   viên để lọc đúng quy chế áp dụng (QC2019 hay QC2023)    │   │
-│   │   - get_my_warnings                  │      │ • `StaticRegulationSource`: Dùng cho test & eval offline  │   │
-│   │ • Chiếu đúng 8 trường an toàn        │      │ • Sẵn sàng cắm Regulation MCP (Mảng 1) qua client HTTP    │   │
+│   │ • Chỉ gọi 2 tool:                    │      │ • Nhận `ctdt` từ evidence; nguồn static lọc theo `ctdt`,  │   │
+│   │   - get_my_academic_summary          │      │   Regulation MCP chưa dùng `ctdt` để lọc hiệu lực         │   │
+│   │   - get_my_academic_decisions        │      │ • `ToolRegulationSource` (mặc định): gọi Regulation MCP   │   │
+│   │ • Chiếu đúng 10 trường cần cho tư vấn│      │ • `StaticRegulationSource`: 4 điều viết tay, cho test     │   │
 │   │ • Giấu MSSV, CCCD, Token, Transcript │      └───────────────────────────────────────────────────────────┘   │
 │   │ • Tự động retry INTERNAL đúng 1 lần  │                                                                      │
 │   └──────────────────────────────────────┘                                                                      │
@@ -63,7 +63,7 @@ Thành phần **Mảng 3** trong hệ thống tư vấn học tập cá nhân h�
 │   ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
 │   │ 5. Generation & LLM Layer                                                                               │   │
 │   │    (`LLMClient` & Response Synthesis)                                                                  │   │
-│   │ • OpenAI-compatible Client hỗ trợ OpenCode (model `kimi-k3`), OpenAI, hoặc local Ollama/vLLM.           │   │
+│   │ • OpenAI-compatible Client, chọn provider bằng `LLM_PROVIDER`: gemini (mặc định), openai, kimi.         │   │
 │   │ • Nhúng chuỗi Canary `G3-CANARY-7F3A` vào System Prompt theo tiêu chuẩn an toàn R6.                     │   │
 │   │ • Lớp lọc Canary Leak & Token Echo Defense.                                                             │   │
 │   │ • Graceful Fallback: Nếu LLM lỗi/hết funds, tự động chuyển sang bộ tổng hợp Template mà không crash.    │   │
@@ -103,10 +103,9 @@ Thành phần **Mảng 3** trong hệ thống tư vấn học tập cá nhân h�
 ## 3. Kết quả Chạy Thực nghiệm trên Test Suite & Benchmark
 
 ### A. Toàn bộ Unit & Integration Tests
-Toàn bộ **259 bài test** trong repository đã vượt qua với kết quả hoàn hảo:
+Chạy toàn bộ test của repository (CI chạy trên Python 3.10 và 3.12):
 ```bash
 uv run pytest
-# Output: 259 passed in 4.56s (100% pass)
 ```
 
 | File kiểm thử | Số lượng test | Nội dung kiểm thử | Kết quả |
@@ -117,6 +116,10 @@ uv run pytest
 | `tests/test_agent.py` | 6 | Luồng thực thi Agent, tuần tự RAG quy chế, không echo token, adapter protocol | ✅ Pass |
 | `tests/test_llm.py` | 4 | Client OpenAI-compatible, phòng chống lộ Canary, fallback khi LLM lỗi/hết funds | ✅ Pass |
 | `tests/test_laya.py` | 4 | Laya decision engine, fast-path guardrail, mode switch qua env, live prediction | ✅ Pass |
+| `tests/test_llm_providers.py` | 9 | Bảng provider (gemini/openai/kimi), thứ tự ưu tiên tham số > env > profile, không gửi tham số provider không hỗ trợ, ghi cấu hình vào báo cáo eval | ✅ Pass |
+| `tests/test_planner_repetition.py` | 3 | LLM planner không lặp lại bước đã có bằng chứng; Advisor vẫn trả lời khi LLM chọn lặp | ✅ Pass |
+| `tests/test_regulation_tool_source.py` | 3 | Tra cứu Regulation MCP thật, chọn nguồn `static`, lỗi tool thì không trả tài liệu | ✅ Pass |
+| `tests/test_student_tools.py` | 2 | Gọi Student Record service thật cho mọi tool Advisor được phép gọi | ✅ Pass |
 
 ---
 
@@ -125,12 +128,15 @@ uv run pytest
 Hệ thống hỗ trợ 2 mô hình AI ra quyết định động (Decision Planners), có thể linh hoạt chuyển đổi thông qua biến môi trường:
 
 ```bash
-# Mô hình 1 (Mặc định): LLM Decision-driven RAG (Kimi / GPT / OpenCode)
+# Mô hình 1 (Mặc định): LLM Decision-driven RAG (provider theo LLM_PROVIDER: Gemini / OpenAI / Kimi)
 ADVISOR_PLANNER_MODE=llm uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01
 
 # Mô hình 2: Laya Non-autoregressive System 1 Engine (MPS Apple GPU)
 ADVISOR_PLANNER_MODE=laya uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01
 ```
+
+> Số liệu trong bảng đo trước khi Advisor nối với Regulation MCP và trước mock data mới ở #4 (P01 khi đó là 113 TC,
+> quy chế viết tay `Dieu_24_LVTN`). Chạy lại với code hiện tại sẽ cho kết quả khác.
 
 | Chỉ số so sánh | Mô hình 1: LLM Decision-driven RAG | Mô hình 2: Laya System 1 Decision Engine | Nhận xét kiến trúc |
 |---|:---:|:---:|---|
@@ -166,10 +172,16 @@ export LAYA_SERVER_URL=http://127.0.0.1:8000/v1/systemone
 ```
 
 ### C. Cấu hình LLM Client (Mô hình 1)
-```bash
-export OPENCODE_API_KEY="your-opencode-or-openai-api-key"
-export OPENCODE_BASE_URL="https://opencode.ai/inference/openai/v1"
-export OPENCODE_MODEL="kimi-k3"
+Cấu hình trong file `.env` ở gốc repo (xem `.env.example`):
+
 ```
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=...
+```
+
+`LLM_PROVIDER` nhận `gemini`, `openai` hoặc `kimi`.
+
+Base URL, model mặc định và tham số mỗi provider hỗ trợ nằm trong `PROVIDERS` của `llm.py`; `LLM_MODEL`,
+`LLM_BASE_URL`, `LLM_API_KEY` đè lên mặc định.
 *(Nếu không đặt API Key hoặc tài khoản hết credit, hệ thống tự động kích hoạt bộ fallback an toàn mà không làm gián đoạn bài test).*
 

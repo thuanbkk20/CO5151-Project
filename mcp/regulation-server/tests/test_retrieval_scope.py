@@ -1,12 +1,10 @@
 """Regression tests for the conservative lexical topic gate, not semantic accuracy."""
 
-import sys
 import unittest
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src/regulation_server"))
 import test_retrieval_local as fixtures
-from retrieve_regulations import scope_matches
+
+from regulation_server.retrieve_regulations import scope_matches
 
 
 class ScopeTests(unittest.TestCase):

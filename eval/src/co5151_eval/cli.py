@@ -4,6 +4,8 @@ import sys
 import time
 from pathlib import Path
 
+from co5151_contracts.env import find_env_file, load_env_file
+
 from .gold import check_gold
 from .runner import run, write_report
 from .tasks import load_tasks
@@ -40,8 +42,11 @@ def cmd_run(a) -> int:
         mark = "ERR " if r.error else {True: "PASS", False: "fail", None: "hand"}[r.passed]
         print(f"  [seed {r.seed}] {r.task_id} {mark} {r.outcome:<7} {r.latency_s:.2f}s", file=sys.stderr)
 
+    probe = factory(a.seeds[0])
+    config = probe.describe() if callable(getattr(probe, "describe", None)) else None
     records = run(factory, tasks, a.seeds, on_record=progress if a.verbose else None)
-    meta = {"agent": a.agent, "tasks": len(tasks), "started": time.strftime("%Y-%m-%d %H:%M:%S")}
+    meta = {"agent": a.agent, "agent_config": config, "tasks": len(tasks),
+            "started": time.strftime("%Y-%m-%d %H:%M:%S")}  # fmt: skip
     summary = write_report(records, out, f"Kết quả: {name}", meta)
     print((out / "summary.md").read_text("utf-8"))
     print(f"Chi tiết: {out}/results.jsonl", file=sys.stderr)
@@ -68,6 +73,7 @@ def cmd_security(a) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="co5151-eval")
+    p.add_argument("--env-file", type=Path, help="mặc định: file .env gần nhất, tìm ngược lên tới gốc repo")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     r = sub.add_parser("run", help="chạy một hệ thống trên tập task và ghi báo cáo")
@@ -92,6 +98,7 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(fn=cmd_security)
 
     a = p.parse_args(argv)
+    load_env_file(a.env_file or find_env_file())
     return a.fn(a)
 
 

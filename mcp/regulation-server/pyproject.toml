@@ -1,0 +1,23 @@
+[project]
+name = "co5151-regulation-server"
+version = "0.2.0"
+description = "Regulation MCP — lexical + graph retrieval over HCMUT academic regulations (draft data)"
+readme = "README_HANDOFF.md"
+requires-python = ">=3.10"
+dependencies = [
+    "co5151-contracts",
+    "mcp>=1.30,<3",
+]
+
+[project.scripts]
+regulation-mcp = "regulation_server.regulation_mcp_v2:main"
+
+[tool.uv.sources]
+co5151-contracts = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/regulation_server"]

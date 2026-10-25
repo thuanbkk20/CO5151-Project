@@ -1,5 +1,5 @@
 import unicodedata
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict
 
@@ -95,3 +95,34 @@ class StaticRegulationSource:
                 results.append(doc)
 
         return results
+
+
+class RegulationToolService(Protocol):
+    def call(self, name: str, arguments: dict) -> Any: ...
+
+
+class ToolRegulationSource:
+    def __init__(self, service: RegulationToolService, *, top_k: int = 3, hops: int = 1, max_chars: int = 1500):
+        self._service = service
+        self._top_k = top_k
+        self._hops = hops
+        self._max_chars = max_chars
+
+    def search(self, query: str, *, ctdt: str | None = None) -> list[RegulationDocument]:
+        res = self._service.call("search_regulations", {"query": query, "top_k": self._top_k, "hops": self._hops})
+        if not res.ok:
+            return []
+        return [self._document(r) for r in res.data.get("results", [])]
+
+    def _document(self, result: dict) -> RegulationDocument:
+        evidence = result.get("evidence") or {}
+        citation = result.get("citation") or {}
+        pages = citation.get("pdf_pages") or []
+        source = citation.get("file_name", "")
+        where = f"{source}, trang {pages[0]}-{pages[-1]}" if pages else source
+        text = " ".join(f.get("text", "") for f in evidence.get("fragments", []))
+        return RegulationDocument(
+            id=evidence.get("provision_id") or result["id"],
+            title=f"{evidence.get('title', result['id'])} ({where})" if where else evidence.get("title", result["id"]),
+            content=" ".join(text.split())[: self._max_chars],
+        )

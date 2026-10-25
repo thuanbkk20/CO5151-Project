@@ -13,7 +13,7 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from build_corpus import atomic
+from .build_corpus import atomic
 
 
 def read(path):

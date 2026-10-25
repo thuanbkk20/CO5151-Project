@@ -1,10 +1,9 @@
-import sys
 import unittest
 from pathlib import Path
 
+from regulation_server.regulation_service_v2 import INPUTS, RegulationServiceV2
+
 BASE = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(BASE / "src/regulation_server"))
-from regulation_service_v2 import INPUTS, RegulationServiceV2  # noqa: E402 - bootstrap local src path before import
 
 
 class HandoffTests(unittest.TestCase):

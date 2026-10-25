@@ -25,7 +25,7 @@ def envelope(result):
 
 
 async def check(base, draft):
-    args = [str(Path(__file__).with_name("regulation_mcp.py")), "--base", str(base)]
+    args = ["-m", "regulation_server.regulation_mcp", "--base", str(base)]
     if draft:
         args.append("--allow-draft")
     parameters = StdioServerParameters(command=sys.executable, args=args, env={**os.environ, "PYTHONUTF8": "1"})

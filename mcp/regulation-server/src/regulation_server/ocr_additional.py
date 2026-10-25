@@ -9,7 +9,8 @@ import urllib.request
 from pathlib import Path
 
 import fitz
-from ingest_documents import write_json
+
+from .ingest_documents import write_json
 
 
 def sha(path):

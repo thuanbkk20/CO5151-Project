@@ -20,11 +20,61 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 
 ```bash
 uv sync                 # cài toàn bộ workspace + dev tools vào .venv
-uv run pytest           # chạy test
+cp .env.example .env    # điền key LLM và secret, mọi lệnh tự đọc file này
+uv run pytest           # chạy test (test không đọc .env)
 uv run ruff check .     # lint
 ```
 
+Cấu hình của cả app nằm trong một file `.env` ở gốc repo, gồm Student Record MCP, Regulation MCP và LLM của Advisor. Các lệnh
+`student-mcp` và `co5151-eval` tìm `.env` từ thư mục hiện tại ngược lên tới gốc repo; biến đã `export` trong shell được
+ưu tiên. Muốn dùng file khác thì truyền `--env-file <đường dẫn>`. Thành phần mới đọc cấu hình bằng
+`co5151_contracts.env.load_env_file(find_env_file())` khi khởi động.
+
 Yêu cầu: Python ≥ 3.10, [uv](https://docs.astral.sh/uv/) ≥ 0.5.
+
+## Chạy ứng dụng
+
+Chỉ cần điền key của provider LLM đang chọn trong `.env` (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`);
+các biến khác đã có giá trị mặc định chạy được. Danh sách đầy đủ và ý nghĩa từng biến nằm trong
+[.env.example](.env.example).
+
+Đổi provider cho một lần chạy mà không sửa `.env` (biến trong shell được ưu tiên):
+
+```bash
+LLM_PROVIDER=openai uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01 -v
+```
+
+Provider OpenAI-compatible khác dùng được ngay bằng `LLM_BASE_URL`, `LLM_API_KEY` và `LLM_MODEL`. Muốn có tên riêng
+thì thêm một dòng vào `PROVIDERS` trong `services/advisor/src/co5151_advisor/llm.py`. Provider, model và cấu hình
+Advisor của mỗi lần chạy được ghi vào `summary.json` / `summary.md` (`agent_config`).
+
+```bash
+# Advisor end-to-end trên 1 câu: Student Record + Regulation chạy in-process, LLM theo LLM_PROVIDER
+uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01 -v
+
+# Cả bộ 24 câu, 3 seed; so với hệ thống không dùng LLM
+uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --seeds 0 1 2
+uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2
+
+# Kiểm thử bảo mật Student Record MCP qua HTTP thật
+uv run co5151-eval security
+```
+
+Kết quả nằm ở `eval/results/<thời gian>-<agent>/` (`summary.md`, `results.jsonl`). Nếu terminal in
+`LLM generation failed, falling back to deterministic template` thì câu đó **không** do LLM trả lời (key sai, hết
+tiền, model không hỗ trợ tham số); `tokens` của câu đó là 100.
+
+Chạy từng MCP server riêng để thử bằng MCP client:
+
+```bash
+uv run student-mcp serve                 # Streamable HTTP http://127.0.0.1:8102/mcp, cần Bearer token
+uv run student-mcp issue-token sv001     # token cho tài khoản demo (mật khẩu: demo)
+uv run regulation-mcp --allow-draft      # stdio; dữ liệu quy chế hiện là bản nháp
+```
+
+Chưa có giao diện chat (`apps/web`); Advisor hiện được gọi qua `co5151-eval`.
+
+Quy ước khi thêm code (biến môi trường, package, tool mới) nằm trong [CLAUDE.md](CLAUDE.md).
 
 ## Quy ước
 

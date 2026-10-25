@@ -1,13 +1,11 @@
 import os
-import sys
 import unittest
 from pathlib import Path
 
-BASE = Path(os.environ.get("REGULATION_BASE", str(Path(__file__).resolve().parents[1])))
-sys.path.insert(0, str(BASE / "src/regulation_server"))
-from regulation_service import RegulationService  # noqa: E402 - bootstrap local src path before import
+from co5151_contracts.envelope import ToolResult
+from regulation_server.regulation_service import RegulationService
 
-from co5151_contracts.envelope import ToolResult  # noqa: E402 - bootstrap local src path before import
+BASE = Path(os.environ.get("REGULATION_BASE", str(Path(__file__).resolve().parents[1])))
 
 
 class RegulationServiceTests(unittest.TestCase):
