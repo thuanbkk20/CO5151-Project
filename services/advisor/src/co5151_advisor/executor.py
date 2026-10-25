@@ -28,7 +28,7 @@ SAFE_ERROR_MESSAGES: dict[ErrorCode, str] = {
 class StudentExecutor:
     """Wraps StudentRecordService.call to enforce strict tool scoping, evidence projection, and error mapping."""
 
-    ALLOWED_TOOLS = {"get_my_academic_summary", "get_my_warnings"}
+    ALLOWED_TOOLS = {"get_my_academic_summary", "get_my_academic_decisions"}
 
     def __init__(self, service: Any):
         self._service = service
@@ -63,7 +63,7 @@ class StudentExecutor:
             )
             return StudentExecutionResult(ok=True, evidence=evidence)
 
-        if tool_name == "get_my_warnings":
+        if tool_name == "get_my_academic_decisions":
             evidence = Evidence(
                 warnings_checked=True,
                 currently_warned=data.currently_warned,

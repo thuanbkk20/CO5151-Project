@@ -102,8 +102,8 @@ class AdvisorAgent:
 
             if action == Action.WARNINGS:
                 self.traces.append(DecisionTrace(action="WARNINGS", sources=["student_mcp"], created_at=time.time()))
-                tool_calls.append("get_my_warnings")
-                res = self.executor.call("get_my_warnings", token=session_token)
+                tool_calls.append("get_my_academic_decisions")
+                res = self.executor.call("get_my_academic_decisions", token=session_token)
                 if not res.ok:
                     return AgentResponse(
                         text=res.error or "Không thể đọc dữ liệu cảnh báo.",

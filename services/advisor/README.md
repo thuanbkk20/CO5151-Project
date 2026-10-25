@@ -43,7 +43,7 @@ Thành phần **Mảng 3** trong hệ thống tư vấn học tập cá nhân h�
 │   │ • Bọc API StudentRecordService.call  │      │ • Protocol chuẩn hóa tra cứu quy chế                      │   │
 │   │ • Chỉ gọi 2 tool:                    │      │ • Dynamic Search: nhận tham số `ctdt` từ evidence sinh    │   │
 │   │   - get_my_academic_summary          │      │   viên để lọc đúng quy chế áp dụng (QC2019 hay QC2023)    │   │
-│   │   - get_my_warnings                  │      │ • `StaticRegulationSource`: Dùng cho test & eval offline  │   │
+│   │   - get_my_academic_decisions        │      │ • `StaticRegulationSource`: Dùng cho test & eval offline  │   │
 │   │ • Chiếu đúng 8 trường an toàn        │      │ • Sẵn sàng cắm Regulation MCP (Mảng 1) qua client HTTP    │   │
 │   │ • Giấu MSSV, CCCD, Token, Transcript │      └───────────────────────────────────────────────────────────┘   │
 │   │ • Tự động retry INTERNAL đúng 1 lần  │                                                                      │
