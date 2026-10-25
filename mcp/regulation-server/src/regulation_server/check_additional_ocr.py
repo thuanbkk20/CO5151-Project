@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from build_corpus import atomic
+from .build_corpus import atomic
 
 
 def write_json(path, value):

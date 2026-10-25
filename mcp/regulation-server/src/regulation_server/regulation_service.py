@@ -9,9 +9,10 @@ import json
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, ValidationError
-from retrieve_regulations import RegulationRetriever
 
 from co5151_contracts.envelope import ErrorCode, err, ok
+
+from .retrieve_regulations import RegulationRetriever
 
 
 class SearchInput(BaseModel):

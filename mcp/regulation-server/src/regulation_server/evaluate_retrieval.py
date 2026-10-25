@@ -12,8 +12,8 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 
-from build_corpus import atomic
-from retrieve_regulations import RegulationRetriever
+from .build_corpus import atomic
+from .retrieve_regulations import RegulationRetriever
 
 
 def main():

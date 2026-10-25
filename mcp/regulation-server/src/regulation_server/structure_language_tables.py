@@ -9,7 +9,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from build_corpus import atomic
+from .build_corpus import atomic
 
 CONVERSION_COLUMNS = [
     "toeic_listening_reading",

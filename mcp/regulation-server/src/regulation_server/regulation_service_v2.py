@@ -2,7 +2,6 @@
 
 from datetime import date
 
-from handoff_retriever import HandoffRetriever
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -14,6 +13,8 @@ from pydantic import (
 )
 
 from co5151_contracts.envelope import ErrorCode, err, ok
+
+from .handoff_retriever import HandoffRetriever
 
 
 class Context(BaseModel):

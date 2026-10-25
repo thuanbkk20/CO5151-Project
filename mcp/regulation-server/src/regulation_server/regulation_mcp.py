@@ -19,7 +19,8 @@ from mcp.types import (
     Tool,
     ToolAnnotations,
 )
-from regulation_service import INPUTS, RegulationService
+
+from .regulation_service import INPUTS, RegulationService
 
 DESCRIPTIONS = {
     "search_regulations": (

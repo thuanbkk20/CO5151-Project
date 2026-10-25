@@ -2,13 +2,11 @@
 
 import hashlib
 import json
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src/regulation_server"))
-from merge_regulation_batches import merge
+from regulation_server.merge_regulation_batches import merge
 
 
 class MergeBatchTests(unittest.TestCase):

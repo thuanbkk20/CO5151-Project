@@ -1,13 +1,11 @@
 """Small synthetic tests: retrieval behavior, not regulation correctness."""
 
 import json
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src/regulation_server"))
-from retrieve_regulations import RegulationRetriever, tokens
+from regulation_server.retrieve_regulations import RegulationRetriever, tokens
 
 
 class RetrievalTests(unittest.TestCase):

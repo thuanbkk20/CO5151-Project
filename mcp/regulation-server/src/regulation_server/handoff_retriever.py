@@ -6,7 +6,7 @@ import math
 from collections import Counter, deque
 from pathlib import Path
 
-from retrieve_regulations import scope_matches, tokens
+from .retrieve_regulations import scope_matches, tokens
 
 TOPICS = (
     "hoc phi",

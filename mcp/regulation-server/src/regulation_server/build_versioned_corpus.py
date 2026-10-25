@@ -10,7 +10,7 @@ import json
 import re
 from pathlib import Path
 
-from build_corpus import atomic
+from .build_corpus import atomic
 
 HASHES = {
     "2933": "8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb",

@@ -10,7 +10,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from build_corpus import atomic
+from .build_corpus import atomic
 
 
 def main():
