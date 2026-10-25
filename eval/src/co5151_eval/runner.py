@@ -50,8 +50,8 @@ def run(
     tasks = list(tasks)
     records = []
     for seed in seeds:
-        agent = make_agent(seed)
         for task in tasks:
+            agent = make_agent(seed)
             token = oracle.token(task.user) if task.user else None
             start = time.perf_counter()
             try:

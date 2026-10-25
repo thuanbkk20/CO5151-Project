@@ -63,7 +63,7 @@ từ chối / hỏi lại trong `scoring.py`. Cách này là heuristic, cần ki
 
 ## Cắm một hệ thống vào harness
 
-Viết một factory `make_agent(seed) -> Agent` (xem `agent.py`):
+Viết một factory `make_agent(seed) -> Agent` (xem `agent.py`). Harness gọi factory **một lần cho mỗi câu × seed**, nên mỗi câu là một phiên mới: bộ nhớ hay trạng thái của agent không lọt từ câu này sang câu khác, kể cả giữa các tài khoản khác nhau. Ngữ cảnh hội thoại chỉ đến từ trường `history` của task:
 
 ```python
 from co5151_eval.agent import AgentResponse, Usage

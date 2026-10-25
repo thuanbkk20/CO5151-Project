@@ -71,3 +71,27 @@ def test_write_report(tmp_path, tasks, oracle):
 def test_ungradable_tasks_are_excluded_from_pass_rate(tasks, oracle):
     s = summarize(run(lambda seed: Scripted({}), [tasks["B01"]], oracle=oracle))
     assert s["overall"]["pass_rate"] is None and s["overall"]["needs_human"] == 1
+
+
+class Remembering:
+    name = "remembering"
+
+    def __init__(self):
+        self.seen: list[str] = []
+
+    def answer(self, question, *, session_token, history):
+        self.seen.append(question)
+        return AgentResponse(text=f"đã thấy {len(self.seen)} câu")
+
+
+def test_every_task_gets_a_fresh_agent_so_no_state_leaks_between_tasks():
+    tasks = load_tasks()[:3]
+    built = []
+
+    def factory(seed):
+        built.append(Remembering())
+        return built[-1]
+
+    records = run(factory, tasks, seeds=[0, 1])
+    assert len(built) == len(tasks) * 2
+    assert {r.text for r in records} == {"đã thấy 1 câu"}
