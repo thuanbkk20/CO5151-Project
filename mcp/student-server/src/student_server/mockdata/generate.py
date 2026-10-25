@@ -7,11 +7,11 @@ Outputs (in this folder):
   profiles.json        {mssv: <profile object>}                 — schema "profile sinh viên"
   diem_mon_hoc.json    {mssv: {"data": [<course row>, ...]}}     — schema "bảng điểm môn học"
   diem_hoc_ky.json     {mssv: [<semester row>, ...]}             — schema "bảng điểm học kỳ" (mới nhất trước)
-  xu_ly_hoc_vu.json    {mssv: [<warning row>, ...]}              — schema GIẢ ĐỊNH (chưa có mẫu thật)
+  xu_ly_hoc_vu.json    {mssv: {"data": [<decision row>, ...]}}  — schema "quyết định học vụ" (mới nhất trước)
   accounts.json        demo logins (username / PBKDF2 password hash → mssv / advisees)
   reference.json       CTĐT mô phỏng, bảng mã điểm đặc biệt, quy đổi chứng chỉ ngoại ngữ
 
-Everything is internally consistent: semester rows and warnings are COMPUTED from course rows,
+Everything is internally consistent: semester rows and warning decisions are COMPUTED from course rows,
 so tổng tín chỉ / điểm TB / cảnh báo always agree with the transcript.
 """
 
@@ -81,12 +81,63 @@ CTDT_2019 = CTDT_2023 + [(7, "CO3103", "Đồ án tổng hợp", 2, "core")]  # 
 COURSE = {c[1]: c for c in CTDT_2019}
 
 # ---------------------------------------------------------------- bảng mã đặc biệt & quy đổi
-# diemSo > 10 là MÃ, không phải điểm. Chỉ MT=12 được xác nhận từ mẫu thật; còn lại GIẢ ĐỊNH, cần đối chiếu API.
+# diemSo > 10 là MÃ, không phải điểm
+# CT = Cấm thi, VT = Vắng thi, CH = Chưa có điểm, RT = Rút môn học, KD = Không đạt, VP = Vắng thi có phép, DT = Điểm đạt, HT = Hoãn thi, MT = Miễn thi.
 SPECIAL = {
-    "11": {"diemChu": "CT", "nghia": "Cấm thi", "dat": False, "tinhTB": False},
-    "12": {"diemChu": "MT", "nghia": "Miễn (miễn thi / miễn học, công nhận)", "dat": True, "tinhTB": False},
-    "13": {"diemChu": "VT", "nghia": "Vắng thi", "dat": False, "tinhTB": False},
-    "14": {"diemChu": "HT", "nghia": "Hoãn thi (chưa có điểm)", "dat": False, "tinhTB": False},
+    "11": {
+        "diemChu": "CT",
+        "nghia": "Cấm thi",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "12": {
+        "diemChu": "MT",
+        "nghia": "Miễn thi",
+        "dat": True,
+        "tinhTB": False,
+    },
+    "13": {
+        "diemChu": "VT",
+        "nghia": "Vắng thi",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "14": {
+        "diemChu": "HT",
+        "nghia": "Hoãn thi",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "15": {
+        "diemChu": "CH",
+        "nghia": "Chưa có điểm",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "16": {
+        "diemChu": "RT",
+        "nghia": "Rút môn học",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "17": {
+        "diemChu": "KD",
+        "nghia": "Không đạt",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "18": {
+        "diemChu": "VP",
+        "nghia": "Vắng thi có phép",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "21": {
+        "diemChu": "DT",
+        "nghia": "Điểm đạt",
+        "dat": True,
+        "tinhTB": False,
+    },
 }
 LETTERS = [
     (9.5, "A+", 4.0),
@@ -125,6 +176,11 @@ def sem_name(code):
     return f"Năm học {y} - {y + 1} / Học kỳ {SEM_LABEL[k]}"
 
 
+def decision_sem_name(code):
+    y, k = int(code[:4]), code[4]
+    return f"Học kỳ {k} ({y} - {y + 1})"
+
+
 def letter(score):
     for lo, ch, _ in LETTERS:
         if score >= lo:
@@ -141,6 +197,11 @@ def P(**k):
     return k
 
 
+# (học kỳ, loại, nội dung, lý do, tình trạng, ngày quyết định)
+THESIS = ("20261", "Quyết định khác", "Giao đề tài Đồ án/Đề án tốt nghiệp", "Giao đề tài LVThS/ĐATN", "Đang theo học",
+          "24/09/2026")  # fmt: skip
+
+
 PERSONAS = [
     P(
         user="sv001",
@@ -153,6 +214,7 @@ PERSONAS = [
         sems=["20231", "20232", "20241", "20242", "20251", "20252"],
         summer={"20243": ["CO3335"], "20253": ["CO3117"]},
         cert=("TOEIC 500", "20241"),
+        decisions=[THESIS],
         note="K2023, đủ điều kiện LVTN, không cảnh báo",
     ),
     P(
@@ -201,6 +263,11 @@ PERSONAS = [
         mu=8.3,
         sd=0.7,
         sems=["20221", "20222", "20241", "20242", "20251", "20252"],
+        decisions=[
+            ("20231", "Tạm dừng học", "Tạm dừng học 2 học kỳ", "Nguyện vọng cá nhân", "Tạm dừng học", "05/09/2023"),
+            ("20241", "Tiếp tục học", "Tiếp tục học", "Hết thời gian tạm dừng", "Đang theo học", "26/08/2024"),
+            THESIS,
+        ],
         note="K2022 (QC2019), tạm dừng 20231–20232, đủ ĐK LVTN theo QC2019",
     ),
     P(
@@ -377,11 +444,11 @@ def semester_rows(p, rows):
     return sorted(out, key=lambda r: r["maNamHocHocKy"], reverse=True)
 
 
-def warnings(p, rows):
-    """Áp dụng Điều 14 Khoản 1 (bản mô phỏng) cho từng học kỳ CHÍNH."""
+def warning_semesters(p, rows):
+    """Áp dụng Điều 14 Khoản 1 (bản mô phỏng) cho từng học kỳ CHÍNH → [(maHocKy, lý do)]."""
     qc2023 = p["cohort"] >= 2023
     policy = "max" if qc2023 else "last"
-    out, lan = [], 0
+    out = []
     mains = [s for s in sorted({r["maHocKy"] for r in rows if r["maHocKy"] != "BL"}) if s[4] in "12"]
     for idx, s in enumerate(mains):
         sem_rows = [r for r in rows if r["maHocKy"] == s and counted(r)]
@@ -397,32 +464,53 @@ def warnings(p, rows):
         sem_min = 0.8 if (qc2023 and idx == 0) else 1.0
         reg = sum(r["soTinChi"] for r in sem_rows)
         fail = sum(r["soTinChi"] for r in sem_rows if r["diemDat"] == "0")
-        reason = None
         if g_sem < sem_min:
-            reason = f"Điểm trung bình học kỳ {g_sem:.2f} (thang 4), dưới {sem_min:.1f}"
+            out.append((s, f"Điểm trung bình học kỳ {g_sem:.2f} (thang 4), dưới {sem_min:.1f}"))
         elif g_cum < cum_min:
-            reason = f"Điểm trung bình tích lũy {g_cum:.2f} (thang 4), dưới {cum_min:.1f} (năm thứ {year})"
+            out.append((s, f"Điểm trung bình tích lũy {g_cum:.2f} (thang 4), dưới {cum_min:.1f} (năm thứ {year})"))
         elif qc2023 and reg and fail / reg > 0.5:
-            reason = f"Không đạt {fail}/{reg} tín chỉ đăng ký (trên 50%)"
-        lan = lan + 1 if reason else 0
-        if reason:
-            y = int(s[:4])
-            out.append(
-                {
-                    "sinhVienId": p["svid"],
-                    "namHocHocKyId": sem_id(s),
-                    "maHocKy": s,
-                    "namHocHocKyTen": sem_name(s),
-                    "hinhThucXuLy": "Cảnh báo học tập",
-                    "lanLienTiep": lan,
-                    "lyDo": reason,
-                    "soQuyetDinh": f"{1000 + int(s) % 997}/QĐ-ĐHBK-ĐT",
-                    "ngayQuyetDinh": f"20/02/{y + 1}" if s[4] == "1" else f"15/08/{y + 1}",
-                    "code": "0",
-                    "msg": "done",
-                }
-            )
+            out.append((s, f"Không đạt {fail}/{reg} tín chỉ đăng ký (trên 50%)"))
     return out
+
+
+def plus_days(ddmmyyyy, n):
+    d, m, y = (int(x) for x in ddmmyyyy.split("/"))
+    return f"{d + n:02d}/{m:02d}/{y}"  # các ngày dùng ở đây đều ≤ 26 → không tràn tháng
+
+
+def decisions(p, rows):
+    """Cảnh báo (tính từ bảng điểm), miễn học ngoại ngữ (từ chứng chỉ) và quyết định riêng của persona."""
+    items = []
+    for s, reason in warning_semesters(p, rows):
+        y = int(s[:4])
+        date = f"20/02/{y + 1}" if s[4] == "1" else f"15/08/{y + 1}"
+        items.append((s, "Cảnh báo học tập", "Cảnh báo học tập", reason, "Đang theo học", date))
+    if p.get("cert"):
+        _, s = p["cert"]
+        y = int(s[:4])
+        date = {"1": f"08/10/{y}", "2": f"10/03/{y + 1}", "3": f"10/07/{y + 1}"}[s[4]]
+        items.append((s, "Quyết định khác", "miễn học, ghi điểm học phần và điều kiện ngoại ngữ", "Miễn môn học",
+                      "Đang theo học", date))  # fmt: skip
+    items += p.get("decisions", [])
+    out = []
+    for s, kind, content, reason, status, date in items:
+        out.append(
+            {
+                "decisionCode": f"{1000 + (int(s) + p['svid'] + len(content)) % 8999}/QĐ-ĐHBK",
+                "decisionDate": date,
+                "yearSemesterName": decision_sem_name(s),
+                "id": 0,  # gán tuần tự toàn cục trong build()
+                "type": kind,
+                "decisionContent": content,
+                "decisionReason": reason,
+                "status": status,
+                "yearSemesterCode": s,
+                "studentCode": p["mssv"],
+                "lastUpdatedAt": plus_days(date, 1),
+            }
+        )
+    key = lambda r: (r["yearSemesterCode"], r["decisionDate"][6:], r["decisionDate"][3:5], r["decisionDate"][:2])  # noqa: E731
+    return sorted(out, key=key, reverse=True)
 
 
 def profile(p, i):
@@ -462,7 +550,7 @@ def build():
         profiles[p["mssv"]] = profile(p, i)
         dmh[p["mssv"]] = {"data": rows}
         dhk[p["mssv"]] = semester_rows(p, rows)
-        xlhv[p["mssv"]] = warnings(p, rows)
+        xlhv[p["mssv"]] = decisions(p, rows)
         accounts.append(
             {
                 "username": p["user"],
@@ -473,6 +561,12 @@ def build():
             }
         )
     accounts += [{**a, "password_hash": demo_hash(a["username"])} for a in ADVISORS]
+    next_id = 1
+    for mssv in xlhv:
+        for r in xlhv[mssv]:
+            r["id"] = next_id
+            next_id += 1
+        xlhv[mssv] = {"code": "200", "msg": "OK", "data": xlhv[mssv], "sign": None}
     ref = {
         "_note": (
             "Dữ liệu tham chiếu MÔ PHỎNG cho mock API. Mã môn/CTĐT mang tính minh họa — đối chiếu CTĐT thật trước D3."
@@ -521,7 +615,7 @@ def main(argv=None):
         print(
             f"{p['user']} {p['mssv']} K{p['cohort']}  TC={top.get('soTCTLChung')}  ĐTBTL10={top.get('diemTBTLChung')}  "
             f"courses={len(payloads['diem_mon_hoc'][p['mssv']]['data'])}  "
-            f"warnings={[w['maHocKy'] for w in payloads['xu_ly_hoc_vu'][p['mssv']]]}"
+            f"decisions={[(d['yearSemesterCode'], d['type']) for d in payloads['xu_ly_hoc_vu'][p['mssv']]['data']]}"
         )
     return 0
 

@@ -657,7 +657,7 @@
     },
     "12": {
       "diemChu": "MT",
-      "nghia": "Miễn (miễn thi / miễn học, công nhận)",
+      "nghia": "Miễn thi",
       "dat": true,
       "tinhTB": false
     },
@@ -669,8 +669,38 @@
     },
     "14": {
       "diemChu": "HT",
-      "nghia": "Hoãn thi (chưa có điểm)",
+      "nghia": "Hoãn thi",
       "dat": false,
+      "tinhTB": false
+    },
+    "15": {
+      "diemChu": "CH",
+      "nghia": "Chưa có điểm",
+      "dat": false,
+      "tinhTB": false
+    },
+    "16": {
+      "diemChu": "RT",
+      "nghia": "Rút môn học",
+      "dat": false,
+      "tinhTB": false
+    },
+    "17": {
+      "diemChu": "KD",
+      "nghia": "Không đạt",
+      "dat": false,
+      "tinhTB": false
+    },
+    "18": {
+      "diemChu": "VP",
+      "nghia": "Vắng thi có phép",
+      "dat": false,
+      "tinhTB": false
+    },
+    "21": {
+      "diemChu": "DT",
+      "nghia": "Điểm đạt",
+      "dat": true,
       "tinhTB": false
     }
   },

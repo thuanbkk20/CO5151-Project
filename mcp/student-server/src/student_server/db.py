@@ -21,14 +21,14 @@ COURSE_COLS = ["sinhVienId", "namHocHocKyId", "maHocKy", "monHocId", "maMonHoc",
                "diemSo", "diemDat", "tinhTrangDiem", "diemKhongIn", "nhomTo", "ghiChu", "code", "msg"]  # fmt: skip
 SEM_COLS = ["sinhVienId", "namHocHocKyId", "maNamHocHocKy", "namHocHocKyTen", "soTCTLHocKy", "diemTBTLHocKy",
             "soTCTLChung", "diemTBTLChung", "capNhatCuoi", "code", "msg"]  # fmt: skip
-WARN_COLS = ["sinhVienId", "namHocHocKyId", "maHocKy", "namHocHocKyTen", "hinhThucXuLy", "lanLienTiep", "lyDo",
-             "soQuyetDinh", "ngayQuyetDinh", "code", "msg"]  # fmt: skip
+DECISION_COLS = ["id", "decisionCode", "decisionDate", "yearSemesterCode", "yearSemesterName", "type",
+                 "decisionContent", "decisionReason", "status", "studentCode", "lastUpdatedAt"]  # fmt: skip
 
 # table -> (payload file, columns, unwrap payload -> rows, ORDER BY)
 _TABLES = {
     "diem_mon_hoc": ("diem_mon_hoc", COURSE_COLS, lambda v: v["data"], "rowid"),
     "diem_hoc_ky": ("diem_hoc_ky", SEM_COLS, lambda v: v, "maNamHocHocKy DESC"),
-    "xu_ly_hoc_vu": ("xu_ly_hoc_vu", WARN_COLS, lambda v: v, "maHocKy"),
+    "xu_ly_hoc_vu": ("xu_ly_hoc_vu", DECISION_COLS, lambda v: v["data"], "rowid"),
 }
 
 
@@ -101,7 +101,8 @@ class StudentDB:
         """Newest first, as returned by the API."""
         return self._rows("diem_hoc_ky", mssv)
 
-    def raw_warnings(self, mssv: str) -> list[dict]:
+    def raw_decisions(self, mssv: str) -> list[dict]:
+        """Newest first, as returned by the API."""
         return self._rows("xu_ly_hoc_vu", mssv)
 
     # ---------------- accounts ----------------

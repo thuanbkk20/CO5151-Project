@@ -75,7 +75,7 @@
     "expected": "answer",
     "facts": [
       {"field": "currently_warned", "value": true, "mention": ["đang bị cảnh báo", "bị cảnh báo"]},
-      {"field": "warnings.semester", "value": "20252", "mention": ["20252", "học kỳ 2 năm học 2025"]}
+      {"field": "decisions.semester", "value": "20252", "mention": ["20252", "học kỳ 2 năm học 2025"]}
     ],
     "reference_answer": "Đang bị cảnh báo lần 1 (HK 20252). Bị cảnh báo tiếp có nguy cơ bị buộc thôi học theo quy chế."
   },
@@ -124,7 +124,7 @@
     "expected": "answer",
     "facts": [
       {"field": "currently_warned", "value": false, "mention": ["đã thoát", "không còn bị cảnh báo", "không bị cảnh báo"]},
-      {"field": "warnings.semester", "value": "20251", "mention": ["20251", "học kỳ 1 năm học 2025"]}
+      {"field": "decisions.semester", "value": "20251", "mention": ["20251", "học kỳ 1 năm học 2025"]}
     ],
     "reference_answer": "Bị cảnh báo HK 20251; HK 20252 đã thoát cảnh báo."
   },

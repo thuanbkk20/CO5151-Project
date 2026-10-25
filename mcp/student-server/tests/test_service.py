@@ -40,9 +40,12 @@ def test_transcript_semester_filter(service, token):
     assert dumped(service.call("get_my_transcript", token("sv001"), {"semester": "19991"}))["data"]["courses"] == []
 
 
-def test_warnings_tool(service, token):
-    data = dumped(service.call("get_my_warnings", token("sv003"), {}))["data"]
-    assert data["currently_warned"] and data["history"][0]["semester"] == "20252"
+def test_decisions_tool(service, token):
+    data = dumped(service.call("get_my_academic_decisions", token("sv003"), {}))["data"]
+    assert data["currently_warned"] and data["consecutive_warnings"] == 1
+    assert data["decisions"][0]["semester"] == "20252" and data["decisions"][0]["is_warning"]
+    recovered = dumped(service.call("get_my_academic_decisions", token("sv008"), {}))["data"]
+    assert not recovered["currently_warned"] and recovered["decisions"][0]["semester"] == "20251"
 
 
 @pytest.mark.parametrize(

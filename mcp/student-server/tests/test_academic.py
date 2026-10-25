@@ -7,7 +7,7 @@ ALL = ["2310001", "2310002", "2310003", "2210004", "2210005", "2410006", "231000
 
 def summary(db, mssv):
     return academic.summary(
-        db.raw_profile(mssv), db.raw_transcript(mssv), db.raw_semesters(mssv), db.raw_warnings(mssv), db.ref
+        db.raw_profile(mssv), db.raw_transcript(mssv), db.raw_semesters(mssv), db.raw_decisions(mssv), db.ref
     )
 
 
@@ -73,8 +73,22 @@ def test_profile_mapping_drops_sensitive_fields(db):
     assert set(p) == {"student_id", "full_name", "faculty", "program_type", "cohort", "ctdt"}
 
 
-def test_semester_and_warning_mapping(db):
+def test_semester_and_decision_mapping(db):
     sem = academic.semester(db.raw_semesters("2310001")[0])
     assert sem.semester == "20253" and isinstance(sem.gpa10_cumulative, float)
-    w = academic.warning(db.raw_warnings("2310003")[0])
-    assert w.semester == "20252" and "QĐ" in w.decision
+    w = academic.decision(db.raw_decisions("2310003")[0])
+    assert w.semester == "20252" and w.is_warning and "QĐ" in w.decision_no
+    d = academic.decision(db.raw_decisions("2310001")[0])
+    assert d.content == "Giao đề tài Đồ án/Đề án tốt nghiệp" and not d.is_warning
+
+
+def test_consecutive_warnings_counts_back_from_latest_main_semester():
+    rows = [{"maHocKy": s} for s in ("20241", "20242", "20243", "20251", "20252")]
+
+    def warn(s):
+        return {"yearSemesterCode": s, "type": "Cảnh báo học tập", "decisionContent": "Cảnh báo học tập"}
+
+    other = {"yearSemesterCode": "20252", "type": "Quyết định khác", "decisionContent": "Miễn môn học"}
+    assert academic.consecutive_warnings(rows, [warn("20251"), warn("20252")]) == 2
+    assert academic.consecutive_warnings(rows, [warn("20241"), warn("20252")]) == 1
+    assert academic.consecutive_warnings(rows, [warn("20251"), other]) == 0

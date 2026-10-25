@@ -30,7 +30,7 @@ Thử bằng [MCP Inspector](https://github.com/modelcontextprotocol/inspector):
 | `get_my_academic_summary` | — | student | read-only | `AcademicSummary`: TC tích lũy, ĐTBTL thang 4/10, đồ án, ngoại ngữ, GDTC/GDQP, cảnh báo |
 | `get_my_transcript` | `semester?` (`^([0-9]{4}[123]\|BL)$`) | student | read-only | `Transcript`: danh sách môn, mã điểm đặc biệt đã giải mã |
 | `get_my_semester_summary` | — | student | read-only | `SemesterSummary`: TC và điểm TB từng học kỳ, mới nhất trước |
-| `get_my_warnings` | — | student | read-only | `WarningHistory`: trạng thái và lịch sử cảnh báo học tập |
+| `get_my_academic_decisions` | — | student | read-only | `AcademicDecisions`: mọi quyết định học vụ (cảnh báo, tạm dừng / tiếp tục học, miễn học, giao đề tài TN, ...) + trạng thái cảnh báo hiện tại |
 | `get_advisee_summary` | `student_id` (`^[0-9]{7}$`) | advisor | read-only | `AcademicSummary` của một sinh viên **thuộc danh sách cố vấn** |
 
 Mọi tool khai báo MCP annotation `readOnlyHint=true, destructiveHint=false, idempotentHint=true, openWorldHint=false`.
@@ -133,7 +133,7 @@ src/student_server/
 ## Phát triển
 
 ```bash
-uv run pytest mcp/student-server                         # unit + e2e (server HTTP thật trên cổng ngẫu nhiên)
+uv run python -m pytest mcp/student-server                         # unit + e2e (server HTTP thật trên cổng ngẫu nhiên)
 uv run python -m student_server.mockdata.generate        # sinh lại mock data
 uv run python -m student_server.mockdata.generate --check
 ```

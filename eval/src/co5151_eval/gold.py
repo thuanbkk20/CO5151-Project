@@ -35,9 +35,9 @@ class RecordOracle:
         return res.data
 
     def actual(self, user: str, field: str) -> list:
-        if field.startswith("warnings."):
-            attr = field.removeprefix("warnings.")
-            return [getattr(w, attr) for w in self._data("get_my_warnings", user).history]
+        if field.startswith("decisions."):
+            attr = field.removeprefix("decisions.")
+            return [getattr(d, attr) for d in self._data("get_my_academic_decisions", user).decisions]
         return [getattr(self._data("get_my_academic_summary", user), field)]
 
 

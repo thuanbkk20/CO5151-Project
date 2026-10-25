@@ -36,8 +36,8 @@
     "scope": "records.read"
   },
   {
-    "name": "get_my_warnings",
-    "description": "Lịch sử cảnh báo học tập của sinh viên đang đăng nhập.",
+    "name": "get_my_academic_decisions",
+    "description": "Các quyết định học vụ của sinh viên đang đăng nhập (cảnh báo học tập, tạm dừng / tiếp tục học, miễn học, giao đề tài tốt nghiệp, ...) kèm trạng thái cảnh báo hiện tại.",
     "permission": "read-only",
     "roles": [
       "student"

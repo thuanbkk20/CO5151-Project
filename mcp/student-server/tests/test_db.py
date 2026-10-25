@@ -10,7 +10,8 @@ def test_raw_payloads_round_trip(db):
     assert len(db.raw_transcript("2310001")) == 43
     sems = db.raw_semesters("2310001")
     assert [s["maNamHocHocKy"] for s in sems] == sorted((s["maNamHocHocKy"] for s in sems), reverse=True)
-    assert [w["maHocKy"] for w in db.raw_warnings("2310003")] == ["20252"]
+    assert [d["yearSemesterCode"] for d in db.raw_decisions("2310003")] == ["20252"]
+    assert [d["yearSemesterCode"] for d in db.raw_decisions("2210004")] == ["20261", "20241", "20231"]
 
 
 def test_unknown_student_is_empty(db):

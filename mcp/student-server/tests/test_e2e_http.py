@@ -153,6 +153,6 @@ def test_concurrent_users_are_isolated(live, tokens):
 
 
 def test_calls_are_audited_with_pseudonyms(live, tokens):
-    call(live["url"], tokens["sv005"], "get_my_warnings")
+    call(live["url"], tokens["sv005"], "get_my_academic_decisions")
     ev = live["service"].access_log.events()[-1]
-    assert ev.tool == "get_my_warnings" and ev.allowed and ev.target != "2210005"
+    assert ev.tool == "get_my_academic_decisions" and ev.allowed and ev.target != "2210005"
