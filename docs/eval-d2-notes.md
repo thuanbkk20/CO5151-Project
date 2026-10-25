@@ -6,7 +6,7 @@
 |---|---|
 | Ngày | 25/10/2026, bắt đầu 16:02 |
 | Commit | `38c6e56` (nhánh `feat/eval-html-report`), cây làm việc sạch |
-| Kết quả | `eval/results/final-20261025-1557/` (không commit; `report.html` để xem, chạy lại bằng lệnh dưới) |
+| Kết quả | `eval/results/final-20261025-1557/` (không commit, chạy lại bằng lệnh dưới). Report HTML của lần chạy này: [eval-d2-report.html](eval-d2-report.html), tải về rồi mở bằng trình duyệt |
 | Advisor | `gemini/gemini-3.5-flash-lite`, không thinking; planner `LLMDecisionPlanner`; quy chế qua Regulation MCP (`ToolRegulationSource`, dữ liệu nháp) |
 | Cấu hình đơn giản hơn | `record_template`: đọc hồ sơ rồi in theo mẫu, không dùng LLM |
 | Quy mô | 24 câu × 3 seed mỗi cấu hình |
