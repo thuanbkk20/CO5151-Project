@@ -9,7 +9,7 @@ Chỉ đọc (read-only) và giới hạn theo token (scoped). Một tiến trì
 
 ```bash
 uv sync                                         # ở thư mục gốc repo
-cp mcp/student-server/.env.example .env         # đặt STUDENT_MCP_TOKEN_SECRET
+cp .env.example .env                            # ở gốc repo, đặt STUDENT_MCP_TOKEN_SECRET
 uv run student-mcp accounts                     # 8 sinh viên sv001…sv008 + cố vấn cvht01 (mật khẩu: demo)
 uv run student-mcp serve                        # http://127.0.0.1:8102/mcp, bắt buộc Bearer token
 uv run student-mcp issue-token sv001            # in token để thử bằng MCP Inspector / curl

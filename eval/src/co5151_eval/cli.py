@@ -4,6 +4,8 @@ import sys
 import time
 from pathlib import Path
 
+from co5151_contracts.env import find_env_file, load_env_file
+
 from .gold import check_gold
 from .runner import run, write_report
 from .tasks import load_tasks
@@ -68,6 +70,7 @@ def cmd_security(a) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="co5151-eval")
+    p.add_argument("--env-file", type=Path, help="mặc định: file .env gần nhất, tìm ngược lên tới gốc repo")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     r = sub.add_parser("run", help="chạy một hệ thống trên tập task và ghi báo cáo")
@@ -92,6 +95,7 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(fn=cmd_security)
 
     a = p.parse_args(argv)
+    load_env_file(a.env_file or find_env_file())
     return a.fn(a)
 
 
