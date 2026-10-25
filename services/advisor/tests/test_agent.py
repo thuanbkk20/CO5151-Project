@@ -50,7 +50,7 @@ def test_graduation_question_calls_summary_then_regulation_search():
     assert "113" in resp.text
     assert "500" in resp.text
     assert "Dieu_24_LVTN" in resp.citations
-    assert resp.tool_calls == ["get_my_academic_summary"]
+    assert resp.tool_calls == ["get_my_academic_summary", "search_regulations"]
 
     mock_svc.call.assert_called_once_with("get_my_academic_summary", "valid-token-xyz", None)
     mock_reg.search.assert_called_once()

@@ -45,7 +45,7 @@ def test_guest_question_does_not_touch_the_student_record():
     reply = backend.ask(
         backend.new_advisor(), "Điều kiện để được xét công nhận tốt nghiệp gồm những gì?", token=None, history=[]
     )
-    assert reply.details["tool_calls"] == []
+    assert reply.details["tool_calls"] == ["search_regulations"]
 
 
 def test_only_recent_history_is_passed_on():

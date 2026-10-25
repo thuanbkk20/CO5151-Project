@@ -44,7 +44,7 @@ def test_not_logged_in_skips_record_tools_and_answers_from_regulations():
     llm = ScriptedLLM(["SUMMARY", "SUMMARY", "WARNINGS"])
     _, agent = _agent(llm)
     resp = agent.answer("Điều kiện để được xét công nhận tốt nghiệp gồm những gì?", session_token=None, history=[])
-    assert resp.tool_calls == []
+    assert resp.tool_calls == ["search_regulations"]
     assert resp.text == "Câu trả lời từ LLM."
     assert "chưa đăng nhập" in llm.answer_prompts[-1]
 
@@ -53,7 +53,7 @@ def test_not_logged_in_rule_planner_does_not_refuse_a_general_question():
     _, agent = _agent()
     resp = agent.answer("Điều kiện để được xét công nhận tốt nghiệp gồm những gì?", session_token=None, history=[])
     assert resp.outcome is Outcome.ANSWER
-    assert resp.tool_calls == []
+    assert resp.tool_calls == ["search_regulations"]
 
 
 def test_planner_tokens_are_counted_in_usage():
