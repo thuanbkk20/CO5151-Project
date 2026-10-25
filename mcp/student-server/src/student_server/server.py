@@ -60,14 +60,14 @@ def _tool_functions(run: Callable[[str, dict], str]) -> dict[str, Callable[..., 
     def get_my_semester_summary() -> str:
         return run("get_my_semester_summary", {})
 
-    def get_my_warnings() -> str:
-        return run("get_my_warnings", {})
+    def get_my_academic_decisions() -> str:
+        return run("get_my_academic_decisions", {})
 
     def get_advisee_summary(student_id: str) -> str:
         return run("get_advisee_summary", {"student_id": student_id})
 
-    fns = [get_my_profile, get_my_academic_summary, get_my_transcript, get_my_semester_summary, get_my_warnings,
-           get_advisee_summary]  # fmt: skip
+    fns = [get_my_profile, get_my_academic_summary, get_my_transcript, get_my_semester_summary,
+           get_my_academic_decisions, get_advisee_summary]  # fmt: skip
     return {f.__name__: f for f in fns}
 
 

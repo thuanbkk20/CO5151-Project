@@ -100,15 +100,21 @@ class SemesterSummary(_Strict):
     semesters: list[SemesterRecord] = Field(description="Mới nhất trước.")
 
 
-class WarningRecord(_Strict):
+class AcademicDecision(_Strict):
     semester: SemesterCode
-    reason: str
-    consecutive: int
-    decision: str
+    semester_label: str = Field(description="Tên học kỳ, ví dụ 'Học kỳ 1 (2026 - 2027)'.")
+    decision_no: str = Field(description="Số quyết định, ví dụ '5487/QĐ-ĐHBK'.")
+    decision_date: str = Field(description="Ngày ký quyết định (dd/mm/yyyy).")
+    type: str = Field(description="Loại quyết định, ví dụ 'Cảnh báo học tập', 'Tạm dừng học', 'Quyết định khác'.")
+    content: str = Field(description="Nội dung quyết định, ví dụ 'Giao đề tài Đồ án/Đề án tốt nghiệp'.")
+    reason: str | None = Field(description="Lý do ra quyết định.")
+    student_status: str = Field(description="Tình trạng học tập của sinh viên theo quyết định, ví dụ 'Đang theo học'.")
+    is_warning: bool = Field(description="Quyết định là cảnh báo học tập.")
+    updated: str = Field(description="Ngày cập nhật cuối (dd/mm/yyyy).")
 
 
-class WarningHistory(_Strict):
+class AcademicDecisions(_Strict):
     student_id: StudentId
-    currently_warned: bool
-    consecutive_warnings: int
-    history: list[WarningRecord]
+    currently_warned: bool = Field(description="Đang bị cảnh báo học tập ở học kỳ chính gần nhất.")
+    consecutive_warnings: int = Field(description="Số học kỳ chính liên tiếp bị cảnh báo, tính đến học kỳ gần nhất.")
+    decisions: list[AcademicDecision] = Field(description="Mọi quyết định học vụ của sinh viên, mới nhất trước.")

@@ -1,38 +1,173 @@
 {
-  "2310001": [],
-  "2310002": [],
-  "2310003": [
-    {
-      "sinhVienId": 228103,
-      "namHocHocKyId": 746,
-      "maHocKy": "20252",
-      "namHocHocKyTen": "Năm học 2025 - 2026 / Học kỳ 2",
-      "hinhThucXuLy": "Cảnh báo học tập",
-      "lanLienTiep": 1,
-      "lyDo": "Điểm trung bình học kỳ 0.29 (thang 4), dưới 1.0",
-      "soQuyetDinh": "1312/QĐ-ĐHBK-ĐT",
-      "ngayQuyetDinh": "15/08/2026",
-      "code": "0",
-      "msg": "done"
-    }
-  ],
-  "2210004": [],
-  "2210005": [],
-  "2410006": [],
-  "2310007": [],
-  "2510008": [
-    {
-      "sinhVienId": 248108,
-      "namHocHocKyId": 743,
-      "maHocKy": "20251",
-      "namHocHocKyTen": "Năm học 2025 - 2026 / Học kỳ 1",
-      "hinhThucXuLy": "Cảnh báo học tập",
-      "lanLienTiep": 1,
-      "lyDo": "Điểm trung bình học kỳ 0.21 (thang 4), dưới 0.8",
-      "soQuyetDinh": "1311/QĐ-ĐHBK-ĐT",
-      "ngayQuyetDinh": "20/02/2026",
-      "code": "0",
-      "msg": "done"
-    }
-  ]
+  "2310001": {
+    "code": "200",
+    "msg": "OK",
+    "data": [
+      {
+        "decisionCode": "6423/QĐ-ĐHBK",
+        "decisionDate": "24/09/2026",
+        "yearSemesterName": "Học kỳ 1 (2026 - 2027)",
+        "id": 1,
+        "type": "Quyết định khác",
+        "decisionContent": "Giao đề tài Đồ án/Đề án tốt nghiệp",
+        "decisionReason": "Giao đề tài LVThS/ĐATN",
+        "status": "Đang theo học",
+        "yearSemesterCode": "20261",
+        "studentCode": "2310001",
+        "lastUpdatedAt": "25/09/2026"
+      },
+      {
+        "decisionCode": "6419/QĐ-ĐHBK",
+        "decisionDate": "08/10/2024",
+        "yearSemesterName": "Học kỳ 1 (2024 - 2025)",
+        "id": 2,
+        "type": "Quyết định khác",
+        "decisionContent": "miễn học, ghi điểm học phần và điều kiện ngoại ngữ",
+        "decisionReason": "Miễn môn học",
+        "status": "Đang theo học",
+        "yearSemesterCode": "20241",
+        "studentCode": "2310001",
+        "lastUpdatedAt": "09/10/2024"
+      }
+    ],
+    "sign": null
+  },
+  "2310002": {
+    "code": "200",
+    "msg": "OK",
+    "data": [],
+    "sign": null
+  },
+  "2310003": {
+    "code": "200",
+    "msg": "OK",
+    "data": [
+      {
+        "decisionCode": "6398/QĐ-ĐHBK",
+        "decisionDate": "15/08/2026",
+        "yearSemesterName": "Học kỳ 2 (2025 - 2026)",
+        "id": 3,
+        "type": "Cảnh báo học tập",
+        "decisionContent": "Cảnh báo học tập",
+        "decisionReason": "Điểm trung bình học kỳ 0.65 (thang 4), dưới 1.0",
+        "status": "Đang theo học",
+        "yearSemesterCode": "20252",
+        "studentCode": "2310003",
+        "lastUpdatedAt": "16/08/2026"
+      }
+    ],
+    "sign": null
+  },
+  "2210004": {
+    "code": "200",
+    "msg": "OK",
+    "data": [
+      {
+        "decisionCode": "5425/QĐ-ĐHBK",
+        "decisionDate": "24/09/2026",
+        "yearSemesterName": "Học kỳ 1 (2026 - 2027)",
+        "id": 4,
+        "type": "Quyết định khác",
+        "decisionContent": "Giao đề tài Đồ án/Đề án tốt nghiệp",
+        "decisionReason": "Giao đề tài LVThS/ĐATN",
+        "status": "Đang theo học",
+        "yearSemesterCode": "20261",
+        "studentCode": "2210004",
+        "lastUpdatedAt": "25/09/2026"
+      },
+      {
+        "decisionCode": "5383/QĐ-ĐHBK",
+        "decisionDate": "26/08/2024",
+        "yearSemesterName": "Học kỳ 1 (2024 - 2025)",
+        "id": 5,
+        "type": "Tiếp tục học",
+        "decisionContent": "Tiếp tục học",
+        "decisionReason": "Hết thời gian tạm dừng",
+        "status": "Đang theo học",
+        "yearSemesterCode": "20241",
+        "studentCode": "2210004",
+        "lastUpdatedAt": "27/08/2024"
+      },
+      {
+        "decisionCode": "5382/QĐ-ĐHBK",
+        "decisionDate": "05/09/2023",
+        "yearSemesterName": "Học kỳ 1 (2023 - 2024)",
+        "id": 6,
+        "type": "Tạm dừng học",
+        "decisionContent": "Tạm dừng học 2 học kỳ",
+        "decisionReason": "Nguyện vọng cá nhân",
+        "status": "Tạm dừng học",
+        "yearSemesterCode": "20231",
+        "studentCode": "2210004",
+        "lastUpdatedAt": "06/09/2023"
+      }
+    ],
+    "sign": null
+  },
+  "2210005": {
+    "code": "200",
+    "msg": "OK",
+    "data": [
+      {
+        "decisionCode": "5413/QĐ-ĐHBK",
+        "decisionDate": "10/03/2024",
+        "yearSemesterName": "Học kỳ 2 (2023 - 2024)",
+        "id": 7,
+        "type": "Quyết định khác",
+        "decisionContent": "miễn học, ghi điểm học phần và điều kiện ngoại ngữ",
+        "decisionReason": "Miễn môn học",
+        "status": "Đang theo học",
+        "yearSemesterCode": "20232",
+        "studentCode": "2210005",
+        "lastUpdatedAt": "11/03/2024"
+      }
+    ],
+    "sign": null
+  },
+  "2410006": {
+    "code": "200",
+    "msg": "OK",
+    "data": [],
+    "sign": null
+  },
+  "2310007": {
+    "code": "200",
+    "msg": "OK",
+    "data": [
+      {
+        "decisionCode": "6416/QĐ-ĐHBK",
+        "decisionDate": "10/03/2024",
+        "yearSemesterName": "Học kỳ 2 (2023 - 2024)",
+        "id": 8,
+        "type": "Quyết định khác",
+        "decisionContent": "miễn học, ghi điểm học phần và điều kiện ngoại ngữ",
+        "decisionReason": "Miễn môn học",
+        "status": "Đang theo học",
+        "yearSemesterCode": "20232",
+        "studentCode": "2310007",
+        "lastUpdatedAt": "11/03/2024"
+      }
+    ],
+    "sign": null
+  },
+  "2510008": {
+    "code": "200",
+    "msg": "OK",
+    "data": [
+      {
+        "decisionCode": "8404/QĐ-ĐHBK",
+        "decisionDate": "20/02/2026",
+        "yearSemesterName": "Học kỳ 1 (2025 - 2026)",
+        "id": 9,
+        "type": "Cảnh báo học tập",
+        "decisionContent": "Cảnh báo học tập",
+        "decisionReason": "Điểm trung bình học kỳ 0.00 (thang 4), dưới 0.8",
+        "status": "Đang theo học",
+        "yearSemesterCode": "20251",
+        "studentCode": "2510008",
+        "lastUpdatedAt": "21/02/2026"
+      }
+    ],
+    "sign": null
+  }
 }

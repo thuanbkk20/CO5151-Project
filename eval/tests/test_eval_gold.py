@@ -47,4 +47,4 @@ def test_check_gold_reports_drift(oracle):
     t = Task(id="X01", group="personal", question="?", user="sv001", expected="answer",
              facts=[Fact(field="credits_earned", value=999, mention=["999"])])  # fmt: skip
     [msg] = check_gold([t], oracle)
-    assert "X01" in msg and "113" in msg
+    assert "X01" in msg and "102" in msg

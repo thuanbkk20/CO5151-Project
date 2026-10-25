@@ -1,0 +1,114 @@
+{
+  "$defs": {
+    "AcademicDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "semester": {
+          "pattern": "^([0-9]{4}[123]|BL)$",
+          "title": "Semester",
+          "type": "string"
+        },
+        "semester_label": {
+          "description": "Tên học kỳ, ví dụ 'Học kỳ 1 (2026 - 2027)'.",
+          "title": "Semester Label",
+          "type": "string"
+        },
+        "decision_no": {
+          "description": "Số quyết định, ví dụ '5487/QĐ-ĐHBK'.",
+          "title": "Decision No",
+          "type": "string"
+        },
+        "decision_date": {
+          "description": "Ngày ký quyết định (dd/mm/yyyy).",
+          "title": "Decision Date",
+          "type": "string"
+        },
+        "type": {
+          "description": "Loại quyết định, ví dụ 'Cảnh báo học tập', 'Tạm dừng học', 'Quyết định khác'.",
+          "title": "Type",
+          "type": "string"
+        },
+        "content": {
+          "description": "Nội dung quyết định, ví dụ 'Giao đề tài Đồ án/Đề án tốt nghiệp'.",
+          "title": "Content",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Lý do ra quyết định.",
+          "title": "Reason"
+        },
+        "student_status": {
+          "description": "Tình trạng học tập của sinh viên theo quyết định, ví dụ 'Đang theo học'.",
+          "title": "Student Status",
+          "type": "string"
+        },
+        "is_warning": {
+          "description": "Quyết định là cảnh báo học tập.",
+          "title": "Is Warning",
+          "type": "boolean"
+        },
+        "updated": {
+          "description": "Ngày cập nhật cuối (dd/mm/yyyy).",
+          "title": "Updated",
+          "type": "string"
+        }
+      },
+      "required": [
+        "semester",
+        "semester_label",
+        "decision_no",
+        "decision_date",
+        "type",
+        "content",
+        "reason",
+        "student_status",
+        "is_warning",
+        "updated"
+      ],
+      "title": "AcademicDecision",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "student_id": {
+      "pattern": "^[0-9]{7}$",
+      "title": "Student Id",
+      "type": "string"
+    },
+    "currently_warned": {
+      "description": "Đang bị cảnh báo học tập ở học kỳ chính gần nhất.",
+      "title": "Currently Warned",
+      "type": "boolean"
+    },
+    "consecutive_warnings": {
+      "description": "Số học kỳ chính liên tiếp bị cảnh báo, tính đến học kỳ gần nhất.",
+      "title": "Consecutive Warnings",
+      "type": "integer"
+    },
+    "decisions": {
+      "description": "Mọi quyết định học vụ của sinh viên, mới nhất trước.",
+      "items": {
+        "$ref": "#/$defs/AcademicDecision"
+      },
+      "title": "Decisions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "student_id",
+    "currently_warned",
+    "consecutive_warnings",
+    "decisions"
+  ],
+  "title": "AcademicDecisions",
+  "type": "object"
+}

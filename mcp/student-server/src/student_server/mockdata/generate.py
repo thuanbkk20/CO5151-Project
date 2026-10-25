@@ -7,11 +7,11 @@ Outputs (in this folder):
   profiles.json        {mssv: <profile object>}                 — schema "profile sinh viên"
   diem_mon_hoc.json    {mssv: {"data": [<course row>, ...]}}     — schema "bảng điểm môn học"
   diem_hoc_ky.json     {mssv: [<semester row>, ...]}             — schema "bảng điểm học kỳ" (mới nhất trước)
-  xu_ly_hoc_vu.json    {mssv: [<warning row>, ...]}              — schema GIẢ ĐỊNH (chưa có mẫu thật)
+  xu_ly_hoc_vu.json    {mssv: {"data": [<decision row>, ...]}}  — schema "quyết định học vụ" (mới nhất trước)
   accounts.json        demo logins (username / PBKDF2 password hash → mssv / advisees)
   reference.json       CTĐT mô phỏng, bảng mã điểm đặc biệt, quy đổi chứng chỉ ngoại ngữ
 
-Everything is internally consistent: semester rows and warnings are COMPUTED from course rows,
+Everything is internally consistent: semester rows and warning decisions are COMPUTED from course rows,
 so tổng tín chỉ / điểm TB / cảnh báo always agree with the transcript.
 """
 
@@ -28,65 +28,173 @@ HERE = Path(__file__).resolve().parent
 SEED = 2026
 TODAY_SEM = "20261"  # học kỳ đang diễn ra (chưa có điểm)
 
-# ---------------------------------------------------------------- CTĐT mô phỏng (128 TC, không tính GDTC/GDQP)
+# ---------------------------------------------------------------- CTĐT ngành KHMT (128 TC, không tính GDTC/GDQP)
+# Nguồn: CTĐT cử nhân KHMT khóa 2019 (08/08/2020) và CTĐT ngành KHMT 2026 (DH_CQ_MT_NG_7480101_2026), chuyên ngành
+# Khoa học Máy tính. Tên môn, số TC, khối kiến thức lấy từ CTĐT; môn tự chọn là một lựa chọn hợp lệ cụ thể.
+# Học kỳ khuyến nghị theo Kế hoạch giảng dạy CTĐT 2026; CTĐT 2019 không kèm kế hoạch nên xếp theo cùng khung đó.
+# Loại: math_science, general, management, english, foundation, major, major_elective, speciality_elective,
+#       free_elective, internship, capstone (Đồ án chuyên ngành), thesis (Đồ án tốt nghiệp), gdtc, gdqp.
 # (học kỳ khuyến nghị, mã, tên, số TC, loại)
-CTDT_2023 = [
-    (1, "MT1003", "Giải tích 1", 4, "core"),
-    (1, "PH1003", "Vật lý 1", 4, "core"),
-    (1, "CO1005", "Nhập môn điện toán", 3, "core"),
-    (1, "CO1023", "Hệ thống số", 3, "core"),
-    (1, "LA1003", "Anh văn 1", 2, "av"),
-    (1, "SP1031", "Triết học Mác - Lênin", 3, "core"),
+CTDT_2019 = [
+    (1, "MT1003", "Giải tích 1", 4, "math_science"),
+    (1, "PH1003", "Vật lý 1", 4, "math_science"),
+    (1, "CO1005", "Nhập môn điện toán", 3, "general"),
+    (1, "CO1023", "Hệ thống số", 3, "foundation"),
+    (1, "LA1003", "Anh văn 1", 2, "english"),
     (1, "PE1003", "Giáo dục thể chất 1", 0, "gdtc"),
-    (1, "MI1003", "Giáo dục quốc phòng - an ninh", 0, "gdqp"),
-    (2, "MT1005", "Giải tích 2", 4, "core"),
-    (2, "MT1007", "Đại số tuyến tính", 3, "core"),
-    (2, "CO1007", "Cấu trúc rời rạc cho khoa học máy tính", 4, "core"),
-    (2, "CO1027", "Kỹ thuật lập trình", 3, "core"),
-    (2, "LA1005", "Anh văn 2", 2, "av"),
-    (2, "SP1033", "Kinh tế chính trị Mác - Lênin", 2, "core"),
+    (2, "MT1005", "Giải tích 2", 4, "math_science"),
+    (2, "MT1007", "Đại số tuyến tính", 3, "math_science"),
+    (2, "CO1007", "Cấu trúc rời rạc cho khoa học máy tính", 4, "math_science"),
+    (2, "CO1027", "Kỹ thuật lập trình", 3, "foundation"),
+    (2, "PH1007", "Thí nghiệm vật lý", 1, "math_science"),
+    (2, "LA1005", "Anh văn 2", 2, "english"),
+    (2, "MI1003", "Giáo dục quốc phòng", 0, "gdqp"),
     (2, "PE1005", "Giáo dục thể chất 2", 0, "gdtc"),
-    (3, "CO2003", "Cấu trúc dữ liệu và giải thuật", 4, "core"),
-    (3, "CO2007", "Kiến trúc máy tính", 4, "core"),
-    (3, "MT2013", "Xác suất và thống kê", 4, "core"),
-    (3, "CO2011", "Mô hình hóa toán học", 3, "core"),
-    (3, "LA1007", "Anh văn 3", 2, "av"),
-    (3, "SP1035", "Chủ nghĩa xã hội khoa học", 2, "core"),
+    (3, "CO2003", "Cấu trúc dữ liệu và giải thuật", 4, "foundation"),
+    (3, "CO2007", "Kiến trúc máy tính", 4, "foundation"),
+    (3, "CO2011", "Mô hình hóa toán học", 3, "math_science"),
+    (3, "SP1031", "Triết học Mác - Lênin", 3, "general"),
+    (3, "LA1007", "Anh văn 3", 2, "english"),
     (3, "PE1007", "Giáo dục thể chất 3", 0, "gdtc"),
-    (4, "CO2013", "Hệ cơ sở dữ liệu", 4, "core"),
-    (4, "CO2017", "Hệ điều hành", 3, "core"),
-    (4, "CO2039", "Lập trình nâng cao", 3, "core"),
-    (4, "CO2001", "Kỹ năng chuyên nghiệp cho kỹ sư", 3, "core"),
-    (4, "LA1009", "Anh văn 4", 2, "av"),
-    (4, "SP1037", "Tư tưởng Hồ Chí Minh", 2, "core"),
-    (5, "CO3001", "Công nghệ phần mềm", 3, "core"),
-    (5, "CO3005", "Nguyên lý ngôn ngữ lập trình", 4, "core"),
-    (5, "CO3093", "Mạng máy tính", 3, "core"),
-    (5, "CO3011", "Quản lý dự án phần mềm", 3, "core"),
-    (5, "CO3015", "Kiểm thử phần mềm", 3, "core"),
-    (5, "SP1039", "Lịch sử Đảng Cộng sản Việt Nam", 2, "core"),
-    (6, "CO3013", "Xây dựng chương trình dịch", 4, "core"),
-    (6, "CO3061", "Nhập môn trí tuệ nhân tạo", 3, "core"),
-    (6, "CO3101", "Đồ án chuyên ngành", 2, "capstone"),
-    (6, "CO3021", "Hệ quản trị cơ sở dữ liệu", 3, "core"),
-    (6, "CO3029", "Khai phá dữ liệu", 3, "core"),
-    (6, "SP1007", "Pháp luật Việt Nam đại cương", 2, "core"),
-    (7, "CO3335", "Thực tập ngoài trường", 2, "intern"),
-    (7, "CO3065", "Công nghệ phần mềm nâng cao", 3, "core"),
-    (7, "CO3117", "Học máy", 3, "core"),
-    (7, "CO4031", "Kho dữ liệu và hệ hỗ trợ quyết định", 3, "core"),
-    (8, "CO4337", "Luận văn tốt nghiệp", 9, "thesis"),
+    (4, "CO2017", "Hệ điều hành", 3, "major"),
+    (4, "CO2039", "Lập trình nâng cao", 3, "foundation"),
+    (4, "MT2013", "Xác suất và thống kê", 4, "math_science"),
+    (4, "SP1033", "Kinh tế chính trị Mác - Lênin", 2, "general"),
+    (4, "LA1009", "Anh văn 4", 2, "english"),
+    (4, "CO3061", "Nhập môn trí tuệ nhân tạo", 3, "speciality_elective"),
+    (5, "CO2013", "Hệ cơ sở dữ liệu", 4, "foundation"),
+    (5, "CO3093", "Mạng máy tính", 3, "major"),
+    (5, "CO3001", "Công nghệ phần mềm", 3, "major"),
+    (5, "CH1003", "Hóa đại cương", 3, "math_science"),
+    (5, "SP1035", "Chủ nghĩa xã hội khoa học", 2, "general"),
+    (5, "CO3101", "Đồ án tổng hợp - hướng trí tuệ nhân tạo", 1, "major_elective"),
+    (6, "CO3005", "Nguyên lý ngôn ngữ lập trình", 4, "major"),
+    (6, "CO2001", "Kỹ năng chuyên nghiệp cho kỹ sư", 3, "general"),
+    (6, "SP1037", "Tư tưởng Hồ Chí Minh", 2, "general"),
+    (6, "SP1039", "Lịch sử Đảng Cộng sản Việt Nam", 2, "general"),
+    (6, "IM1013", "Kinh tế học đại cương", 3, "management"),
+    (6, "CO3107", "Thực tập đồ án môn học đa ngành - hướng trí tuệ nhân tạo", 1, "major_elective"),
+    (6, "CO3029", "Khai phá dữ liệu", 3, "speciality_elective"),
+    (7, "CO3335", "Thực tập ngoài trường", 2, "internship"),
+    (7, "CO4029", "Đồ án chuyên ngành", 2, "capstone"),
+    (7, "SP1007", "Pháp luật Việt Nam đại cương", 2, "general"),
+    (7, "CO3117", "Học máy", 3, "speciality_elective"),
+    (7, "CO3021", "Hệ quản trị cơ sở dữ liệu", 3, "speciality_elective"),
+    (7, "CO3049", "Lập trình web", 3, "free_elective"),
+    (8, "CO4337", "Đồ án tốt nghiệp (Khoa học Máy tính)", 4, "thesis"),
+    (8, "CO4031", "Kho dữ liệu và hệ hỗ trợ quyết định", 3, "speciality_elective"),
+    (8, "CO3015", "Kiểm tra phần mềm", 3, "free_elective"),
+    (8, "CO3011", "Quản lý dự án phần mềm", 3, "free_elective"),
 ]
-CTDT_2019 = CTDT_2023 + [(7, "CO3103", "Đồ án tổng hợp", 2, "core")]  # 130 TC
-COURSE = {c[1]: c for c in CTDT_2019}
+CTDT_2026 = [
+    (1, "LA1003", "Anh văn 1", 2, "english"),
+    (1, "MT1003", "Giải tích 1", 4, "math_science"),
+    (1, "PH1003", "Vật lý 1", 4, "math_science"),
+    (1, "CO1005", "Nhập môn điện toán", 3, "general"),
+    (1, "CO1023", "Hệ thống số", 3, "foundation"),
+    (1, "PE1001", "Giáo dục thể chất (học phần 1)", 0, "gdtc"),
+    (2, "LA1005", "Anh văn 2", 2, "english"),
+    (2, "MT1005", "Giải tích 2", 4, "math_science"),
+    (2, "MT1007", "Đại số tuyến tính", 3, "math_science"),
+    (2, "CO1007", "Cấu trúc rời rạc cho khoa học máy tính", 4, "math_science"),
+    (2, "CO1027", "Kỹ thuật lập trình", 3, "foundation"),
+    (2, "PH1007", "Thí nghiệm vật lý", 1, "math_science"),
+    (2, "MI1003", "Giáo dục quốc phòng", 0, "gdqp"),
+    (2, "PE1002", "Giáo dục thể chất (học phần 2)", 0, "gdtc"),
+    (3, "LA1007", "Anh văn 3", 2, "english"),
+    (3, "SP1031", "Triết học Mác - Lênin", 3, "general"),
+    (3, "CO2007", "Kiến trúc máy tính", 4, "foundation"),
+    (3, "CO2011", "Mô hình hóa toán học", 3, "math_science"),
+    (3, "CO2003", "Cấu trúc dữ liệu và giải thuật", 4, "foundation"),
+    (4, "LA1009", "Anh văn 4", 2, "english"),
+    (4, "SP1033", "Kinh tế chính trị Mác - Lênin", 2, "general"),
+    (4, "CO2017", "Hệ điều hành", 3, "major"),
+    (4, "CO2039", "Lập trình nâng cao", 3, "foundation"),
+    (4, "MT2013", "Xác suất và thống kê", 4, "math_science"),
+    (4, "CO3061", "Nhập môn trí tuệ nhân tạo", 3, "speciality_elective"),
+    (5, "SP1035", "Chủ nghĩa xã hội khoa học", 2, "general"),
+    (5, "CO3093", "Mạng máy tính", 3, "major"),
+    (5, "CO2013", "Hệ cơ sở dữ liệu", 4, "foundation"),
+    (5, "CO3001", "Công nghệ phần mềm", 3, "major"),
+    (5, "CH1003", "Hóa đại cương", 3, "math_science"),
+    (5, "CO3101", "Đồ án tổng hợp - hướng trí tuệ nhân tạo", 1, "major_elective"),
+    (6, "SP1039", "Lịch sử Đảng Cộng sản Việt Nam", 2, "general"),
+    (6, "CO2001", "Kỹ năng chuyên nghiệp cho kỹ sư", 3, "general"),
+    (6, "CO3019", "Nguyên lý ngôn ngữ lập trình", 3, "major"),
+    (6, "SP1037", "Tư tưởng Hồ Chí Minh", 2, "general"),
+    (6, "IM1013", "Kinh tế học đại cương", 3, "management"),
+    (6, "CO3107", "Thực tập đồ án môn học đa ngành - hướng trí tuệ nhân tạo", 1, "major_elective"),
+    (6, "CO3029", "Khai phá dữ liệu", 3, "speciality_elective"),
+    (7, "CO4029", "Đồ án chuyên ngành", 2, "capstone"),
+    (7, "CO4359", "Học kỳ thực tập doanh nghiệp", 11, "internship"),
+    (8, "SP1073", "Pháp luật đại cương", 3, "general"),
+    (8, "CO4337", "Đồ án tốt nghiệp (Khoa học Máy tính)", 4, "thesis"),
+    (8, "CO3117", "Học máy", 3, "speciality_elective"),
+    (8, "CO3021", "Hệ quản trị cơ sở dữ liệu", 3, "speciality_elective"),
+    (8, "CO4031", "Kho dữ liệu và hệ hỗ trợ quyết định", 3, "speciality_elective"),
+]
+COURSE = {c[1]: c for c in CTDT_2019 + CTDT_2026}
+
 
 # ---------------------------------------------------------------- bảng mã đặc biệt & quy đổi
-# diemSo > 10 là MÃ, không phải điểm. Chỉ MT=12 được xác nhận từ mẫu thật; còn lại GIẢ ĐỊNH, cần đối chiếu API.
+# diemSo > 10 là MÃ, không phải điểm
+# CT = Cấm thi, VT = Vắng thi, CH = Chưa có điểm, RT = Rút môn học, KD = Không đạt,
+# VP = Vắng thi có phép, DT = Điểm đạt, HT = Hoãn thi, MT = Miễn thi.
 SPECIAL = {
-    "11": {"diemChu": "CT", "nghia": "Cấm thi", "dat": False, "tinhTB": False},
-    "12": {"diemChu": "MT", "nghia": "Miễn (miễn thi / miễn học, công nhận)", "dat": True, "tinhTB": False},
-    "13": {"diemChu": "VT", "nghia": "Vắng thi", "dat": False, "tinhTB": False},
-    "14": {"diemChu": "HT", "nghia": "Hoãn thi (chưa có điểm)", "dat": False, "tinhTB": False},
+    "11": {
+        "diemChu": "CT",
+        "nghia": "Cấm thi",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "12": {
+        "diemChu": "MT",
+        "nghia": "Miễn thi",
+        "dat": True,
+        "tinhTB": False,
+    },
+    "13": {
+        "diemChu": "VT",
+        "nghia": "Vắng thi",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "14": {
+        "diemChu": "HT",
+        "nghia": "Hoãn thi",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "15": {
+        "diemChu": "CH",
+        "nghia": "Chưa có điểm",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "16": {
+        "diemChu": "RT",
+        "nghia": "Rút môn học",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "17": {
+        "diemChu": "KD",
+        "nghia": "Không đạt",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "18": {
+        "diemChu": "VP",
+        "nghia": "Vắng thi có phép",
+        "dat": False,
+        "tinhTB": False,
+    },
+    "21": {
+        "diemChu": "DT",
+        "nghia": "Điểm đạt",
+        "dat": True,
+        "tinhTB": False,
+    },
 }
 LETTERS = [
     (9.5, "A+", 4.0),
@@ -99,10 +207,17 @@ LETTERS = [
     (4.0, "D", 1.0),
     (0.0, "F", 0.0),
 ]  # khớp QC2023-D12.2 (bản mô phỏng)
-CERT_TO_TOEIC = {  # quy đổi tương đương — MÔ PHỎNG, thay bằng quy định chuẩn ngoại ngữ thật
-    "TOEIC": [[450, 450], [500, 500], [600, 600], [650, 650], [785, 785]],
-    "IELTS": [[4.5, 450], [5.0, 500], [5.5, 600], [6.0, 650], [6.5, 785]],
-    "VSTEP": [[4.0, 450], [5.0, 500], [6.0, 600], [7.0, 650], [8.5, 785]],
+# Quy đổi chứng chỉ tiếng Anh quốc tế → mức TOEIC Listening & Reading tương đương (quy định chuẩn ngoại ngữ, mục 3).
+# Thang điểm số: [[điểm tối thiểu, mức TOEIC], ...]; chứng chỉ xếp loại: {xếp loại: mức TOEIC}.
+# Ô trống trong bảng gốc (ví dụ IELTS ở mức 500, 700) không có dòng tương ứng. Chứng chỉ có hiệu lực 02 năm từ ngày cấp.
+CERT_TO_TOEIC = {
+    "TOEIC": [[400, 400], [450, 450], [500, 500], [550, 550], [600, 600], [650, 650], [700, 700], [750, 750]],
+    "TOEFL ITP": [[433, 400], [463, 450], [480, 500], [497, 550], [510, 600], [527, 650], [550, 700], [570, 750]],
+    "TOEFL IBT": [[40, 400], [49, 450], [54, 500], [59, 550], [64, 600], [70, 650], [79, 700], [85, 750]],
+    "IELTS": [[3.5, 400], [4.0, 450], [4.5, 550], [5.0, 600], [5.5, 650], [6.0, 750]],
+    "PET": {"PASS": 450, "MERIT": 500, "DISTINCTION": 650},
+    "FCE": {"GRADE C": 700, "GRADE B": 750, "GRADE A": 750},
+    "CAE": {"LEVEL B2": 700, "GRADE C": 750, "GRADE B": 750, "GRADE A": 750},
 }
 
 SEM_ID = {}  # maHocKy -> namHocHocKyId
@@ -125,6 +240,11 @@ def sem_name(code):
     return f"Năm học {y} - {y + 1} / Học kỳ {SEM_LABEL[k]}"
 
 
+def decision_sem_name(code):
+    y, k = int(code[:4]), code[4]
+    return f"Học kỳ {k} ({y} - {y + 1})"
+
+
 def letter(score):
     for lo, ch, _ in LETTERS:
         if score >= lo:
@@ -141,6 +261,11 @@ def P(**k):
     return k
 
 
+# (học kỳ, loại, nội dung, lý do, tình trạng, ngày quyết định)
+THESIS = ("20261", "Quyết định khác", "Giao đề tài Đồ án/Đề án tốt nghiệp", "Giao đề tài LVThS/ĐATN", "Đang theo học",
+          "24/09/2026")  # fmt: skip
+
+
 PERSONAS = [
     P(
         user="sv001",
@@ -151,8 +276,9 @@ PERSONAS = [
         mu=6.9,
         sd=0.9,
         sems=["20231", "20232", "20241", "20242", "20251", "20252"],
-        summer={"20243": ["CO3335"], "20253": ["CO3117"]},
+        summer={"20243": ["CH1003"], "20253": ["CO3117"]},
         cert=("TOEIC 500", "20241"),
+        decisions=[THESIS],
         note="K2023, đủ điều kiện LVTN, không cảnh báo",
     ),
     P(
@@ -164,9 +290,9 @@ PERSONAS = [
         mu=6.6,
         sd=1.0,
         sems=["20231", "20232", "20241", "20242", "20251", "20252"],
-        force={"CO2007": [3.2], "CO3101": [3.5], "CO3005": [3.6], "CO3029": [2.8]},
+        force={"CO2007": [3.2], "CO3101": [3.5], "CO3019": [3.6], "CO3029": [2.8]},
         retake={"CO2007": ("20242", 5.8)},
-        note="K2023, thiếu TC, rớt Đồ án chuyên ngành, chưa có chứng chỉ NN",
+        note="K2023, thiếu TC, rớt Đồ án tổng hợp, chưa có chứng chỉ NN",
     ),
     P(
         user="sv003",
@@ -180,14 +306,14 @@ PERSONAS = [
         force={
             "CO2003": [3.5],
             "MT2013": [3.0],
-            "CO2017": [3.8],
-            "CO3005": [3.4],
-            "CO3013": [2.1],
-            "CO3061": [3.2],
-            "CO3101": [2.5],
-            "CO3021": [4.2],
+            "CO2017": [5.6],
+            "CO2013": [3.4],
+            "CO3019": [2.1],
+            "IM1013": [3.2],
+            "CO3107": [2.5],
+            "CO2001": [4.2],
             "CO3029": [2.0],
-            "SP1007": [4.6],
+            "SP1037": [4.6],
         },
         retake={"CO2003": ("20242", 4.8), "MT2013": ("20251", 5.0)},
         note="K2023, bị cảnh báo HK 20252 (lần 1)",
@@ -201,6 +327,11 @@ PERSONAS = [
         mu=8.3,
         sd=0.7,
         sems=["20221", "20222", "20241", "20242", "20251", "20252"],
+        decisions=[
+            ("20231", "Tạm dừng học", "Tạm dừng học 2 học kỳ", "Nguyện vọng cá nhân", "Tạm dừng học", "05/09/2023"),
+            ("20241", "Tiếp tục học", "Tiếp tục học", "Hết thời gian tạm dừng", "Đang theo học", "26/08/2024"),
+            THESIS,
+        ],
         note="K2022 (QC2019), tạm dừng 20231–20232, đủ ĐK LVTN theo QC2019",
     ),
     P(
@@ -212,7 +343,7 @@ PERSONAS = [
         mu=8.8,
         sd=0.6,
         sems=["20221", "20222", "20231", "20232", "20241", "20242", "20251", "20252"],
-        skip=["CO3335", "CO3103"],
+        skip=["CO3335", "SP1007"],
         force={"PE1007": ["HT"]},
         cert=("TOEIC 650", "20232"),
         note="K2022, thiếu 4 TC và GDTC 3 để tốt nghiệp",
@@ -237,7 +368,7 @@ PERSONAS = [
         mu=8.9,
         sd=0.5,
         sems=["20231", "20232", "20241", "20242", "20251", "20252"],
-        summer={"20243": ["CO3335"], "20253": ["CO3117"]},
+        summer={"20243": ["CH1003"], "20253": ["CO3117"]},
         cert=("IELTS 6.5", "20232"),
         note="K2023 GPA ≥ 3.2 → được đăng ký 28 TC",
     ),
@@ -250,7 +381,7 @@ PERSONAS = [
         mu=6.4,
         sd=0.9,
         sems=["20251", "20252"],
-        force={"MT1003": [2.0], "PH1003": [1.5], "CO1005": [3.0], "CO1023": [3.5], "SP1031": [3.2]},
+        force={"MT1003": [2.0], "PH1003": [1.5], "CO1005": [3.0], "CO1023": [3.5], "LA1003": [3.2]},
         note="K2025, bị cảnh báo HK đầu 20251, HK 20252 đã cải thiện",
     ),
 ]
@@ -267,12 +398,13 @@ ADVISORS = [
 
 # ---------------------------------------------------------------- generation
 def gen_student(p, rng):
-    ctdt = CTDT_2019 if p["cohort"] <= 2022 else CTDT_2023
+    ctdt = CTDT_2019 if p["cohort"] <= 2022 else CTDT_2026
+    course = {c[1]: c for c in ctdt}
     force, retake, skip = p.get("force", {}), p.get("retake", {}), set(p.get("skip", []))
     rows = []
 
     def add(sem, code, value, ghiChu=None, sem_label=None):
-        _, _, name, tc, kind = COURSE[code] if code in COURSE else (0, code, "Chuẩn ngoại ngữ đầu ra", 0, "cert")
+        _, _, name, tc, kind = course[code] if code in course else (0, code, "Chuẩn ngoại ngữ đầu ra", 0, "cert")
         if isinstance(value, str):  # special code
             num = [k for k, v in SPECIAL.items() if v["diemChu"] == value][0]
             dchu, dso, dat = value, int(num), SPECIAL[num]["dat"]
@@ -377,11 +509,11 @@ def semester_rows(p, rows):
     return sorted(out, key=lambda r: r["maNamHocHocKy"], reverse=True)
 
 
-def warnings(p, rows):
-    """Áp dụng Điều 14 Khoản 1 (bản mô phỏng) cho từng học kỳ CHÍNH."""
+def warning_semesters(p, rows):
+    """Áp dụng Điều 14 Khoản 1 (bản mô phỏng) cho từng học kỳ CHÍNH → [(maHocKy, lý do)]."""
     qc2023 = p["cohort"] >= 2023
     policy = "max" if qc2023 else "last"
-    out, lan = [], 0
+    out = []
     mains = [s for s in sorted({r["maHocKy"] for r in rows if r["maHocKy"] != "BL"}) if s[4] in "12"]
     for idx, s in enumerate(mains):
         sem_rows = [r for r in rows if r["maHocKy"] == s and counted(r)]
@@ -397,32 +529,53 @@ def warnings(p, rows):
         sem_min = 0.8 if (qc2023 and idx == 0) else 1.0
         reg = sum(r["soTinChi"] for r in sem_rows)
         fail = sum(r["soTinChi"] for r in sem_rows if r["diemDat"] == "0")
-        reason = None
         if g_sem < sem_min:
-            reason = f"Điểm trung bình học kỳ {g_sem:.2f} (thang 4), dưới {sem_min:.1f}"
+            out.append((s, f"Điểm trung bình học kỳ {g_sem:.2f} (thang 4), dưới {sem_min:.1f}"))
         elif g_cum < cum_min:
-            reason = f"Điểm trung bình tích lũy {g_cum:.2f} (thang 4), dưới {cum_min:.1f} (năm thứ {year})"
+            out.append((s, f"Điểm trung bình tích lũy {g_cum:.2f} (thang 4), dưới {cum_min:.1f} (năm thứ {year})"))
         elif qc2023 and reg and fail / reg > 0.5:
-            reason = f"Không đạt {fail}/{reg} tín chỉ đăng ký (trên 50%)"
-        lan = lan + 1 if reason else 0
-        if reason:
-            y = int(s[:4])
-            out.append(
-                {
-                    "sinhVienId": p["svid"],
-                    "namHocHocKyId": sem_id(s),
-                    "maHocKy": s,
-                    "namHocHocKyTen": sem_name(s),
-                    "hinhThucXuLy": "Cảnh báo học tập",
-                    "lanLienTiep": lan,
-                    "lyDo": reason,
-                    "soQuyetDinh": f"{1000 + int(s) % 997}/QĐ-ĐHBK-ĐT",
-                    "ngayQuyetDinh": f"20/02/{y + 1}" if s[4] == "1" else f"15/08/{y + 1}",
-                    "code": "0",
-                    "msg": "done",
-                }
-            )
+            out.append((s, f"Không đạt {fail}/{reg} tín chỉ đăng ký (trên 50%)"))
     return out
+
+
+def plus_days(ddmmyyyy, n):
+    d, m, y = (int(x) for x in ddmmyyyy.split("/"))
+    return f"{d + n:02d}/{m:02d}/{y}"  # các ngày dùng ở đây đều ≤ 26 → không tràn tháng
+
+
+def decisions(p, rows):
+    """Cảnh báo (tính từ bảng điểm), miễn học ngoại ngữ (từ chứng chỉ) và quyết định riêng của persona."""
+    items = []
+    for s, reason in warning_semesters(p, rows):
+        y = int(s[:4])
+        date = f"20/02/{y + 1}" if s[4] == "1" else f"15/08/{y + 1}"
+        items.append((s, "Cảnh báo học tập", "Cảnh báo học tập", reason, "Đang theo học", date))
+    if p.get("cert"):
+        _, s = p["cert"]
+        y = int(s[:4])
+        date = {"1": f"08/10/{y}", "2": f"10/03/{y + 1}", "3": f"10/07/{y + 1}"}[s[4]]
+        items.append((s, "Quyết định khác", "miễn học, ghi điểm học phần và điều kiện ngoại ngữ", "Miễn môn học",
+                      "Đang theo học", date))  # fmt: skip
+    items += p.get("decisions", [])
+    out = []
+    for s, kind, content, reason, status, date in items:
+        out.append(
+            {
+                "decisionCode": f"{1000 + (int(s) + p['svid'] + len(content)) % 8999}/QĐ-ĐHBK",
+                "decisionDate": date,
+                "yearSemesterName": decision_sem_name(s),
+                "id": 0,  # gán tuần tự toàn cục trong build()
+                "type": kind,
+                "decisionContent": content,
+                "decisionReason": reason,
+                "status": status,
+                "yearSemesterCode": s,
+                "studentCode": p["mssv"],
+                "lastUpdatedAt": plus_days(date, 1),
+            }
+        )
+    key = lambda r: (r["yearSemesterCode"], r["decisionDate"][6:], r["decisionDate"][3:5], r["decisionDate"][:2])  # noqa: E731
+    return sorted(out, key=key, reverse=True)
 
 
 def profile(p, i):
@@ -462,7 +615,7 @@ def build():
         profiles[p["mssv"]] = profile(p, i)
         dmh[p["mssv"]] = {"data": rows}
         dhk[p["mssv"]] = semester_rows(p, rows)
-        xlhv[p["mssv"]] = warnings(p, rows)
+        xlhv[p["mssv"]] = decisions(p, rows)
         accounts.append(
             {
                 "username": p["user"],
@@ -473,13 +626,21 @@ def build():
             }
         )
     accounts += [{**a, "password_hash": demo_hash(a["username"])} for a in ADVISORS]
+    next_id = 1
+    for mssv in xlhv:
+        for r in xlhv[mssv]:
+            r["id"] = next_id
+            next_id += 1
+        xlhv[mssv] = {"code": "200", "msg": "OK", "data": xlhv[mssv], "sign": None}
     ref = {
         "_note": (
-            "Dữ liệu tham chiếu MÔ PHỎNG cho mock API. Mã môn/CTĐT mang tính minh họa — đối chiếu CTĐT thật trước D3."
+            "Dữ liệu tham chiếu cho mock API. CTĐT theo CTĐT ngành KHMT khóa 2019 và 2026 (chuyên ngành KHMT); "
+            "môn tự chọn là một lựa chọn cụ thể, học kỳ khuyến nghị theo Kế hoạch giảng dạy CTĐT 2026."
         ),
         "today_semester": TODAY_SEM,
-        "ctdt": {"2019": [list(c) for c in CTDT_2019], "2023": [list(c) for c in CTDT_2023]},
-        "program_credits": {"2019": sum(c[3] for c in CTDT_2019), "2023": sum(c[3] for c in CTDT_2023)},
+        # khóa ≥ 2023 (QC2023) dùng CTĐT 2026 — bản CTĐT thật mới nhất hiện có
+        "ctdt": {"2019": [list(c) for c in CTDT_2019], "2023": [list(c) for c in CTDT_2026]},
+        "program_credits": {"2019": sum(c[3] for c in CTDT_2019), "2023": sum(c[3] for c in CTDT_2026)},
         "special_codes": SPECIAL,
         "letters": LETTERS,
         "cert_to_toeic": CERT_TO_TOEIC,
@@ -521,7 +682,7 @@ def main(argv=None):
         print(
             f"{p['user']} {p['mssv']} K{p['cohort']}  TC={top.get('soTCTLChung')}  ĐTBTL10={top.get('diemTBTLChung')}  "
             f"courses={len(payloads['diem_mon_hoc'][p['mssv']]['data'])}  "
-            f"warnings={[w['maHocKy'] for w in payloads['xu_ly_hoc_vu'][p['mssv']]]}"
+            f"decisions={[(d['yearSemesterCode'], d['type']) for d in payloads['xu_ly_hoc_vu'][p['mssv']]['data']]}"
         )
     return 0
 

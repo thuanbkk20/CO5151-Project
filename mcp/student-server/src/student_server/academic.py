@@ -8,16 +8,27 @@ Raw sources (same shape as the real endpoints):
   profile        {id, userType, personId, hoVaTen, tenDonVi, maDonVi, ..., userId, sessionId, email, soCccd}
   diem_mon_hoc   [{maHocKy, maMonHoc, soTinChi, diemChu, diemSo, diemDat, diemKhongIn, ghiChu, ...}]
   diem_hoc_ky    [{maNamHocHocKy, soTCTLHocKy, diemTBTLHocKy, soTCTLChung, diemTBTLChung, ...}]  (newest first)
-  xu_ly_hoc_vu   [{maHocKy, hinhThucXuLy, lanLienTiep, lyDo, ...}]   (schema assumed)
+  xu_ly_hoc_vu   [{decisionCode, decisionDate, yearSemesterCode, type, decisionContent, decisionReason, status, ...}]
+                 (newest first; academic warnings are one decision type among others)
 """
 
 import re
 from typing import Literal
 
-from co5151_contracts.student import AcademicSummary, CourseRecord, SemesterRecord, StudentProfile, WarningRecord
+from co5151_contracts.student import (
+    AcademicDecision,
+    AcademicSummary,
+    CourseRecord,
+    SemesterRecord,
+    StudentProfile,
+)
 
 LETTER4 = {"A+": 4.0, "A": 4.0, "B+": 3.5, "B": 3.0, "C+": 2.5, "C": 2.0, "D+": 1.5, "D": 1.0, "F": 0.0}
-CERT_RE = re.compile(r"\b(TOEIC|IELTS|VSTEP)\s*([0-9]+(?:\.[0-9]+)?)", re.I)
+CERT_RE = re.compile(
+    r"\b(TOEIC|TOEFL\s+ITP|TOEFL\s+iBT|IELTS|PET|FCE|CAE)\s+"
+    r"([0-9]+(?:\.[0-9]+)?|Pass|Merit|Distinction|Grade\s+[ABC]|Level\s+B2)\b",
+    re.I,
+)
 RetakePolicy = Literal["last", "max"]
 
 
@@ -65,10 +76,38 @@ def gpa4(rows: list[dict]) -> float | None:
     return round(sum(LETTER4[r["diemChu"]] * int(r["soTinChi"]) for r in rows) / tc, 2) if tc else None
 
 
-def toeic_equivalent(cert_type: str, score: float, table: dict) -> int | None:
+def is_warning(d: dict) -> bool:
+    """Assumed: a warning decision says 'cảnh báo học tập' in its type or content."""
+    return any("cảnh báo học tập" in (d.get(k) or "").lower() for k in ("type", "decisionContent"))
+
+
+def main_semesters(rows: list[dict]) -> list[str]:
+    return sorted({r["maHocKy"] for r in rows if r["maHocKy"] != "BL" and r["maHocKy"][4] in "12"})
+
+
+def consecutive_warnings(rows: list[dict], decision_rows: list[dict]) -> int:
+    """Main semesters in a row, ending at the latest one with grades, that carry a warning decision."""
+    warned = {d["yearSemesterCode"] for d in decision_rows if is_warning(d)}
+    n = 0
+    for s in reversed(main_semesters(rows)):
+        if s not in warned:
+            break
+        n += 1
+    return n
+
+
+def _norm(text: str) -> str:
+    return " ".join(text.split()).upper()
+
+
+def toeic_equivalent(cert_type: str, score: float | str, table: dict) -> int | None:
+    """Score bands (TOEIC, TOEFL, IELTS) map by threshold; graded certificates (PET, FCE, CAE) by grade."""
+    rule = table.get(_norm(cert_type))
+    if isinstance(rule, dict):
+        return rule.get(_norm(str(score)))
     best = None
-    for lo, toeic in table.get(cert_type.upper(), []):
-        if score >= lo:
+    for lo, toeic in rule or []:
+        if float(score) >= lo:
             best = toeic
     return best
 
@@ -80,10 +119,10 @@ def english_certificate(rows: list[dict], table: dict) -> tuple[str | None, int 
         m = CERT_RE.search(r.get("ghiChu") or "")
         if not (m and r["diemDat"] == "1"):
             continue
-        kind, score = m.group(1).upper(), float(m.group(2))
+        kind, score = m.group(1), m.group(2)
         eq = toeic_equivalent(kind, score, table)
         if eq is not None and (toeic is None or eq > toeic):
-            label, toeic = f"{kind} {m.group(2)}", int(score) if kind == "TOEIC" else eq
+            label, toeic = f"{' '.join(kind.split())} {score}", int(float(score)) if _norm(kind) == "TOEIC" else eq
     return label, toeic
 
 
@@ -104,7 +143,7 @@ def profile(raw: dict) -> StudentProfile:
 
 
 def summary(
-    raw_profile: dict, rows: list[dict], sem_rows: list[dict], warn_rows: list[dict], ref: dict
+    raw_profile: dict, rows: list[dict], sem_rows: list[dict], decision_rows: list[dict], ref: dict
 ) -> AcademicSummary:
     mssv = raw_profile["userId"]
     cohort = cohort_of(mssv)
@@ -113,14 +152,18 @@ def summary(
     latest = sem_rows[0] if sem_rows else {}
     program = ref["ctdt"][ctdt]
 
+    def passed(code: str) -> bool:
+        return any(r["maMonHoc"] == code and r["diemDat"] == "1" for r in rows)
+
     def all_passed(kind: str) -> bool:
-        codes = [c[1] for c in program if c[4] == kind]
-        return all(any(r["maMonHoc"] == code and r["diemDat"] == "1" for r in rows) for code in codes)
+        return all(passed(c[1]) for c in program if c[4] == kind)
+
+    def any_passed(kind: str) -> bool:
+        return any(passed(c[1]) for c in program if c[4] == kind)
 
     cert, toeic = english_certificate(rows, ref["cert_to_toeic"])
 
-    mains = sorted({r["maHocKy"] for r in rows if r["maHocKy"] != "BL" and r["maHocKy"][4] in "12"})
-    w_last = [w for w in warn_rows if mains and w["maHocKy"] == mains[-1]]
+    warned = consecutive_warnings(rows, decision_rows)
     attempts: dict[str, list[dict]] = {}
     for r in rows:
         if r["maHocKy"] != "BL" and int(r["soTinChi"]) > 0:
@@ -135,13 +178,13 @@ def summary(
         credits_earned=int(latest.get("soTCTLChung", 0)),  # nguồn: bảng điểm học kỳ (API)
         cgpa=gpa4(best),  # thang 4, tính từ điểm chữ (QC Điều 12)
         cgpa10=float(latest.get("diemTBTLChung", 0) or 0),  # nguồn: bảng điểm học kỳ (API)
-        capstone_project_passed=any(r["maMonHoc"] == "CO3101" and r["diemDat"] == "1" for r in rows),
+        capstone_project_passed=any_passed("capstone"),
         toeic=toeic,
         english_cert=cert,
         gdtc_completed=all_passed("gdtc"),
         gdqp_completed=all_passed("gdqp"),
-        currently_warned=bool(w_last),
-        consecutive_warnings=w_last[0]["lanLienTiep"] if w_last else 0,
+        currently_warned=warned > 0,
+        consecutive_warnings=warned,
         retake_credits=retake,
         last_semester=latest.get("maNamHocHocKy"),
     )
@@ -175,10 +218,16 @@ def semester(s: dict) -> SemesterRecord:
     )
 
 
-def warning(w: dict) -> WarningRecord:
-    return WarningRecord(
-        semester=w["maHocKy"],
-        reason=w["lyDo"],
-        consecutive=int(w["lanLienTiep"]),
-        decision=f"{w['soQuyetDinh']} ngày {w['ngayQuyetDinh']}",
+def decision(d: dict) -> AcademicDecision:
+    return AcademicDecision(
+        semester=d["yearSemesterCode"],
+        semester_label=d["yearSemesterName"],
+        decision_no=d["decisionCode"],
+        decision_date=d["decisionDate"],
+        type=d["type"],
+        content=d["decisionContent"],
+        reason=d.get("decisionReason"),
+        student_status=d["status"],
+        is_warning=is_warning(d),
+        updated=d["lastUpdatedAt"],
     )

@@ -13,6 +13,7 @@ from pydantic import BaseModel, ValidationError
 from .auth import SCOPE_RECORDS_READ, Role
 from .envelope import ErrorCode, ToolError
 from .student import (
+    AcademicDecisions,
     AcademicSummary,
     AdviseeQuery,
     NoArgs,
@@ -20,7 +21,6 @@ from .student import (
     StudentProfile,
     Transcript,
     TranscriptQuery,
-    WarningHistory,
 )
 
 
@@ -105,10 +105,11 @@ STUDENT_RECORD_TOOLS: dict[str, ToolSpec] = {
             SemesterSummary,
         ),
         _student_tool(
-            "get_my_warnings",
-            "Lịch sử cảnh báo học tập của sinh viên đang đăng nhập.",
+            "get_my_academic_decisions",
+            "Các quyết định học vụ của sinh viên đang đăng nhập (cảnh báo học tập, tạm dừng / tiếp tục học, "
+            "miễn học, giao đề tài tốt nghiệp, ...) kèm trạng thái cảnh báo hiện tại.",
             NoArgs,
-            WarningHistory,
+            AcademicDecisions,
         ),
         _student_tool(
             "get_advisee_summary",

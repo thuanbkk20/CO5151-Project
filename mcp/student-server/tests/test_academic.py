@@ -7,7 +7,7 @@ ALL = ["2310001", "2310002", "2310003", "2210004", "2210005", "2410006", "231000
 
 def summary(db, mssv):
     return academic.summary(
-        db.raw_profile(mssv), db.raw_transcript(mssv), db.raw_semesters(mssv), db.raw_warnings(mssv), db.ref
+        db.raw_profile(mssv), db.raw_transcript(mssv), db.raw_semesters(mssv), db.raw_decisions(mssv), db.ref
     )
 
 
@@ -43,17 +43,51 @@ def test_gpa4_weighted_by_credits():
 @pytest.mark.parametrize(
     "mssv, expected",
     [
-        ("2310001", {"credits_earned": 113, "toeic": 500, "capstone_project_passed": True, "currently_warned": False}),
+        ("2310001", {"credits_earned": 102, "toeic": 500, "capstone_project_passed": False, "currently_warned": False}),
         ("2310002", {"capstone_project_passed": False, "english_cert": None}),
         ("2310003", {"currently_warned": True, "consecutive_warnings": 1}),
-        ("2210004", {"ctdt": "2019", "credits_earned": 108}),
-        ("2210005", {"gdtc_completed": False, "toeic": 650}),
-        ("2310007", {"english_cert": "IELTS 6.5", "toeic": 785}),
+        ("2210004", {"ctdt": "2019", "credits_earned": 100}),
+        ("2210005", {"gdtc_completed": False, "toeic": 650, "capstone_project_passed": True}),
+        ("2310007", {"english_cert": "IELTS 6.5", "toeic": 750}),
     ],
 )
 def test_persona_summaries(db, mssv, expected):
     s = summary(db, mssv).model_dump()
     assert {k: s[k] for k in expected} == expected
+
+
+def test_program_follows_real_curriculum(db):
+    for ctdt in ("2019", "2023"):
+        program = db.ref["ctdt"][ctdt]
+        assert db.ref["program_credits"][ctdt] == sum(c[3] for c in program) == 128
+        assert [c[1] for c in program if c[4] in ("capstone", "thesis")] == ["CO4029", "CO4337"]
+
+
+@pytest.mark.parametrize(
+    "kind, score, toeic",
+    [
+        ("IELTS", 3.0, None),
+        ("IELTS", 4.5, 550),
+        ("IELTS", 6.5, 750),
+        ("TOEFL ITP", 500, 550),
+        ("TOEFL iBT", 79, 700),
+        ("PET", "Merit", 500),
+        ("FCE", "grade b", 750),
+        ("CAE", "Level B2", 700),
+        ("VSTEP", 8.0, None),
+    ],
+)
+def test_toeic_equivalent_follows_conversion_table(db, kind, score, toeic):
+    assert academic.toeic_equivalent(kind, score, db.ref["cert_to_toeic"]) == toeic
+
+
+def test_english_certificate_picks_best_passed(db):
+    rows = [
+        {"ghiChu": "PET Distinction", "diemDat": "1"},
+        {"ghiChu": "TOEFL  iBT 80", "diemDat": "1"},
+        {"ghiChu": "CAE Grade A", "diemDat": "0"},
+    ]
+    assert academic.english_certificate(rows, db.ref["cert_to_toeic"]) == ("TOEFL iBT 80", 700)
 
 
 def test_retakes_are_counted(db):
@@ -73,8 +107,22 @@ def test_profile_mapping_drops_sensitive_fields(db):
     assert set(p) == {"student_id", "full_name", "faculty", "program_type", "cohort", "ctdt"}
 
 
-def test_semester_and_warning_mapping(db):
+def test_semester_and_decision_mapping(db):
     sem = academic.semester(db.raw_semesters("2310001")[0])
     assert sem.semester == "20253" and isinstance(sem.gpa10_cumulative, float)
-    w = academic.warning(db.raw_warnings("2310003")[0])
-    assert w.semester == "20252" and "QĐ" in w.decision
+    w = academic.decision(db.raw_decisions("2310003")[0])
+    assert w.semester == "20252" and w.is_warning and "QĐ" in w.decision_no
+    d = academic.decision(db.raw_decisions("2310001")[0])
+    assert d.content == "Giao đề tài Đồ án/Đề án tốt nghiệp" and not d.is_warning
+
+
+def test_consecutive_warnings_counts_back_from_latest_main_semester():
+    rows = [{"maHocKy": s} for s in ("20241", "20242", "20243", "20251", "20252")]
+
+    def warn(s):
+        return {"yearSemesterCode": s, "type": "Cảnh báo học tập", "decisionContent": "Cảnh báo học tập"}
+
+    other = {"yearSemesterCode": "20252", "type": "Quyết định khác", "decisionContent": "Miễn môn học"}
+    assert academic.consecutive_warnings(rows, [warn("20251"), warn("20252")]) == 2
+    assert academic.consecutive_warnings(rows, [warn("20241"), warn("20252")]) == 1
+    assert academic.consecutive_warnings(rows, [warn("20251"), other]) == 0

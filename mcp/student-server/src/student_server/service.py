@@ -12,7 +12,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from co5151_contracts import STUDENT_RECORD_TOOLS, ErrorCode, ToolError, ToolResult, err, ok
-from co5151_contracts.student import SemesterSummary, Transcript, TranscriptQuery, WarningHistory
+from co5151_contracts.student import AcademicDecisions, SemesterSummary, Transcript, TranscriptQuery
 
 from . import academic
 from .audit import AccessLog
@@ -33,7 +33,7 @@ class StudentRecordService:
             "get_my_academic_summary": lambda sid, _: self._summary(sid),
             "get_my_transcript": self._transcript,
             "get_my_semester_summary": lambda sid, _: self._semesters(sid),
-            "get_my_warnings": lambda sid, _: self._warnings(sid),
+            "get_my_academic_decisions": lambda sid, _: self._decisions(sid),
             "get_advisee_summary": lambda sid, _: self._summary(sid),
         }
         assert set(self._handlers) == set(STUDENT_RECORD_TOOLS), "every registered tool needs a handler"
@@ -84,7 +84,7 @@ class StudentRecordService:
     def _summary(self, sid: str):
         raw = self._raw_profile(sid)
         db = self.db
-        return academic.summary(raw, db.raw_transcript(sid), db.raw_semesters(sid), db.raw_warnings(sid), db.ref)
+        return academic.summary(raw, db.raw_transcript(sid), db.raw_semesters(sid), db.raw_decisions(sid), db.ref)
 
     def _transcript(self, sid: str, q: TranscriptQuery):
         self._raw_profile(sid)
@@ -96,11 +96,13 @@ class StudentRecordService:
         self._raw_profile(sid)
         return SemesterSummary(student_id=sid, semesters=[academic.semester(s) for s in self.db.raw_semesters(sid)])
 
-    def _warnings(self, sid: str):
-        s = self._summary(sid)
-        return WarningHistory(
+    def _decisions(self, sid: str):
+        self._raw_profile(sid)
+        rows = self.db.raw_decisions(sid)
+        warned = academic.consecutive_warnings(self.db.raw_transcript(sid), rows)
+        return AcademicDecisions(
             student_id=sid,
-            currently_warned=s.currently_warned,
-            consecutive_warnings=s.consecutive_warnings,
-            history=[academic.warning(w) for w in self.db.raw_warnings(sid)],
+            currently_warned=warned > 0,
+            consecutive_warnings=warned,
+            decisions=[academic.decision(d) for d in rows],
         )
