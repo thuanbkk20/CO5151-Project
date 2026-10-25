@@ -60,7 +60,8 @@ uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1
 uv run co5151-eval security
 ```
 
-Kết quả nằm ở `eval/results/<thời gian>-<agent>/` (`summary.md`, `results.jsonl`). Nếu terminal in
+Kết quả nằm ở `eval/results/<thời gian>-<agent>/` (`report.html` mở bằng trình duyệt, `summary.md`, `results.jsonl`);
+so sánh nhiều lần chạy trên một trang bằng `uv run co5151-eval report <thư mục 1> <thư mục 2> -o report.html`. Nếu terminal in
 `LLM generation failed, falling back to deterministic template` thì câu đó **không** do LLM trả lời (key sai, hết
 tiền, model không hỗ trợ tham số); `tokens` của câu đó là 100.
 

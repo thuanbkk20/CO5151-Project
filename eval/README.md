@@ -11,11 +11,16 @@ uv run co5151-eval check-gold                                              # đ�
 uv run co5151-eval security                                                # 16 ca tấn công Student Record MCP qua HTTP
 uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2
 uv run co5151-eval run --agent <package.module>:make_agent --suite injection
+uv run co5151-eval report <thư mục run 1> <thư mục run 2> -o report.html   # so sánh nhiều cấu hình trên một trang
 ```
 
 `run` in bảng markdown ra màn hình và ghi `eval/results/<thời gian>-<agent>/` gồm `results.jsonl` (từng câu, từng seed),
-`summary.json`, `summary.md`. Thư mục `eval/results/` không commit; số liệu trong báo cáo phải chạy lại được bằng
-đúng lệnh ghi kèm.
+`summary.json`, `summary.md` và `report.html`. `summary.json` lưu commit đã chạy (`-dirty` nếu có thay đổi chưa
+commit). Thư mục `eval/results/` không commit; số liệu trong báo cáo phải chạy lại được bằng đúng lệnh ghi kèm.
+
+`report.html` là một file tự chứa, mở offline bằng trình duyệt: cấu hình và commit của từng lần chạy, cảnh báo câu nghi
+trả lời bằng template (100 token) và câu khớp mẫu cấm, bảng so sánh có tô giá trị tốt nhất, biểu đồ Pass theo nhóm,
+bảng từng câu bấm mở được để đọc câu trả lời của mọi seed (dùng khi chấm tay và phân tích lỗi).
 
 ## Bộ task
 
