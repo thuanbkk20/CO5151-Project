@@ -13,20 +13,11 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
+from co5151_contracts.env import find_env_file, load_env_file
+
 from .auth import AuthError, TokenSigner, login
 from .config import Settings
 from .db import StudentDB
-
-
-def load_env_file(path: Path) -> None:
-    """Minimal .env loader: KEY=VALUE lines; variables already set in the shell win."""
-    if not path.is_file():
-        return
-    for line in path.read_text("utf-8").splitlines():
-        line = line.strip()
-        if line and not line.startswith("#") and "=" in line:
-            key, value = line.split("=", 1)
-            os.environ.setdefault(key.strip(), value.strip().strip("'\""))
 
 
 def _issue(settings: Settings, username: str, password: str) -> str:
@@ -72,7 +63,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         prog="student-mcp", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    ap.add_argument("--env-file", type=Path, default=Path(".env"), help="default: ./.env if present")
+    ap.add_argument("--env-file", type=Path, help="default: nearest .env up to the repo root")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("serve", help="run the MCP server")
@@ -91,7 +82,7 @@ def main(argv=None) -> int:
     sub.add_parser("accounts", help="list demo accounts").set_defaults(fn=cmd_accounts)
 
     a = ap.parse_args(argv)
-    load_env_file(a.env_file)
+    load_env_file(a.env_file or find_env_file())
     logging.basicConfig(level=os.environ.get("STUDENT_MCP_LOG_LEVEL", "INFO"), stream=sys.stderr)
     return a.fn(a, Settings.from_env())
 

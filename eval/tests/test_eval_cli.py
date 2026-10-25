@@ -1,4 +1,5 @@
 import json
+import os
 
 import pytest
 
@@ -34,3 +35,12 @@ def test_run_refuse_all_subset(tmp_path):
 def test_unknown_task_id(tmp_path):
     with pytest.raises(SystemExit, match="unknown task ids"):
         main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--only", "Z99", "--out", str(tmp_path)])
+
+
+def test_env_file_is_loaded_before_the_command(tmp_path, monkeypatch):
+    monkeypatch.delenv("CO5151_EVAL_ENV_PROBE", raising=False)
+    env = tmp_path / ".env"
+    env.write_text("CO5151_EVAL_ENV_PROBE=1\n")
+    assert main(["--env-file", str(env), "check-gold"]) == 0
+    assert os.environ["CO5151_EVAL_ENV_PROBE"] == "1"
+    monkeypatch.delenv("CO5151_EVAL_ENV_PROBE")

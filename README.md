@@ -20,9 +20,15 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 
 ```bash
 uv sync                 # cài toàn bộ workspace + dev tools vào .venv
-uv run pytest           # chạy test
+cp .env.example .env    # điền key LLM và secret, mọi lệnh tự đọc file này
+uv run pytest           # chạy test (test không đọc .env)
 uv run ruff check .     # lint
 ```
+
+Cấu hình của cả app nằm trong một file `.env` ở gốc repo, gồm Student Record MCP và LLM của Advisor. Các lệnh
+`student-mcp` và `co5151-eval` tìm `.env` từ thư mục hiện tại ngược lên tới gốc repo; biến đã `export` trong shell được
+ưu tiên. Muốn dùng file khác thì truyền `--env-file <đường dẫn>`. Thành phần mới đọc cấu hình bằng
+`co5151_contracts.env.load_env_file(find_env_file())` khi khởi động.
 
 Yêu cầu: Python ≥ 3.10, [uv](https://docs.astral.sh/uv/) ≥ 0.5.
 
