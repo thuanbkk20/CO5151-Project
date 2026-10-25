@@ -1,0 +1,552 @@
+{
+  "schema_version": "0.2",
+  "document_number_candidate": "2749/QD-DHBK",
+  "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+  "source_metadata": {
+    "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+    "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+    "sha256": "173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+    "size_bytes": 587389,
+    "source_url": null,
+    "document_number": null,
+    "effective_from": null,
+    "applicability": null,
+    "verified": false,
+    "page_count": 6,
+    "unit_count": 6,
+    "status_counts": {
+      "extracted": 6,
+      "needs_review": 0,
+      "needs_ocr": 0
+    }
+  },
+  "provisions": [
+    {
+      "provision_id": "HCMUT-2749-2026-ART1",
+      "title": "Thay the Phu luc 1",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:1",
+      "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+      "pdf_page": 1,
+      "source_text": "Điều 1. Thay thế phụ lục 1 của Quy định học vụ và đào tạo bậc Đại học ban hành\n\n    kèm theo Quyết định số 2933/QĐ-ĐHBK ngày 10 tháng 09 năm 2021 và Quyết định số\n\n   1260/QĐ-ĐHBK ngày 16 tháng 03 năm 2026 của Hiệu trưởng trường Đại học Bách khoa\n\n    – Đại học Quốc Gia Tp.HCM.",
+      "source_text_sha256": "f40f61cf9f30c9804e1df0d2ed743a7da1452c0b7d3fa5fc165dd92c67c98a80",
+      "scope_note": "Pham vi thay the phu luc, khong phai toan bo quy che",
+      "purpose": "document_versioning",
+      "effective_from_candidate": "2026-05-27",
+      "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+      "review_status": "candidate",
+      "verified": false,
+      "approval_required_before_advising": true
+    },
+    {
+      "provision_id": "HCMUT-2749-2026-ART2",
+      "title": "Hieu luc quyet dinh",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:1",
+      "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+      "pdf_page": 1,
+      "source_text": "Điều 2. Quyết định này có hiệu lực kể từ ngày ký.",
+      "source_text_sha256": "f12a79eb780f798ff93603cae73fd7fbbe4d5655fc9f1737828ea8d0f9b7c65c",
+      "scope_note": "Hieu luc van ban; dieu khoan co the co moc ap dung rieng",
+      "purpose": "document_versioning",
+      "effective_from_candidate": "2026-05-27",
+      "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+      "review_status": "candidate",
+      "verified": false,
+      "approval_required_before_advising": true
+    },
+    {
+      "provision_id": "HCMUT-2749-2026-A2-CERT",
+      "title": "Chung chi bao gom bon ky nang",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:3",
+      "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+      "pdf_page": 3,
+      "source_text": "Các chứng chỉ tiếng Anh bao gồm đầy đủ các kỹ năng Nghe – Đọc – Nói – Viết để xét\n\nchuẩn tốt nghiệp gồm: IELTS, TOEFL iBT (không sử dụng chứng chỉ TOEFL iBT\n\nHome Edition), PET, FCE, CAE, PTE Academic, Linguaskill, APTIS ESOL. Khi đạt\n\nmức điểm tương đương TOEIC theo bảng quy đổi tại mục 3.1 của Phụ lục này, sinh\n\nviên được xét đạt chuẩn ngoại ngữ tốt nghiệp cho tất cả các kỹ năng.",
+      "source_text_sha256": "62afb6bd168be3f22191c3116607be137ce9051fc288d47dba0b3a0af06a44af",
+      "scope_note": "Phu luc 1, phan A: chuong trinh giang day bang tieng Viet; check specific program and exceptions.",
+      "purpose": "graduation_language",
+      "effective_from_candidate": "2026-05-27",
+      "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+      "review_status": "candidate",
+      "verified": false,
+      "approval_required_before_advising": true
+    },
+    {
+      "provision_id": "HCMUT-2749-2026-A2-TEMP",
+      "title": "Ket qua kiem tra Noi-Viet tai trung tam",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:3",
+      "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+      "pdf_page": 3,
+      "source_text": "Tạm thời cho phép sinh viên sử dụng kết quả các kỳ kiểm tra kỹ năng Nói – Viết do\n\nTrung tâm Ngoại ngữ Trường Đại học Bách khoa tổ chức để xét tốt nghiệp.",
+      "source_text_sha256": "2fb40867c2d5ddd7d0bdd5f571a446a14c9a1c17d9af073a8f2904c3853dd6ea",
+      "scope_note": "Phu luc 1, phan A: chuong trinh giang day bang tieng Viet; check specific program and exceptions.",
+      "purpose": "graduation_language",
+      "effective_from_candidate": "2026-05-27",
+      "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+      "review_status": "candidate",
+      "verified": false,
+      "approval_required_before_advising": true
+    },
+    {
+      "provision_id": "HCMUT-2749-2026-A2-THESIS",
+      "title": "Ngoai ngu khi dang ky Khoa luan",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:4",
+      "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+      "pdf_page": 4,
+      "source_text": "Khi xét điều kiện đăng ký học phần Khóa luận tốt nghiệp, cho phép áp dụng chuẩn ngoại\n\nngữ tốt nghiệp tiếng Anh chỉ đối với kỹ năng Nghe – Đọc, Chương trình Định hướng\n\nNhật Bản là JLPT N3 (tiếng Nhật).",
+      "source_text_sha256": "44dca3ecfe6c2739df9af6b19fe1690509be9518802cf2cf9b266d2612381104",
+      "scope_note": "Phu luc 1, phan A: chuong trinh giang day bang tieng Viet; check specific program and exceptions.",
+      "purpose": "thesis_registration_language_only",
+      "effective_from_candidate": "2026-05-27",
+      "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+      "review_status": "candidate",
+      "verified": false,
+      "approval_required_before_advising": true
+    },
+    {
+      "provision_id": "HCMUT-2749-2026-A31-VALID",
+      "title": "Thoi han cong nhan chung chi",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:4",
+      "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+      "pdf_page": 4,
+      "source_text": "Thời hạn công nhận chứng chỉ: trong thời hạn 2 năm tính từ ngày cấp cho đến ngày đăng\nký xét đạt chuẩn.",
+      "source_text_sha256": "43d403d87cabde3c9ceb0582dd98627977b3a2ba5f2b7aa1b4162a680d591533",
+      "scope_note": "Phu luc 1, phan A: chuong trinh giang day bang tieng Viet; check specific program and exceptions.",
+      "purpose": "certificate_recognition_window",
+      "effective_from_candidate": "2026-05-27",
+      "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+      "review_status": "candidate",
+      "verified": false,
+      "approval_required_before_advising": true
+    },
+    {
+      "provision_id": "HCMUT-2749-2026-A41-PLACEMENT",
+      "title": "Thi xep trinh do khi nhap hoc",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:5",
+      "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+      "pdf_page": 5,
+      "source_text": "Sau khi nhập học, Nhà trường tổ chức một kỳ thi xếp trình độ tiếng Anh dành cho sinh viên\n\nchương trình giảng dạy bằng tiếng Việt vừa trúng tuyển. Căn cứ vào kết quả kỳ thi, sinh\n\nviên được phân lớp hoặc đăng ký các học phần Anh văn 1, 2, 3, 4 tương ứng. Kết quả thi\n\nxếp trình độ tiếng Anh chỉ được sử dụng để xét tạm đạt điều kiện tiên quyết khi đăng ký\n\ncác học phần Anh văn trong học kỳ 1 và học kỳ 2 của năm nhất; không có giá trị xét miễn\n\nbất kỳ học phần Anh văn nào trong chương trình đào tạo.",
+      "source_text_sha256": "7c96d5eb83676c75eb5e4888dd5bc1ed83b98bc003994cbf5b4ef76ba42140d9",
+      "scope_note": "Phu luc 1, phan A: chuong trinh giang day bang tieng Viet; check specific program and exceptions.",
+      "purpose": "placement_not_course_exemption",
+      "effective_from_candidate": "2026-05-27",
+      "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+      "review_status": "candidate",
+      "verified": false,
+      "approval_required_before_advising": true
+    },
+    {
+      "provision_id": "HCMUT-2749-2026-A41-TEST",
+      "title": "Kiem tra cuoi hoc ky 1 nam nhat",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:5",
+      "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+      "pdf_page": 5,
+      "source_text": "Vào cuối học kỳ 1 năm nhất, Nhà trường tổ chức thêm một kỳ kiểm tra trình độ tiếng Anh\n\nđầu vào theo định dạng TOEIC dành cho sinh viên chương trình giảng dạy bằng tiếng Việt.\n\nKết quả kiểm tra này được sử dụng để xét miễn một lần duy nhất các học phần Anh văn 1,\n\n2, 3, 4 tương ứng theo thang điểm quy đổi tại bảng quy đổi tại tiểu mục 3.1 mục 3 của Phụ\n\nlục này. Đối với các học phần không được miễn, sinh viên phải đăng ký học theo quy định.",
+      "source_text_sha256": "2baa3575d3791b736dc27de3053dfcf79b8408dfd7279728303d2961d5862402",
+      "scope_note": "Phu luc 1, phan A: chuong trinh giang day bang tieng Viet; check specific program and exceptions.",
+      "purpose": "one_time_course_exemption",
+      "effective_from_candidate": "2026-05-27",
+      "applicability_note": "Check cohort-specific and semester-specific provisions; decision date alone does not resolve scope.",
+      "review_status": "candidate",
+      "verified": false,
+      "approval_required_before_advising": true
+    }
+  ],
+  "tables": [
+    {
+      "table_id": "HCMUT-2749-2026-A2",
+      "title": "Chuan ngoai ngu tot nghiep",
+      "pdf_page": 3,
+      "purpose": "graduation_language",
+      "required_review": "Reconstruct merged program/cohort/skill cells from PDF. Keep exceptions and notes.",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:3",
+      "raw_page_text": "                                     3\n\nc) Chuẩn ngoại ngữ tiếng Nhật từng năm dành cho sinh viên Chương trình định hướng\nNhật Bản từ khóa 2026 về sau:\n    Chuẩn từng năm            Đạt tương đương            Ghi chú\n\n Năm thứ nhất\n Năm thứ hai              Tiếng Nhật 1, 2                   Hết năm nhất\n Năm thứ ba              Tiếng Nhật 1, 2, 3, 4               Hết năm hai\n Năm thứ tư               Tiếng Nhật 1, 2, 3, 4, 5, 6           Hết năm ba\n\n2. Chuẩn ngoại ngữ tốt nghiệp\nChuẩn ngoại ngữ tốt nghiệp được quy định theo chứng chỉ ngoại ngữ quốc tế như sau:\n Chương trình,                       Chuẩn ngoại ngữ tốt nghiệp\n hình thức đào tạo                 Tiếng Anh (tương đương\n                                 TOEIC)                Khác\n                               Nghe-Đọc        Nói-Viết\n Chương trình tiêu chuẩn         500 (khoá 2018 về\n                                    trước)\n                                                   200\n                             550 (khoá 2019)\n                             600 (từ khoá 2020)\n Chương trình Định hướng Nhật                              JLPT N3\n                                Không áp dụng\n Bản                                                                           (tiếng Nhật)\n Chương trình tài năng           600 (khoá 2018 về\n                                    trước)\n                                                   245\n                             650 (khoá 2019)\n                             700 (từ khoá 2020)\n Chương trình đào tạo kỹ sư chất  600 (khoá 2018 về                                               DELF B1\n lượng  cao   tại  Việt  Nam   trước)                                                   245       TCF B1\n (PFIEV)                     650 (khoá 2019)                                                                                (tiếng Pháp)\n                             700 (từ khoá 2020)\n Vừa làm vừa học,              400 (khoá 2017 về\n Đào tạo từ xa                      trước)                 200\n                             450 (khoá 2018)         (từ khoá\n                             500 (khoá 2019)        2021)\n                             600 (từ khoá 2020)\n Chính quy Bằng thứ hai        Học chương trình đào tạo chính quy của khóa nào thì áp\n                             dụng chuẩn của khóa đó.\nCác chứng chỉ tiếng Anh bao gồm đầy đủ các kỹ năng Nghe – Đọc – Nói – Viết để xét\n\nchuẩn tốt nghiệp gồm: IELTS, TOEFL iBT (không sử dụng chứng chỉ TOEFL iBT\n\nHome Edition), PET, FCE, CAE, PTE Academic, Linguaskill, APTIS ESOL. Khi đạt\n\nmức điểm tương đương TOEIC theo bảng quy đổi tại mục 3.1 của Phụ lục này, sinh\n\nviên được xét đạt chuẩn ngoại ngữ tốt nghiệp cho tất cả các kỹ năng.\n\nTạm thời cho phép sinh viên sử dụng kết quả các kỳ kiểm tra kỹ năng Nói – Viết do\n\nTrung tâm Ngoại ngữ Trường Đại học Bách khoa tổ chức để xét tốt nghiệp.",
+      "rows": [
+        {
+          "program_label": "Chương trình tiêu chuẩn",
+          "cohort_expression": "<=2018",
+          "toeic_listening_reading": "500",
+          "toeic_speaking_writing": "200",
+          "other_certificate_text": "",
+          "combination_logic": "see_source_and_exceptions"
+        },
+        {
+          "program_label": "Chương trình tiêu chuẩn",
+          "cohort_expression": "2019",
+          "toeic_listening_reading": "550",
+          "toeic_speaking_writing": "200",
+          "other_certificate_text": "",
+          "combination_logic": "see_source_and_exceptions"
+        },
+        {
+          "program_label": "Chương trình tiêu chuẩn",
+          "cohort_expression": ">=2020",
+          "toeic_listening_reading": "600",
+          "toeic_speaking_writing": "200",
+          "other_certificate_text": "",
+          "combination_logic": "see_source_and_exceptions"
+        },
+        {
+          "program_label": "Chương trình tài năng",
+          "cohort_expression": "<=2018",
+          "toeic_listening_reading": "600",
+          "toeic_speaking_writing": "245",
+          "other_certificate_text": "",
+          "combination_logic": "see_source_and_exceptions"
+        },
+        {
+          "program_label": "Chương trình tài năng",
+          "cohort_expression": "2019",
+          "toeic_listening_reading": "650",
+          "toeic_speaking_writing": "245",
+          "other_certificate_text": "",
+          "combination_logic": "see_source_and_exceptions"
+        },
+        {
+          "program_label": "Chương trình tài năng",
+          "cohort_expression": ">=2020",
+          "toeic_listening_reading": "700",
+          "toeic_speaking_writing": "245",
+          "other_certificate_text": "",
+          "combination_logic": "see_source_and_exceptions"
+        },
+        {
+          "program_label": "PFIEV",
+          "cohort_expression": "<=2018",
+          "toeic_listening_reading": "600",
+          "toeic_speaking_writing": "245",
+          "other_certificate_text": "DELF B1; TCF B1 (tiếng Pháp)",
+          "combination_logic": "unresolved_from_table"
+        },
+        {
+          "program_label": "PFIEV",
+          "cohort_expression": "2019",
+          "toeic_listening_reading": "650",
+          "toeic_speaking_writing": "245",
+          "other_certificate_text": "DELF B1; TCF B1 (tiếng Pháp)",
+          "combination_logic": "unresolved_from_table"
+        },
+        {
+          "program_label": "PFIEV",
+          "cohort_expression": ">=2020",
+          "toeic_listening_reading": "700",
+          "toeic_speaking_writing": "245",
+          "other_certificate_text": "DELF B1; TCF B1 (tiếng Pháp)",
+          "combination_logic": "unresolved_from_table"
+        },
+        {
+          "program_label": "Chương trình Định hướng Nhật Bản",
+          "cohort_expression": "not_stated_in_this_row",
+          "english_cell": "Không áp dụng",
+          "other_certificate_text": "JLPT N3 (tiếng Nhật)"
+        },
+        {
+          "program_label": "Vừa làm vừa học, Đào tạo từ xa",
+          "cohort_expression": "<=2017",
+          "toeic_listening_reading": "400",
+          "toeic_speaking_writing_source_cell": "200 (từ khoá 2021)",
+          "scope_note": "Outside requested regular full-time scope; retain for source fidelity"
+        },
+        {
+          "program_label": "Vừa làm vừa học, Đào tạo từ xa",
+          "cohort_expression": "2018",
+          "toeic_listening_reading": "450",
+          "toeic_speaking_writing_source_cell": "200 (từ khoá 2021)",
+          "scope_note": "Outside requested regular full-time scope; retain for source fidelity"
+        },
+        {
+          "program_label": "Vừa làm vừa học, Đào tạo từ xa",
+          "cohort_expression": "2019",
+          "toeic_listening_reading": "500",
+          "toeic_speaking_writing_source_cell": "200 (từ khoá 2021)",
+          "scope_note": "Outside requested regular full-time scope; retain for source fidelity"
+        },
+        {
+          "program_label": "Vừa làm vừa học, Đào tạo từ xa",
+          "cohort_expression": ">=2020",
+          "toeic_listening_reading": "600",
+          "toeic_speaking_writing_source_cell": "200 (từ khoá 2021)",
+          "scope_note": "Outside requested regular full-time scope; retain for source fidelity"
+        },
+        {
+          "program_label": "Chính quy Bằng thứ hai",
+          "source_rule": "Học chương trình đào tạo chính quy của khóa nào thì áp dụng chuẩn của khóa đó.",
+          "scope_note": "Do not treat this as the default program for regular students"
+        }
+      ],
+      "review_status": "transcribed_pending_human_review",
+      "verified": false,
+      "transcription_method": "manual_from_rendered_pdf",
+      "page_text_sha256": "3ccb866c05fb1dddd7d92a6c41aac95d3d0ca0f510b8f64244063e51524ea500",
+      "scope_context": "Phụ lục 1 phần A: chương trình giảng dạy bằng tiếng Việt; read introductory exceptions on PDF page 2.",
+      "required_related_evidence": [
+        {
+          "pdf_page": 2,
+          "note": "Exemption for Lao/Cambodian international students in the stated Vietnamese-taught standard program; course requirements remain."
+        },
+        {
+          "pdf_page": 3,
+          "note": "Four-skill certificates and temporary speaking-writing test provision"
+        },
+        {
+          "pdf_page": 4,
+          "note": "Thesis registration language rule differs from graduation; certificate conversion and recognition window"
+        }
+      ]
+    },
+    {
+      "table_id": "HCMUT-2749-2026-A31",
+      "title": "Quy doi chung chi tieng Anh",
+      "pdf_page": 4,
+      "purpose": "certificate_conversion",
+      "required_review": "Preserve every row, column, X, dash and footnote. Same IELTS score occurs in multiple rows; do not collapse to a single TOEIC value.",
+      "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+      "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:4",
+      "raw_page_text": "                                     4\n\nKhi xét điều kiện đăng ký học phần Khóa luận tốt nghiệp, cho phép áp dụng chuẩn ngoại\n\nngữ tốt nghiệp tiếng Anh chỉ đối với kỹ năng Nghe – Đọc, Chương trình Định hướng\n\nNhật Bản là JLPT N3 (tiếng Nhật).\n\n3. Quy đổi các bằng cấp và chứng chỉ ngoại ngữ\n3.1. Các chứng chỉ tiếng Anh quốc tế được quy đổi tương đương như sau:\n\n                           Các chứng chỉ tiếng Anh Quốc tế                            Các học phần Anh văn\n\n TOEIC        TOEFL\nListening TOEFL iBT 2026                      PTE   Lingua APTIS            Cơ\n                      IELTS  PET FCE CAE                    VSTEP VEPT       1   2   3   4\n  &      iBT   (Overall                         Academic  -skill  ESOL               bản\nReading            Score)\n\n   400      40       2.5         -         -        -        -           -            -          -          -           Đạt    -     -     -     -\n\n   450      49       3          -         -        -        -           -       140        -       4.0     43   Đạt Đạt   -     -     -\n\n                                  Grade\n   500      54       3       4.0                 -        -           -       143        -       4.5     51   Đạt Đạt Đạt   -     -\n                          C\n                                  Grade\n   550      59       3.5      4.5                 -        -           -       146        -       5.0     59   Đạt Đạt Đạt Đạt   -\n                          B\n                                  Grade\n   600      64       3.5      5.0                 -         -      41      149    B1      5.5     67   Đạt Đạt Đạt Đạt Đạt\n                          B\n                                  Grade\n   650      70       3.5      5.0                 -        -       43      152        -    X    X    Đạt Đạt Đạt Đạt Đạt\n                        A\n                                  Grade\n   700      79       4       5.5                 -        -       45      155    B1    X    X    Đạt Đạt Đạt Đạt Đạt\n                        A\n\n                                                  Level\n                                        Grade   B2\n                                            C,   Grade\n                                        Grade    C,\n   785      85       4       5.5   X                  48      160    B2    X    X    Đạt Đạt Đạt Đạt Đạt\n                                            B,   Grade\n                                        Grade    B,\n                            A    Grade\n                                 A\n\nLưu ý: Không sử dụng chứng chỉ ngoại ngữ TOEFL iBT Home Edition\nThời hạn công nhận chứng chỉ: trong thời hạn 2 năm tính từ ngày cấp cho đến ngày đăng\nký xét đạt chuẩn.\nBằng tốt nghiệp bậc đại học trở lên ngành/chuyên ngành tiếng Anh được xét miễn các học\nphần Anh văn 1, 2, 3, 4.\n3.2. Các chứng chỉ tiếng Pháp được quy đổi tương đương như sau:\n             Các chứng chỉ tiếng Pháp                   Các học phần tiếng Pháp\n\n             Tốt nghiệp phổ thông\n Tú tài\n          chương trình Song ngữ và   DELF   TCF     1    2    3    4    5    6   7*\n  Pháp\n             tăng cường tiếng Pháp\n\n  X          X            A1    100-199  Đạt\n\n  X          X            A2    200-299  Đạt  Đạt\n\n                                     B1,\n                                            300-399  Đạt  Đạt  Đạt  Đạt  Đạt  Đạt  Đạt\n                              B2\n\n*Pháp văn 7: áp dụng cho sinh viên Khoá 2018 về trước.",
+      "rows": [
+        {
+          "toeic_listening_reading": "400",
+          "toefl_ibt": "40",
+          "toefl_ibt_2026_overall": "2.5",
+          "ielts": "-",
+          "pet": "-",
+          "fce": "-",
+          "cae": "-",
+          "pte_academic": "-",
+          "linguaskill": "-",
+          "aptis_esol": "-",
+          "vstep": "-",
+          "vept": "-",
+          "english_basic": "Đạt",
+          "english_1": "-",
+          "english_2": "-",
+          "english_3": "-",
+          "english_4": "-"
+        },
+        {
+          "toeic_listening_reading": "450",
+          "toefl_ibt": "49",
+          "toefl_ibt_2026_overall": "3",
+          "ielts": "-",
+          "pet": "-",
+          "fce": "-",
+          "cae": "-",
+          "pte_academic": "-",
+          "linguaskill": "140",
+          "aptis_esol": "-",
+          "vstep": "4.0",
+          "vept": "43",
+          "english_basic": "Đạt",
+          "english_1": "Đạt",
+          "english_2": "-",
+          "english_3": "-",
+          "english_4": "-"
+        },
+        {
+          "toeic_listening_reading": "500",
+          "toefl_ibt": "54",
+          "toefl_ibt_2026_overall": "3",
+          "ielts": "4.0",
+          "pet": "Grade C",
+          "fce": "-",
+          "cae": "-",
+          "pte_academic": "-",
+          "linguaskill": "143",
+          "aptis_esol": "-",
+          "vstep": "4.5",
+          "vept": "51",
+          "english_basic": "Đạt",
+          "english_1": "Đạt",
+          "english_2": "Đạt",
+          "english_3": "-",
+          "english_4": "-"
+        },
+        {
+          "toeic_listening_reading": "550",
+          "toefl_ibt": "59",
+          "toefl_ibt_2026_overall": "3.5",
+          "ielts": "4.5",
+          "pet": "Grade B",
+          "fce": "-",
+          "cae": "-",
+          "pte_academic": "-",
+          "linguaskill": "146",
+          "aptis_esol": "-",
+          "vstep": "5.0",
+          "vept": "59",
+          "english_basic": "Đạt",
+          "english_1": "Đạt",
+          "english_2": "Đạt",
+          "english_3": "Đạt",
+          "english_4": "-"
+        },
+        {
+          "toeic_listening_reading": "600",
+          "toefl_ibt": "64",
+          "toefl_ibt_2026_overall": "3.5",
+          "ielts": "5.0",
+          "pet": "Grade B",
+          "fce": "-",
+          "cae": "-",
+          "pte_academic": "41",
+          "linguaskill": "149",
+          "aptis_esol": "B1",
+          "vstep": "5.5",
+          "vept": "67",
+          "english_basic": "Đạt",
+          "english_1": "Đạt",
+          "english_2": "Đạt",
+          "english_3": "Đạt",
+          "english_4": "Đạt"
+        },
+        {
+          "toeic_listening_reading": "650",
+          "toefl_ibt": "70",
+          "toefl_ibt_2026_overall": "3.5",
+          "ielts": "5.0",
+          "pet": "Grade A",
+          "fce": "-",
+          "cae": "-",
+          "pte_academic": "43",
+          "linguaskill": "152",
+          "aptis_esol": "-",
+          "vstep": "X",
+          "vept": "X",
+          "english_basic": "Đạt",
+          "english_1": "Đạt",
+          "english_2": "Đạt",
+          "english_3": "Đạt",
+          "english_4": "Đạt"
+        },
+        {
+          "toeic_listening_reading": "700",
+          "toefl_ibt": "79",
+          "toefl_ibt_2026_overall": "4",
+          "ielts": "5.5",
+          "pet": "Grade A",
+          "fce": "-",
+          "cae": "-",
+          "pte_academic": "45",
+          "linguaskill": "155",
+          "aptis_esol": "B1",
+          "vstep": "X",
+          "vept": "X",
+          "english_basic": "Đạt",
+          "english_1": "Đạt",
+          "english_2": "Đạt",
+          "english_3": "Đạt",
+          "english_4": "Đạt"
+        },
+        {
+          "toeic_listening_reading": "785",
+          "toefl_ibt": "85",
+          "toefl_ibt_2026_overall": "4",
+          "ielts": "5.5",
+          "pet": "X",
+          "fce": "Grade C, Grade B, Grade A",
+          "cae": "Level B2 Grade C, Grade B, Grade A",
+          "pte_academic": "48",
+          "linguaskill": "160",
+          "aptis_esol": "B2",
+          "vstep": "X",
+          "vept": "X",
+          "english_basic": "Đạt",
+          "english_1": "Đạt",
+          "english_2": "Đạt",
+          "english_3": "Đạt",
+          "english_4": "Đạt"
+        }
+      ],
+      "review_status": "transcribed_pending_human_review",
+      "verified": false,
+      "transcription_method": "manual_from_rendered_pdf",
+      "page_text_sha256": "ab933a4be3b239ae93c052c36809190efcafb8a05a8dcb1acc64607cc04ff4ff",
+      "columns": [
+        "toeic_listening_reading",
+        "toefl_ibt",
+        "toefl_ibt_2026_overall",
+        "ielts",
+        "pet",
+        "fce",
+        "cae",
+        "pte_academic",
+        "linguaskill",
+        "aptis_esol",
+        "vstep",
+        "vept",
+        "english_basic",
+        "english_1",
+        "english_2",
+        "english_3",
+        "english_4"
+      ],
+      "interpretation_notes": [
+        "Keep duplicate IELTS values across source rows; no unique IELTS-to-TOEIC function is inferred.",
+        "Source marks X and - have not been semantically resolved.",
+        "Exclusion of TOEFL iBT Home Edition and certificate recognition window are separate source provisions.",
+        "VSTEP and VEPT columns in the conversion table do not by themselves prove acceptance for graduation.",
+        "Academic program, cohort, exceptions and purpose must be checked before applying any row."
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "source": "HCMUT-2749-2026-A2-CERT",
+      "relation": "REFERENCES",
+      "target": "HCMUT-2749-2026-A31",
+      "evidence": "mục 3.1 của Phụ lục này",
+      "verified": false
+    },
+    {
+      "source": "HCMUT-2749-2026-A41-TEST",
+      "relation": "REFERENCES",
+      "target": "HCMUT-2749-2026-A31",
+      "evidence": "tiểu mục 3.1 mục 3",
+      "verified": false
+    }
+  ],
+  "review_issues": [
+    {
+      "id": "R01",
+      "priority": "high",
+      "note": "Handbook PDF page 23 (printed 21) must be reconciled with decision A.4.1 on placement versus end-of-semester test. Keep as unresolved; do not automatically overwrite either source."
+    },
+    {
+      "id": "R02",
+      "priority": "high",
+      "note": "Handbook PDF page 27 (printed 25) summarizes graduation-course conditions; decision PDF page 4 distinguishes thesis language requirements from graduation. Do not apply the four-skill graduation rule automatically to thesis registration."
+    },
+    {
+      "id": "R03",
+      "priority": "high",
+      "note": "Obtain full QD 2933 and QD 1260 before claiming complete academic-regulation coverage."
+    },
+    {
+      "id": "R04",
+      "priority": "high",
+      "note": "Confirm exact program within chinh quy tap trung; do not map every regular student to chuong trinh tieu chuan."
+    },
+    {
+      "id": "R05",
+      "priority": "medium",
+      "note": "Physical PDF pages differ from printed handbook pages. Confirm printed labels per cited page; do not assume a universal offset."
+    },
+    {
+      "id": "DUP-5",
+      "priority": "medium",
+      "unit_ids": [
+        "sha256:289fb86dd0b00cf77d33c3640ae1c0c6c98e01b0e72e2b16ba8be3f626777ef9:page:59",
+        "sha256:289fb86dd0b00cf77d33c3640ae1c0c6c98e01b0e72e2b16ba8be3f626777ef9:page:60"
+      ],
+      "note": "Identical text; preserve distinct source pages until original PDF comparison."
+    }
+  ],
+  "ready_for_production_advising": false
+}

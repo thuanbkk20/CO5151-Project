@@ -1,0 +1,130 @@
+[
+  {
+    "source_id": "sha256:cf37c95aaa596111cacbf71801f00bf4ab614c2ee1b2484ae69165a083b8faaf",
+    "file_name": "Các câu hỏi liên quan tốt nghiệp.docx",
+    "sha256": "cf37c95aaa596111cacbf71801f00bf4ab614c2ee1b2484ae69165a083b8faaf",
+    "size_bytes": 16775,
+    "source_url": null,
+    "document_number": null,
+    "effective_from": null,
+    "applicability": null,
+    "verified": false,
+    "page_count": null,
+    "page_note": "DOCX pagination is not inferred; block order follows document.xml",
+    "unit_count": 37,
+    "status_counts": {
+      "extracted": 37,
+      "needs_review": 0,
+      "needs_ocr": 0
+    },
+    "ingestion_batch": "initial"
+  },
+  {
+    "source_id": "sha256:289fb86dd0b00cf77d33c3640ae1c0c6c98e01b0e72e2b16ba8be3f626777ef9",
+    "file_name": "HCMUT HANDBOOK 2026.pdf",
+    "sha256": "289fb86dd0b00cf77d33c3640ae1c0c6c98e01b0e72e2b16ba8be3f626777ef9",
+    "size_bytes": 174436241,
+    "source_url": null,
+    "document_number": null,
+    "effective_from": null,
+    "applicability": null,
+    "verified": false,
+    "page_count": 81,
+    "unit_count": 81,
+    "status_counts": {
+      "extracted": 0,
+      "needs_review": 0,
+      "needs_ocr": 81
+    },
+    "ingestion_batch": "initial"
+  },
+  {
+    "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+    "file_name": "QĐ điều chỉnh_Hvu ĐH_ 2933_2026_PL1_lần 2_27-5-2026.signed.pdf",
+    "sha256": "173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+    "size_bytes": 587389,
+    "source_url": null,
+    "document_number": null,
+    "effective_from": null,
+    "applicability": null,
+    "verified": false,
+    "page_count": 6,
+    "unit_count": 6,
+    "status_counts": {
+      "extracted": 6,
+      "needs_review": 0,
+      "needs_ocr": 0
+    },
+    "ingestion_batch": "initial"
+  },
+  {
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "file_name": "HCMUT_QD1260_2026.pdf",
+    "sha256": "71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "size_bytes": 1048987,
+    "source_url": null,
+    "document_number": null,
+    "effective_from": null,
+    "applicability": null,
+    "verified": false,
+    "page_count": 21,
+    "unit_count": 21,
+    "status_counts": {
+      "extracted": 21,
+      "needs_review": 0,
+      "needs_ocr": 0
+    },
+    "ingestion_batch": "additional",
+    "provenance": {
+      "file_name": "HCMUT_QD1260_2026.pdf",
+      "document_number": "1260/QĐ-ĐHBK",
+      "issue_date": "2026-03-16",
+      "source_url": "https://drive.google.com/file/d/1Qingbecnl6u4cGmayPmrELFkBIdYvVlr/view",
+      "discovery_page": "https://mybk.hcmut.edu.vn/bksi/public/vi/blog/quy-che---quy-dinh",
+      "linked_folder": "https://drive.google.com/drive/folders/1cL0f1uaKJ7hF3QXuyZZAiOlzytj6fTbE",
+      "downloaded_at_utc": "2026-10-24T14:36:59.183529+00:00",
+      "sha256": "71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+      "size_bytes": 1048987,
+      "page_count": 21,
+      "pages_without_text": 0,
+      "first_page_identity_visually_checked": true,
+      "digital_signature_validated": false,
+      "all_provisions_reviewed": false
+    }
+  },
+  {
+    "source_id": "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb",
+    "file_name": "HCMUT_QD2933_2021.pdf",
+    "sha256": "8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb",
+    "size_bytes": 13692083,
+    "source_url": null,
+    "document_number": null,
+    "effective_from": null,
+    "applicability": null,
+    "verified": false,
+    "page_count": 48,
+    "unit_count": 48,
+    "status_counts": {
+      "extracted": 0,
+      "needs_review": 0,
+      "needs_ocr": 48
+    },
+    "ingestion_batch": "additional",
+    "provenance": {
+      "file_name": "HCMUT_QD2933_2021.pdf",
+      "document_number": "2933/QĐ-ĐHBK",
+      "issue_date": "2021-09-10",
+      "source_url": "https://drive.google.com/file/d/1k68Nvfm8QUjC6Dry84PlE_ZzIeXtXmvN/view",
+      "discovery_page": "https://mybk.hcmut.edu.vn/bksi/public/vi/blog/quy-che---quy-dinh",
+      "linked_folder": "https://drive.google.com/drive/folders/1cL0f1uaKJ7hF3QXuyZZAiOlzytj6fTbE",
+      "downloaded_at_utc": "2026-10-24T14:36:59.120698+00:00",
+      "sha256": "8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb",
+      "size_bytes": 13692083,
+      "page_count": 48,
+      "pages_without_text": 48,
+      "first_page_identity_visually_checked": true,
+      "digital_signature_validated": false,
+      "all_provisions_reviewed": false
+    }
+  }
+]

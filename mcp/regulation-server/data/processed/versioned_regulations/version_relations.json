@@ -1,0 +1,620 @@
+[
+  {
+    "source": "QD2933-2021-ART3",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL3.1",
+    "evidence_provision_id": "QD2933-2021-ART3",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:4",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:5"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART3",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL3.2",
+    "evidence_provision_id": "QD2933-2021-ART3",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:4",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:5"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART4",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL4.1",
+    "evidence_provision_id": "QD2933-2021-ART4",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:5",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART4",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL4.2",
+    "evidence_provision_id": "QD2933-2021-ART4",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:5",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART5",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL5.1",
+    "evidence_provision_id": "QD2933-2021-ART5",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:6",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:7",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:8",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:9"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART5",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL5.2",
+    "evidence_provision_id": "QD2933-2021-ART5",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:6",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:7",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:8",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:9"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART5",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL5.3",
+    "evidence_provision_id": "QD2933-2021-ART5",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:6",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:7",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:8",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:9"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART5",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL5.4",
+    "evidence_provision_id": "QD2933-2021-ART5",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:6",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:7",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:8",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:9"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART5",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL5.5",
+    "evidence_provision_id": "QD2933-2021-ART5",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:6",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:7",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:8",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:9"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART5",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL5.6",
+    "evidence_provision_id": "QD2933-2021-ART5",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:6",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:7",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:8",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:9"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART6",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL6.1",
+    "evidence_provision_id": "QD2933-2021-ART6",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:9",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:10"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART6",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL6.2",
+    "evidence_provision_id": "QD2933-2021-ART6",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:9",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:10"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART7",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL7.1",
+    "evidence_provision_id": "QD2933-2021-ART7",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:10"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART7",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL7.2",
+    "evidence_provision_id": "QD2933-2021-ART7",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:10"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART7",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL7.3",
+    "evidence_provision_id": "QD2933-2021-ART7",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:10"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART8",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL8.1",
+    "evidence_provision_id": "QD2933-2021-ART8",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:10",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:11"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART8",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL8.2",
+    "evidence_provision_id": "QD2933-2021-ART8",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:10",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:11"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART8",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL8.3",
+    "evidence_provision_id": "QD2933-2021-ART8",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:10",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:11"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART10",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL10.1",
+    "evidence_provision_id": "QD2933-2021-ART10",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:11",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:12"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART10",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL10.2",
+    "evidence_provision_id": "QD2933-2021-ART10",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:11",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:12"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART11",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL11.1",
+    "evidence_provision_id": "QD2933-2021-ART11",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:12",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:13"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART11",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL11.2",
+    "evidence_provision_id": "QD2933-2021-ART11",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:12",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:13"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART12",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL12.1",
+    "evidence_provision_id": "QD2933-2021-ART12",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:13",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:14"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART12",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL12.2",
+    "evidence_provision_id": "QD2933-2021-ART12",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:13",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:14"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART12",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL12.3",
+    "evidence_provision_id": "QD2933-2021-ART12",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:13",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:14"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART12",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL12.4",
+    "evidence_provision_id": "QD2933-2021-ART12",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:13",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:14"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART14",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL14.1",
+    "evidence_provision_id": "QD2933-2021-ART14",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:14",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:15"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART14",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL14.2",
+    "evidence_provision_id": "QD2933-2021-ART14",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:14",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:15"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2933-2021-ART14",
+    "relation": "CONTAINS",
+    "target": "QD2933-2021-CL14.3",
+    "evidence_provision_id": "QD2933-2021-ART14",
+    "source_unit_ids": [
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:14",
+      "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:15"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD1260-2026-CL3.1",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL3.1",
+    "evidence_provision_id": "QD1260-2026-CL3.1",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:2",
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL5.2",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL5.2",
+    "evidence_provision_id": "QD1260-2026-CL5.2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL5.3",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL5.3",
+    "evidence_provision_id": "QD1260-2026-CL5.3",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL5.5",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL5.5",
+    "evidence_provision_id": "QD1260-2026-CL5.5",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3",
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL7.1",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL7.1",
+    "evidence_provision_id": "QD1260-2026-CL7.1",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL8.1",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL8.1",
+    "evidence_provision_id": "QD1260-2026-CL8.1",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL8.2",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL8.2",
+    "evidence_provision_id": "QD1260-2026-CL8.2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL10.1",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL10.1",
+    "evidence_provision_id": "QD1260-2026-CL10.1",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4",
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:5"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL12.2",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL12.2",
+    "evidence_provision_id": "QD1260-2026-CL12.2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:5"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-CL14.3",
+    "relation": "AMENDS",
+    "target": "QD2933-2021-CL14.3",
+    "evidence_provision_id": "QD1260-2026-CL14.3",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:5",
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": "Source uses sửa đổi/bổ sung. Preserve both versions; do not auto-select by issue date."
+  },
+  {
+    "source": "QD1260-2026-APP1",
+    "relation": "REPLACES",
+    "target": "QD2933-2021-APP1",
+    "evidence_provision_id": "QD1260-2026-DECISION-ART2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD1260-2026-APP3",
+    "relation": "REPLACES",
+    "target": "QD2933-2021-APP3",
+    "evidence_provision_id": "QD1260-2026-DECISION-ART2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD1260-2026-APP4",
+    "relation": "REPLACES",
+    "target": "QD2933-2021-APP4",
+    "evidence_provision_id": "QD1260-2026-DECISION-ART2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD1260-2026-APP6",
+    "relation": "REPLACES",
+    "target": "QD2933-2021-APP6",
+    "evidence_provision_id": "QD1260-2026-DECISION-ART2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD1260-2026-DECISION-ART2",
+    "relation": "REPEALS",
+    "target": "QD2933-2021-ART4",
+    "evidence_provision_id": "QD1260-2026-DECISION-ART2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD1260-2026-DECISION-ART2",
+    "relation": "REPEALS",
+    "target": "QD2933-2021-CL5.4",
+    "evidence_provision_id": "QD1260-2026-DECISION-ART2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD1260-2026-DECISION-ART2",
+    "relation": "REPEALS",
+    "target": "QD2933-2021-APP2",
+    "evidence_provision_id": "QD1260-2026-DECISION-ART2",
+    "source_unit_ids": [
+      "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2749-2026-APP1",
+    "relation": "REPLACES",
+    "target": "QD2933-2021-APP1",
+    "evidence_provision_id": "QD2749-2026-DECISION-ART1",
+    "source_unit_ids": [
+      "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:1"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  },
+  {
+    "source": "QD2749-2026-APP1",
+    "relation": "REPLACES",
+    "target": "QD1260-2026-APP1",
+    "evidence_provision_id": "QD2749-2026-DECISION-ART1",
+    "source_unit_ids": [
+      "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:1"
+    ],
+    "verified": false,
+    "applicability_resolved": false,
+    "note": ""
+  }
+]

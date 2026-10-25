@@ -1,0 +1,30 @@
+{
+  "errors": [],
+  "corpus_written": true,
+  "source_count": 5,
+  "unit_count": 193,
+  "batch_counts": {
+    "initial": {
+      "sources": 3,
+      "extraction_units": 124
+    },
+    "additional": {
+      "sources": 2,
+      "extraction_units": 69
+    }
+  },
+  "methods": {
+    "native": 64,
+    "ocr": 129
+  },
+  "reviewed_blank_pages": [
+    {
+      "unit_id": "sha256:8ed72d2173aee3dabb7f78a3b9f153fe91608fef703f31ee60cf13cd8dc4efcb:page:48",
+      "pdf_page": 48
+    }
+  ],
+  "all_content_unverified": true,
+  "ready_for_content_review": true,
+  "active_mcp_graph_updated": false,
+  "amendment_mentions_for_review": 22
+}

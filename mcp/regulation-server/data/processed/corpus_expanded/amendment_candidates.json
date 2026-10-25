@@ -1,0 +1,319 @@
+[
+  {
+    "candidate_id": "AMEND-MENTION-001",
+    "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+    "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:1",
+    "pdf_page": 1,
+    "source_line": "         Sửa đổi, bổ sung một số điều của Quy định học vụ và đào tạo bậc Đại học",
+    "mentioned_articles": [],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-002",
+    "source_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30",
+    "unit_id": "sha256:173ee609c71c9da3a1f5ecbb4c1d5a6ada2e965ce08b1c29c2ac642a55252c30:page:1",
+    "pdf_page": 1,
+    "source_line": "          Điều 1. Thay thế phụ lục 1 của Quy định học vụ và đào tạo bậc Đại học ban hành",
+    "mentioned_articles": [
+      "1"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-003",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:1",
+    "pdf_page": 1,
+    "source_line": "         Sửa đổi, bổ sung một số điều của Quy định học vụ và đào tạo bậc Đại học",
+    "mentioned_articles": [],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-004",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:2",
+    "pdf_page": 2,
+    "source_line": "      Điều 1. Sửa đổi, bổ sung một số điều của Quy định học vụ và đào tạo bậc Đại học",
+    "mentioned_articles": [
+      "1"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-005",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:2",
+    "pdf_page": 2,
+    "source_line": "        1. Sửa đổi, bổ sung khoản 3.1 Điều 3 như sau:",
+    "mentioned_articles": [
+      "3"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-006",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3",
+    "pdf_page": 3,
+    "source_line": "        2. Sửa đổi, bổ sung khoản 5.2, 5.3, 5.5 Điều 5 như sau:",
+    "mentioned_articles": [
+      "5"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-007",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3",
+    "pdf_page": 3,
+    "source_line": "       a) Sửa đổi, bổ sung khoản 5.2 Điều 5 như sau:",
+    "mentioned_articles": [
+      "5"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-008",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3",
+    "pdf_page": 3,
+    "source_line": "thay thế cho một số học phần tương ứng ở bậc đại học. Sau khi sinh viên chương trình liên",
+    "mentioned_articles": [],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-009",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3",
+    "pdf_page": 3,
+    "source_line": "       b) Sửa đổi, bổ sung khoản 5.3 Điều 5 như sau:",
+    "mentioned_articles": [
+      "5"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-010",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:3",
+    "pdf_page": 3,
+    "source_line": "       c) Sửa đổi, bổ sung khoản 5.5 Điều 5 như sau:",
+    "mentioned_articles": [
+      "5"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-011",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4",
+    "pdf_page": 4,
+    "source_line": "        3. Sửa đổi, bổ sung khoản 7.1 Điều 7 như sau:",
+    "mentioned_articles": [
+      "7"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-012",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4",
+    "pdf_page": 4,
+    "source_line": "        4. Sửa đổi, bổ sung khoản 8.1, 8.2 Điều 8 như sau:",
+    "mentioned_articles": [
+      "8"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-013",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4",
+    "pdf_page": 4,
+    "source_line": "       a) Sửa đổi, bổ sung khoản 8.1 Điều 8 như sau:",
+    "mentioned_articles": [
+      "8"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-014",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4",
+    "pdf_page": 4,
+    "source_line": "       “8.1 Điểm học phần tương đương thay thế",
+    "mentioned_articles": [],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-015",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4",
+    "pdf_page": 4,
+    "source_line": "      Sinh viên học đạt các học phần khác tương đương, thay thế cho các học phần gốc",
+    "mentioned_articles": [],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-016",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4",
+    "pdf_page": 4,
+    "source_line": "đương thay thế và tích lũy tín chỉ (áp dụng từ học kỳ 2 năm học 2022-2023).”",
+    "mentioned_articles": [],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-017",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:4",
+    "pdf_page": 4,
+    "source_line": "        5. Sửa đổi, bổ sung khoản 10.1 Điều 10 như sau:",
+    "mentioned_articles": [
+      "10"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-018",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:5",
+    "pdf_page": 5,
+    "source_line": "        7. Sửa đổi, bổ sung khoản 14.3 Điều 14 như sau:",
+    "mentioned_articles": [
+      "14"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-019",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6",
+    "pdf_page": 6,
+    "source_line": "      Điều 2. Thay thế, bãi bỏ một số cụm từ, điều, phụ lục của Quy định học vụ và đào",
+    "mentioned_articles": [
+      "2"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-020",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6",
+    "pdf_page": 6,
+    "source_line": "        1. Thay thế cụm từ “Chương trình Chất lượng cao” thành “Chương trình Dạy và",
+    "mentioned_articles": [],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-021",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6",
+    "pdf_page": 6,
+    "source_line": "Học bằng tiếng Anh” tại khoản 4.1, 4.2 Điều 4 và Phụ lục 6; thay thế Phụ lục 1, 3, 4, 6 của",
+    "mentioned_articles": [
+      "4"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  },
+  {
+    "candidate_id": "AMEND-MENTION-022",
+    "source_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1",
+    "unit_id": "sha256:71883b7763e49e17fbffba9f0d80667d0cee71933165c758c80fbcf0d460bfb1:page:6",
+    "pdf_page": 6,
+    "source_line": "       2. Bãi bỏ Điều 4; bãi bỏ khoản 5.4 Điều 5; bãi bỏ Phụ lục 2.",
+    "mentioned_articles": [
+      "4",
+      "5"
+    ],
+    "relation": null,
+    "target_provision_id": null,
+    "review_status": "candidate_only",
+    "verified": false,
+    "note": "Line may be a heading/citation; inspect full page and continuation. Article numbers mentioned are not automatically amendment targets."
+  }
+]

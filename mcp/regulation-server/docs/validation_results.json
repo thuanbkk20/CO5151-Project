@@ -1,0 +1,32 @@
+{
+  "created_at": "2026-10-24T16:02:46.310500+00:00",
+  "python": "3.12.14",
+  "platform": "Linux",
+  "handoff_status": "ready_for_draft_integration",
+  "production_advising_ready": false,
+  "content_accuracy_verified": false,
+  "applicability_resolved": false,
+  "windows_recipient_verified": false,
+  "real_advisor_verifier_integration_verified": false,
+  "component_tests_passed": 15,
+  "mcp_subprocess_smoke_passed": true,
+  "ruff_passed": true,
+  "test_scope": "development fixtures and supplied corpus; no independent benchmark",
+  "commands": [
+    {
+      "command": "/workspace/scratch/9b7575a02ebf/tmp/mcp_runtime/bin/python -m unittest discover -s output/handoff/mcp/regulation-server/tests -p test_handoff.py -v",
+      "returncode": 0,
+      "output": "test_amendment_both_directions (test_handoff.HandoffTests.test_amendment_both_directions) ... ok\ntest_certificate_reference (test_handoff.HandoffTests.test_certificate_reference) ... ok\ntest_citations_and_raw_text (test_handoff.HandoffTests.test_citations_and_raw_text) ... ok\ntest_context_is_not_approval (test_handoff.HandoffTests.test_context_is_not_approval) ... ok\ntest_default_denies (test_handoff.HandoffTests.test_default_denies) ... ok\ntest_handbook_and_faq_indexed (test_handoff.HandoffTests.test_handbook_and_faq_indexed) ... ok\ntest_invalid_arguments (test_handoff.HandoffTests.test_invalid_arguments) ... ok\ntest_missing_provision (test_handoff.HandoffTests.test_missing_provision) ... ok\ntest_multihop_replacement (test_handoff.HandoffTests.test_multihop_replacement) ... ok\ntest_negative_weather (test_handoff.HandoffTests.test_negative_weather) ... ok\ntest_repeal_has_source (test_handoff.HandoffTests.test_repeal_has_source) ... ok\ntest_schema_closed (test_handoff.HandoffTests.test_schema_closed) ... ok\ntest_thesis_with_language_and_registration (test_handoff.HandoffTests.test_thesis_with_language_and_registration) ... ok\ntest_unknown_tool (test_handoff.HandoffTests.test_unknown_tool) ... ok\ntest_zero_hops (test_handoff.HandoffTests.test_zero_hops) ... ok\n\n----------------------------------------------------------------------\nRan 15 tests in 0.159s\n\nOK\n"
+    },
+    {
+      "command": "/workspace/scratch/9b7575a02ebf/tmp/mcp_runtime/bin/python output/handoff/mcp/regulation-server/src/regulation_server/smoke_handoff_stdio.py --base output/handoff/mcp/regulation-server",
+      "returncode": 0,
+      "output": "PASS initialize draft\nPASS list_tools and schemas\nPASS search + graph reference\nPASS get_provision citation\nPASS version expansion through MCP\nPASS error envelope NOT_FOUND\nPASS error envelope INVALID_ARGUMENT\nPASS error envelope INVALID_ARGUMENT\nPASS initialize default\nPASS list_tools and schemas\nPASS default draft denial\nALL MCP STDIO CHECKS PASSED\n"
+    },
+    {
+      "command": "tmp/mcp_runtime/bin/ruff check output/handoff/mcp/regulation-server",
+      "returncode": 0,
+      "output": "All checks passed!\n"
+    }
+  ]
+}

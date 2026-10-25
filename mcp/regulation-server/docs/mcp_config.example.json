@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "regulation": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "D:/CO5151-Project/CO5151-Project",
+        "run",
+        "python",
+        "mcp/regulation-server/src/regulation_server/regulation_mcp_v2.py",
+        "--base",
+        "D:/CO5151-Project/CO5151-Project/mcp/regulation-server",
+        "--allow-draft"
+      ],
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    }
+  }
+}
