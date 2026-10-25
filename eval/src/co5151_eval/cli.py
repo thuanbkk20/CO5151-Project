@@ -67,7 +67,8 @@ def cmd_run(a) -> int:
 
 def cmd_report(a) -> int:
     out = a.out or a.runs[0].parent / "report.html"
-    write_html_report(a.runs, out, a.title)
+    lookup = load_factory(a.regulation_lookup) if a.regulation_lookup else None
+    write_html_report(a.runs, out, a.title, lookup)
     print(out)
     return 0
 
@@ -111,6 +112,8 @@ def main(argv: list[str] | None = None) -> int:
     rp.add_argument("runs", type=Path, nargs="+", help="thư mục kết quả của lệnh run")
     rp.add_argument("-o", "--out", type=Path, help="file HTML (mặc định report.html cạnh thư mục đầu tiên)")
     rp.add_argument("--title", default="Kết quả đánh giá Advisor")
+    rp.add_argument("--regulation-lookup", help="package.module:function(question) -> list[mã điều khoản]; tra lại "
+                    "Regulation MCP cho lần chạy cũ chưa ghi search_regulations")  # fmt: skip
     rp.set_defaults(fn=cmd_report)
 
     g = sub.add_parser("check-gold", help="đối chiếu đáp án facts với mock data của Student Record MCP")

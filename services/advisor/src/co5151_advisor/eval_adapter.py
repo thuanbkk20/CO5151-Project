@@ -26,6 +26,10 @@ def regulation_source() -> RegulationSource:
     return ToolRegulationSource(_regulation_service(allow_draft))
 
 
+def regulation_ids(question: str) -> list[str]:
+    return [doc.id for doc in regulation_source().search(question)]
+
+
 def make_agent(seed: int = 0) -> AdvisorAgent:
     oracle = RecordOracle()
     return AdvisorAgent(oracle.service, regulation_source(), llm_client=LLMClient())

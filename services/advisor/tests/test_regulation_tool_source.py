@@ -1,4 +1,4 @@
-from co5151_advisor.eval_adapter import regulation_source
+from co5151_advisor.eval_adapter import regulation_ids, regulation_source
 from co5151_advisor.regulations import StaticRegulationSource, ToolRegulationSource
 from co5151_contracts import ErrorCode, err
 
@@ -25,3 +25,10 @@ def test_static_source_can_still_be_selected(monkeypatch):
 
 def test_tool_error_yields_no_documents():
     assert ToolRegulationSource(_Forbidden()).search("tốt nghiệp") == []
+
+
+def test_regulation_ids_lists_the_provisions_found(monkeypatch):
+    monkeypatch.delenv("ADVISOR_REGULATION_SOURCE", raising=False)
+    monkeypatch.delenv("REGULATION_ALLOW_DRAFT", raising=False)
+    assert regulation_ids("Điều kiện làm đồ án tốt nghiệp")
+    assert regulation_ids("Thời gian tối đa để hoàn thành chương trình đại học chính quy là bao lâu?") == []

@@ -61,3 +61,18 @@ def test_report_command_compares_runs(tmp_path, capsys):
     assert main(["report", str(tmp_path / "refuse_all"), str(tmp_path / "record_template")]) == 0
     html = (tmp_path / "report.html").read_text("utf-8")
     assert "refuse_all" in html and "record_template" in html
+
+
+def lookup_for_test(question):
+    return ["QD-TEST-1"]
+
+
+def test_report_command_accepts_a_regulation_lookup(tmp_path):
+    out = tmp_path / "advisor"
+    main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--only", "P01", "--out", str(out)])
+    summary = json.loads((out / "summary.json").read_text())
+    summary["agent_config"] = {"regulation_source": "ToolRegulationSource"}
+    (out / "summary.json").write_text(json.dumps(summary))
+    assert main(["report", str(out), "-o", str(tmp_path / "r.html"),
+                 "--regulation-lookup", "test_eval_cli:lookup_for_test"]) == 0  # fmt: skip
+    assert "QD-TEST-1" in (tmp_path / "r.html").read_text("utf-8")

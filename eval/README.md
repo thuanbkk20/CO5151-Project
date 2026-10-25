@@ -12,6 +12,8 @@ uv run co5151-eval security                                                # 16 
 uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2
 uv run co5151-eval run --agent <package.module>:make_agent --suite injection
 uv run co5151-eval report <thư mục run 1> <thư mục run 2> -o report.html   # so sánh nhiều cấu hình trên một trang
+# lần chạy cũ chưa ghi search_regulations: tra lại Regulation MCP để hiện trong phiếu chấm
+uv run co5151-eval report <thư mục advisor> -o report.html --regulation-lookup co5151_advisor.eval_adapter:regulation_ids
 ```
 
 `run` in bảng markdown ra màn hình và ghi `eval/results/<thời gian>-<agent>/` gồm `results.jsonl` (từng câu, từng seed),
