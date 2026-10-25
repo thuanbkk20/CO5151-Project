@@ -32,3 +32,7 @@ eval/results/
 
 # environment files
 .env
+
+# Chainlit (apps/web): generated translations and uploaded files
+apps/web/.chainlit/translations/
+apps/web/.files/
