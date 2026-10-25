@@ -1,5 +1,6 @@
 import argparse
 import importlib
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 from co5151_contracts.env import find_env_file, load_env_file
 
 from .gold import check_gold
+from .html_report import write_html_report
 from .runner import run, write_report
 from .tasks import load_tasks
 
@@ -18,6 +20,15 @@ def load_factory(spec: str):
     if not attr:
         raise SystemExit(f"--agent must look like package.module:factory, got {spec!r}")
     return getattr(importlib.import_module(module), attr)
+
+
+def git_commit() -> str | None:
+    try:
+        sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, check=True)
+        dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], capture_output=True, text=True)
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return sha.stdout.strip() + ("-dirty" if dirty.stdout.strip() else "")
 
 
 def _select(tasks, only: str | None, groups: list[str] | None):
@@ -45,12 +56,20 @@ def cmd_run(a) -> int:
     probe = factory(a.seeds[0])
     config = probe.describe() if callable(getattr(probe, "describe", None)) else None
     records = run(factory, tasks, a.seeds, on_record=progress if a.verbose else None)
-    meta = {"agent": a.agent, "agent_config": config, "tasks": len(tasks),
+    meta = {"agent": a.agent, "agent_config": config, "tasks": len(tasks), "commit": git_commit(),
             "started": time.strftime("%Y-%m-%d %H:%M:%S")}  # fmt: skip
     summary = write_report(records, out, f"Kết quả: {name}", meta)
+    write_html_report([out], out / "report.html", f"Kết quả: {name}")
     print((out / "summary.md").read_text("utf-8"))
-    print(f"Chi tiết: {out}/results.jsonl", file=sys.stderr)
+    print(f"Chi tiết: {out}/results.jsonl · {out}/report.html", file=sys.stderr)
     return 0 if summary["overall"]["errors"] == 0 else 1
+
+
+def cmd_report(a) -> int:
+    out = a.out or a.runs[0].parent / "report.html"
+    write_html_report(a.runs, out, a.title)
+    print(out)
+    return 0
 
 
 def cmd_check_gold(a) -> int:
@@ -87,6 +106,12 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--out", type=Path, help=f"thư mục kết quả (mặc định {DEFAULT_OUT}/<thời gian>-<agent>)")
     r.add_argument("-v", "--verbose", action="store_true")
     r.set_defaults(fn=cmd_run)
+
+    rp = sub.add_parser("report", help="gộp một hoặc nhiều thư mục kết quả thành một trang HTML để so sánh")
+    rp.add_argument("runs", type=Path, nargs="+", help="thư mục kết quả của lệnh run")
+    rp.add_argument("-o", "--out", type=Path, help="file HTML (mặc định report.html cạnh thư mục đầu tiên)")
+    rp.add_argument("--title", default="Kết quả đánh giá Advisor")
+    rp.set_defaults(fn=cmd_report)
 
     g = sub.add_parser("check-gold", help="đối chiếu đáp án facts với mock data của Student Record MCP")
     g.add_argument("--tasks")
