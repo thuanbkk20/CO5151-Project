@@ -36,7 +36,7 @@ Cả app dùng **một** file `.env` ở gốc repo và **một** cơ chế đ�
 
 Thêm một `Provider` vào `PROVIDERS` trong `services/advisor/src/co5151_advisor/llm.py` (base URL, model mặc định,
 tên biến chứa key, có nhận `seed` không, `reasoning_effort` mặc định), thêm biến key vào `.env.example` và một test
-trong `services/advisor/tests/test_llm.py`. Tham số mà không phải provider nào cũng hỗ trợ (`seed`,
+trong `services/advisor/tests/test_llm_providers.py`. Tham số mà không phải provider nào cũng hỗ trợ (`seed`,
 `reasoning_effort`, ...) chỉ gửi khi profile hoặc biến môi trường bật; provider OpenAI-compatible có thể trả 400
 cho tham số lạ.
 
