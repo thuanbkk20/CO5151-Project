@@ -5,6 +5,7 @@ from typing import Any
 
 from co5151_advisor.agent import AdvisorAgent
 from co5151_advisor.eval_adapter import regulation_source
+from co5151_advisor.eval_adapter import student_service as advisor_student_service
 from co5151_advisor.llm import DEFAULT_PROVIDER, PROVIDERS, LLMClient
 from student_server.auth import AuthError, login
 from student_server.config import Settings
@@ -39,7 +40,7 @@ def default_provider(providers: list[str]) -> str:
 
 def new_advisor(provider: str | None = None, model: str | None = None) -> AdvisorAgent:
     llm = LLMClient(provider=provider, model=model or None)
-    return AdvisorAgent(student_service(), regulation_source(), llm_client=llm)
+    return AdvisorAgent(advisor_student_service(student_service()), regulation_source(), llm_client=llm)
 
 
 @dataclass
