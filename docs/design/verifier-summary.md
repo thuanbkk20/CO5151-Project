@@ -1,7 +1,7 @@
 # Tóm tắt: Compliance Verifier (nhánh `feat/verifier`)
 
-Ngày viết: 2026-11-10. Nhánh tách từ `main` (`1730c90`).
-CI trên máy (Python 3.12): ruff đạt, hai lệnh `--check` đạt, `433 passed`.
+Ngày viết: 2026-11-10. Nhánh đã rebase lên `feat/mcp-adapter` của Thuấn (`4112a65`), nên gồm cả phần gọi qua MCP.
+CI trên máy (Python 3.12): ruff đạt, hai lệnh `--check` đạt, `439 passed`.
 
 ## 1. Verifier làm gì
 
@@ -181,23 +181,23 @@ uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent_no_verifie
 - Check số "Điều/Khoản" chỉ so con số, bắt được trích dẫn bịa rõ ràng chứ không chứng minh nội dung điều khoản.
 - 12 ca prompt injection (`PI01`–`PI12`) chưa chạy.
 - Prompt của Advisor chưa đánh dấu ranh giới dữ liệu cho đoạn quy chế (threat model E3); mới làm ở prompt Verifier.
-- Nhánh tách từ `main`. `feat/mcp-adapter` cũng sửa `eval_adapter.py` và `backend.py`, nên sau khi PR đó merge cần
-  rebase và gộp tay hai file này.
+- Nhánh này nằm trên `feat/mcp-adapter`, nên PR của nhánh này phải merge sau PR đó (hoặc mở PR vào thẳng
+  `feat/mcp-adapter`). Verifier không phụ thuộc cách gọi tool: `inprocess` hay `mcp` đều đi qua cùng interface.
 
 ## 7. Danh sách commit
 
 | Commit | Nội dung |
 |---|---|
-| `1106888` | feat(contracts): verification request and verdict models for the Verifier |
-| `9a5ac9a` | feat(verifier): package skeleton that folds check results into a verdict |
-| `4c3e3e2` | chore: ignore CLAUDE.local.md |
-| `a6ee796` | feat(verifier): rule checks for unsupported citations and leaked secrets |
-| `7b034c2` | feat(contracts): UNVERIFIED issue code for a check that could not run |
-| `93a8f20` | feat(advisor): LLMClient can request JSON-schema structured output |
-| `ea541e8` | feat(verifier): LLM judge that checks the draft against its evidence |
-| `1311eb8` | fix(advisor): regulation excerpts without fragments reached the LLM empty |
-| `03d991a` | feat(advisor): answer through the Verifier with one bounded rewrite |
-| `9897b5c` | feat(web): chat answers go through the Verifier and show its rounds |
-| `706c51a` | feat(eval): record Verifier rounds and count rewrites and refusals |
-| `e53a517` | docs(threat-model): agent-level mitigations now implemented by the Verifier |
-| `23c0464` | docs: group docs into design/ and eval/ with an index |
+| `11df924` | feat(contracts): verification request and verdict models for the Verifier |
+| `44e4534` | feat(verifier): package skeleton that folds check results into a verdict |
+| `fa986fd` | chore: ignore CLAUDE.local.md |
+| `04fce45` | feat(verifier): rule checks for unsupported citations and leaked secrets |
+| `0983ead` | feat(contracts): UNVERIFIED issue code for a check that could not run |
+| `1acc391` | feat(advisor): LLMClient can request JSON-schema structured output |
+| `4f350cd` | feat(verifier): LLM judge that checks the draft against its evidence |
+| `96fbfb3` | fix(advisor): regulation excerpts without fragments reached the LLM empty |
+| `c3dc7c9` | feat(advisor): answer through the Verifier with one bounded rewrite |
+| `9fbdf2f` | feat(web): chat answers go through the Verifier and show its rounds |
+| `f000efc` | feat(eval): record Verifier rounds and count rewrites and refusals |
+| `dd0d1f8` | docs(threat-model): agent-level mitigations now implemented by the Verifier |
+| `5e48c81` | docs: group docs into design/ and eval/ with an index |
