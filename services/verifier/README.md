@@ -34,7 +34,22 @@ Giới hạn đã biết: số "Điều/Khoản" chỉ so với các con số xu
 ("Điều 99") chứ không chứng minh điều khoản đó nói đúng nội dung. Số điều khoản do chính người dùng nêu trong câu hỏi
 không bị xét ở đây. Kết luận có suy ra được từ bằng chứng hay không là việc của bước kiểm bằng LLM.
 
+## Kiểm bằng LLM (`judge.py`)
+
+`LLMJudge` gọi LLM **một lần** cho mỗi bản nháp để xét điều mà luật không xét được: số liệu hồ sơ có khớp không,
+kết luận có suy ra được từ bằng chứng không.
+
+- **Chỉ chạy khi cần**: bản nháp đã bị luật bắt lỗi thì không gọi LLM; không có key LLM thì chỉ chạy luật.
+- **Ngữ cảnh tách biệt**: judge có system prompt riêng, chỉ thấy câu hỏi, bằng chứng và bản nháp, không thấy lịch sử
+  hội thoại. Mọi thứ nó đọc nằm trong thẻ `<question>`, `<student_facts>`, `<regulations>`, `<draft>` và được khai
+  báo là dữ liệu, không phải chỉ dẫn.
+- **Structured output**: gửi `response_format` dạng JSON schema (`{"issues": [{"code", "message"}]}`) cho provider
+  có hỗ trợ; vẫn đọc được khi LLM bọc JSON trong code fence.
+- **Không bao giờ ngầm cho qua**: gọi LLM lỗi hoặc không đọc được kết quả thì báo `UNVERIFIED` → `refuse`.
+- **Không phụ thuộc Advisor**: judge nhận LLM qua interface `JudgeLLM` (`is_available`, `generate`); `LLMClient` của
+  Advisor được truyền vào ở chỗ ráp service.
+
 ## Trạng thái
 
-- Đã có: bộ khung gộp verdict, check theo luật.
-- Chưa có: kiểm bằng LLM, vòng lặp Advisor ↔ Verifier.
+- Đã có: bộ khung gộp verdict, check theo luật, kiểm bằng LLM.
+- Chưa có: vòng lặp Advisor ↔ Verifier.
