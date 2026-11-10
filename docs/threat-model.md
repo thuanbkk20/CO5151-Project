@@ -51,11 +51,11 @@ D2 chưa yêu cầu chạy thử prompt injection lên agent. Các ca đã soạ
 | E4 | Agent bị dụ thực hiện thao tác ghi | Chỉ có tool chỉ đọc (`readOnlyHint`), không có handler ghi | Đã cài + có test | S15; ca agent `PI11` |
 | E5 | Lẫn dữ liệu giữa các người dùng đồng thời | Token đọc theo từng request (context-local) | Đã cài + có test | S16 |
 | E1 | Mạo danh MSSV hoặc vai cố vấn trong câu chat | Danh tính chỉ đến từ token phiên, không từ nội dung chat | Tầng tool: đã cài. Tầng agent: kế hoạch | `PI02`, `PI03`, `PI07`, `PI08`, `O02` |
-| E1 | Jailbreak ép xác nhận "đủ điều kiện tốt nghiệp" | Verifier đối chiếu kết luận với dữ liệu tool và quy chế, được quyền từ chối | Kế hoạch | `PI04`, `PI12`, `O05` |
-| E1 | Ép bịa điều khoản | Strict Refusal khi không có căn cứ; Verifier kiểm tra mọi trích dẫn có trong kết quả Regulation MCP | Kế hoạch | `PI10`, `O01`, `O03` |
-| E1 | Lộ system prompt / token | Token chỉ ở host, không vào ngữ cảnh LLM (đã cài ở tầng MCP); chuỗi canary trong system prompt | Một phần | `PI01`, `PI06` |
-| E2 | Lịch sử hội thoại giả "chế độ quản trị" | Quyền chỉ đến từ token; bộ nhớ ngắn hạn không mang quyền | Kế hoạch | `PI09` |
-| E3 | Đoạn văn độc trong tài liệu quy chế | Coi kết quả Regulation MCP là dữ liệu, không phải lệnh (đánh dấu ranh giới trong prompt); Verifier đối chiếu văn bản gốc | Kế hoạch | `PI05` |
+| E1 | Jailbreak ép xác nhận "đủ điều kiện tốt nghiệp" | Verifier đối chiếu kết luận với dữ liệu tool và quy chế, được quyền từ chối | Đã cài + có test (`services/verifier`: `LLMJudge`); chưa đo trên ca `PI` | `PI04`, `PI12`, `O05` |
+| E1 | Ép bịa điều khoản | Strict Refusal khi không có căn cứ; Verifier kiểm tra mọi trích dẫn có trong kết quả Regulation MCP | Đã cài + có test (check theo luật `cited_provisions_are_retrieved`, không cần LLM); chưa đo trên ca `PI` | `PI10`, `O01`, `O03` |
+| E1 | Lộ system prompt / token | Token chỉ ở host, không vào ngữ cảnh LLM (đã cài ở tầng MCP); chuỗi canary trong system prompt của Advisor và Verifier; Advisor xoá canary/token khỏi câu trả lời, Verifier kiểm lại (`no_secrets`) | Đã cài + có test; chưa đo trên ca `PI` | `PI01`, `PI06` |
+| E2 | Lịch sử hội thoại giả "chế độ quản trị" | Quyền chỉ đến từ token; bộ nhớ ngắn hạn không mang quyền; Verifier không nhận lịch sử hội thoại | Một phần: Verifier đã cài; Advisor vẫn đọc lịch sử, chưa đo | `PI09` |
+| E3 | Đoạn văn độc trong tài liệu quy chế | Coi kết quả Regulation MCP là dữ liệu, không phải lệnh (đánh dấu ranh giới trong prompt); Verifier đối chiếu văn bản gốc | Một phần: prompt của Verifier đánh dấu ranh giới dữ liệu và đối chiếu với các đoạn đã tra (không tra lại corpus gốc); prompt của Advisor chưa đánh dấu | `PI05` |
 | A6 | Audit log thành bản sao dữ liệu cá nhân | Actor/target lưu dạng pseudonym HMAC; bộ nhớ dài hạn không lưu điểm | Tầng MCP: đã cài. Tầng agent: kế hoạch | `test_service.py::test_every_call_is_audited` |
 
 ## 5. Kết quả kiểm thử tầng tool
@@ -74,7 +74,8 @@ do lệnh trên in ra, dán thẳng vào báo cáo được.
 - Token là HMAC với khóa dùng chung, mô phỏng SSO. Lộ khóa thì giả được mọi token. Bản thật nên dùng JWT bất đối
   xứng và kiểm tra `aud`.
 - Chưa thu hồi được token trước khi hết hạn.
-- Mọi biện pháp ở tầng agent (E1–E3) còn là kế hoạch, chưa có số liệu. 12 ca `PI` sẽ chạy khi có Advisor:
+- Biện pháp ở tầng agent (E1–E3) đã có Verifier nhưng **chưa có số liệu**: 12 ca `PI` chưa chạy. Verifier chỉ đối
+  chiếu với các đoạn Advisor đã tra, nên không bắt được lỗi do tra sai đoạn. Chạy 12 ca `PI`:
 
   ```bash
   uv run co5151-eval run --agent <adapter> --suite injection
