@@ -22,6 +22,9 @@ htmlcov/
 *.db
 *.sqlite3
 
+# Personal Claude Code notes
+CLAUDE.local.md
+
 # Editors / OS
 .vscode/
 .idea/
