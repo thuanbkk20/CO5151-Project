@@ -6,7 +6,7 @@
 |---|---|
 | Ngày | 25/10/2026, bắt đầu 16:02 |
 | Commit | `38c6e56` (nhánh `feat/eval-html-report`), cây làm việc sạch |
-| Kết quả | `eval/results/final-20261025-1557/` (không commit, chạy lại bằng lệnh dưới). Report HTML của lần chạy này: [eval-d2-report.html](eval-d2-report.html), tải về rồi mở bằng trình duyệt |
+| Kết quả | `eval/results/final-20261025-1557/` (không commit, chạy lại bằng lệnh dưới). Report HTML của lần chạy này: [d2-report.html](d2-report.html), tải về rồi mở bằng trình duyệt |
 | Advisor | `gemini/gemini-3.5-flash-lite`, không thinking; planner `LLMDecisionPlanner`; quy chế qua Regulation MCP (`ToolRegulationSource`, dữ liệu nháp) |
 | Cấu hình đơn giản hơn | `record_template`: đọc hồ sơ rồi in theo mẫu, không dùng LLM |
 | Quy mô | 24 câu × 3 seed mỗi cấu hình |
@@ -16,7 +16,7 @@ uv run co5151-eval check-gold
 uv run co5151-eval security --json security.json
 uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2 --out <thư mục>/record_template
 uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --seeds 0 1 2 --out <thư mục>/advisor
-uv run co5151-eval report <thư mục>/advisor <thư mục>/record_template -o docs/eval-d2-report.html \
+uv run co5151-eval report <thư mục>/advisor <thư mục>/record_template -o docs/eval/d2-report.html \
   --regulation-lookup co5151_advisor.eval_adapter:regulation_ids
 ```
 

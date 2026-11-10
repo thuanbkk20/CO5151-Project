@@ -119,7 +119,7 @@ Hai hệ thống này **không phải** baseline của proposal.
 `co5151-eval security` tự dựng Student Record MCP trên một cổng trống (hoặc `--url` tới server đang chạy). Sau đó
 nó chạy 16 ca tấn công qua Streamable HTTP thật: token giả / sửa / hết hạn, đọc chéo sinh viên, chèn tham số,
 SQL/prompt injection vào tham số, dò MSSV, tối thiểu hóa dữ liệu, bề mặt tool chỉ đọc, cô lập phiên đồng thời.
-Danh sách ca và kết quả dùng cho [docs/threat-model.md](../docs/threat-model.md).
+Danh sách ca và kết quả dùng cho [docs/design/threat-model.md](../docs/design/threat-model.md).
 
 ## Giới hạn hiện tại
 

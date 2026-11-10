@@ -14,7 +14,7 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 | `services/verifier` | Compliance Verifier, reflection & grounding loop, strict refusal | 4. Verifier & Security |
 | `apps/web` | **Giao diện chat** Chainlit: đăng nhập tài khoản demo, chọn LLM, chat nhiều lượt | 5. Kiểm thử & đánh giá |
 | `eval` | **Evaluation**: bộ 24 task, metric, baseline, kiểm thử bảo mật & prompt injection | 5. Kiểm thử & đánh giá |
-| `docs` | Tài liệu kiến trúc, báo cáo | — |
+| `docs` | Tài liệu thiết kế và báo cáo đánh giá, mục lục ở [docs/README.md](docs/README.md) | — |
 
 ## Bắt đầu
 
