@@ -6,7 +6,8 @@
         "FACT_MISMATCH",
         "UNGROUNDED_CLAIM",
         "MISSING_EVIDENCE",
-        "LEAK"
+        "LEAK",
+        "UNVERIFIED"
       ],
       "title": "IssueCode",
       "type": "string"

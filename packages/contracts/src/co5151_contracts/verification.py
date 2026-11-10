@@ -23,6 +23,7 @@ class IssueCode(str, Enum):
     UNGROUNDED_CLAIM = "UNGROUNDED_CLAIM"  # a conclusion the evidence does not support
     MISSING_EVIDENCE = "MISSING_EVIDENCE"  # nothing was retrieved that could support the conclusion
     LEAK = "LEAK"  # a secret or another person's data appears in the draft
+    UNVERIFIED = "UNVERIFIED"  # the check itself could not be completed (e.g. the judge LLM failed)
 
 
 class RegulationExcerpt(BaseModel):
