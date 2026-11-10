@@ -11,7 +11,7 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 | `mcp/student-server` | **Student Record MCP**: mock DB điểm/tín chỉ/hồ sơ, scoped read-only, xác thực bằng Bearer token | 2. Student Data & MCP |
 | `mcp/regulation-server` | **Regulation MCP**: Knowledge Graph + GraphRAG tra cứu quy chế | 1. Data & GraphRAG & MCP |
 | `services/advisor` | Advisor Agent, decision-driven RAG, short-term & audit memory | 3. Advisor Agent & Memory |
-| `verifier` | Compliance Verifier, reflection & grounding loop, strict refusal | 4. Verifier & Security |
+| `services/verifier` | Compliance Verifier, reflection & grounding loop, strict refusal | 4. Verifier & Security |
 | `apps/web` | **Giao diện chat** Chainlit: đăng nhập tài khoản demo, chọn LLM, chat nhiều lượt | 5. Kiểm thử & đánh giá |
 | `eval` | **Evaluation**: bộ 24 task, metric, baseline, kiểm thử bảo mật & prompt injection | 5. Kiểm thử & đánh giá |
 | `docs` | Tài liệu kiến trúc, báo cáo | — |
