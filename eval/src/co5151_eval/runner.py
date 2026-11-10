@@ -32,12 +32,14 @@ class Record:
     text: str = ""
     error: str | None = None
     citations: list[str] = field(default_factory=list)
+    verifier_rounds: int | None = None
 
 
 def _record(task: Task, seed: int, latency: float, resp: AgentResponse, s: Score, error: str | None) -> Record:
     return Record(task.id, task.group.value, seed, round(latency, 4), resp.usage.total, s.outcome.value,
                   s.outcome_ok, s.facts_hit, s.facts_total, s.citations_hit, s.citations_total, s.forbidden_hits,
-                  False if error else s.passed, resp.tool_calls, resp.text, error, resp.citations)  # fmt: skip
+                  False if error else s.passed, resp.tool_calls, resp.text, error, resp.citations,
+                  resp.verifier_rounds)  # fmt: skip
 
 
 def run(
@@ -99,6 +101,9 @@ def _block(rs: list[Record]) -> dict:
         "latency_p50_s": _pct(lat, 0.5),
         "latency_p95_s": _pct(lat, 0.95),
         "tokens_mean": round(statistics.fmean(r.tokens for r in rs), 1) if rs else None,
+        # Answers the Verifier sent back for a rewrite, and answers it turned into a refusal
+        "verifier_rewrites": sum((r.verifier_rounds or 0) > 1 for r in rs),
+        "verifier_refusals": sum(bool(r.verifier_rounds) and r.outcome == Outcome.REFUSE.value for r in rs),
     }
 
 
@@ -130,6 +135,8 @@ _COLUMNS = [
     ("latency_p50_s", "p50 (s)"),
     ("latency_p95_s", "p95 (s)"),
     ("tokens_mean", "Tokens/câu"),
+    ("verifier_rewrites", "Verifier viết lại"),
+    ("verifier_refusals", "Verifier từ chối"),
 ]
 
 

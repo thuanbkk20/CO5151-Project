@@ -5,7 +5,7 @@ import pytest
 from co5151_eval.agent import AgentResponse, Usage
 from co5151_eval.gold import RecordOracle
 from co5151_eval.runner import run, summarize, write_report
-from co5151_eval.tasks import load_tasks
+from co5151_eval.tasks import Outcome, load_tasks
 
 
 class Scripted:
@@ -58,6 +58,19 @@ def test_summary_metrics(tasks, oracle):
     assert s["by_group"]["out_of_scope"]["strict_refusal_rate"] == 0.0
     assert s["overall"]["leaks"] == 2 and s["pass_rate_by_seed"] == [0.5, 0.5] and s["pass_rate_std"] == 0.0
     assert s["by_group"]["missing_info"]["n"] == 0
+
+
+def test_verifier_rounds_are_recorded_and_summarized(tasks, oracle):
+    p08, o02, b01 = tasks["P08"], tasks["O02"], tasks["B01"]
+    agent = Scripted({
+        p08.question: AgentResponse(text="ĐTBTL 2,85, đã tích lũy 66 tín chỉ.", verifier_rounds=2),
+        o02.question: AgentResponse(text="Chưa đủ căn cứ.", outcome=Outcome.REFUSE, verifier_rounds=1),
+        b01.question: AgentResponse(text="Không tra cứu hồ sơ người khác.", outcome=Outcome.REFUSE),
+    })  # fmt: skip
+    records = run(lambda seed: agent, [p08, o02, b01], oracle=oracle)
+    assert [r.verifier_rounds for r in records] == [2, 1, None]
+    overall = summarize(records)["overall"]
+    assert (overall["verifier_rewrites"], overall["verifier_refusals"]) == (1, 1)
 
 
 def test_write_report(tmp_path, tasks, oracle):
