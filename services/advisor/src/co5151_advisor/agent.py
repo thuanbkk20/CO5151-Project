@@ -1,14 +1,46 @@
 import os
 import time
-from typing import Any
+from typing import Any, Protocol
 
+from co5151_contracts import IssueCode, RegulationExcerpt, Verdict, VerdictStatus, VerificationRequest
 from co5151_eval.agent import AgentResponse, Outcome, Usage
 
 from .executor import StudentExecutor
-from .llm import CANARY_STRING, LLMClient
+from .llm import CANARY_STRING, LLMClient, LLMResult
 from .memory import DecisionTrace, MemoryGate
 from .planner import Action, DecisionPlanner, Evidence, LayaDecisionPlanner, LLMDecisionPlanner
 from .regulations import RegulationDocument, RegulationSource, StaticRegulationSource
+
+# The Verifier checks a draft at most this many times, so the Advisor rewrites at most once before refusing.
+MAX_VERIFIER_ROUNDS = 2
+
+SUMMARY_FACTS = {
+    "ctdt",
+    "program_credits",
+    "credits_earned",
+    "remaining_credits",
+    "cgpa",
+    "capstone_project_passed",
+    "toeic",
+    "english_cert",
+    "gdtc_completed",
+    "gdqp_completed",
+}
+WARNING_FACTS = {"currently_warned", "consecutive_warnings"}
+
+REFUSAL_UNGROUNDED = (
+    "Tôi chưa đủ căn cứ từ quy chế và hồ sơ đã tra cứu để trả lời chắc chắn câu hỏi này. "
+    "Bạn vui lòng liên hệ Phòng Đào tạo hoặc cố vấn học tập để được xác nhận."
+)
+REFUSAL_UNVERIFIED = (
+    "Hệ thống chưa kiểm chứng được câu trả lời nên chưa thể tư vấn cho câu hỏi này. Bạn vui lòng thử lại sau."
+)
+
+
+class Verifier(Protocol):
+    """Second agent that checks a draft against its evidence (`co5151_verifier.ComplianceVerifier`)."""
+
+    def verify(self, request: VerificationRequest) -> Verdict: ...
 
 
 class AdvisorAgent:
@@ -23,8 +55,10 @@ class AdvisorAgent:
         memory_gate: MemoryGate | None = None,
         llm_client: LLMClient | None = None,
         planner: DecisionPlanner | LayaDecisionPlanner | LLMDecisionPlanner | None = None,
+        verifier: Verifier | None = None,
     ):
         self.service = service
+        self.verifier = verifier
         self.executor = StudentExecutor(service)
         self.regulation_source = regulation_source or StaticRegulationSource()
         self.memory_gate = memory_gate or MemoryGate()
@@ -46,6 +80,7 @@ class AdvisorAgent:
             "llm": self.llm_client.describe() if self.llm_client else None,
             "planner": type(self.planner).__name__,
             "regulation_source": type(self.regulation_source).__name__,
+            "verifier": _describe(self.verifier),
         }
 
     def answer(
@@ -183,37 +218,14 @@ class AdvisorAgent:
 
             if action == Action.RESPOND:
                 self.traces.append(DecisionTrace(action="RESPOND", sources=[], created_at=time.time()))
-                usage = Usage(input_tokens=50, output_tokens=50)
-                response_text = ""
-                outcome: Outcome | None = Outcome.ANSWER
-
-                if self.llm_client and self.llm_client.is_available:
-                    prompt = self._build_llm_prompt(
-                        question, evidence, matched_regulations, logged_in=session_token is not None
-                    )
-                    llm_res = self.llm_client.generate(prompt, history=history)
-                    if llm_res and llm_res.text:
-                        response_text = llm_res.text
-                        outcome = None
-                        usage = Usage(input_tokens=llm_res.input_tokens, output_tokens=llm_res.output_tokens)
-
-                if not response_text:
-                    response_text = self._synthesize_response(question, evidence, matched_regulations)
-
-                # Defense against canary leak (R6)
-                if CANARY_STRING in response_text:
-                    response_text = response_text.replace(CANARY_STRING, "")
-
-                # Sanitize to guarantee session token is NEVER echoed
-                if session_token and session_token in response_text:
-                    response_text = response_text.replace(session_token, "[REDACTED_TOKEN]")
-
-                return AgentResponse(
-                    text=response_text,
-                    outcome=outcome,
+                return self._respond(
+                    question,
+                    evidence,
+                    matched_regulations,
+                    session_token=session_token,
+                    history=history,
                     tool_calls=tool_calls,
                     citations=citations,
-                    usage=usage,
                 )
 
         return AgentResponse(
@@ -222,6 +234,70 @@ class AdvisorAgent:
             tool_calls=tool_calls,
             citations=citations,
         )
+
+    def _respond(
+        self,
+        question: str,
+        evidence: Evidence,
+        regulations: list[RegulationDocument],
+        *,
+        session_token: str | None,
+        history: list[dict[str, str]],
+        tool_calls: list[str],
+        citations: list[str],
+    ) -> AgentResponse:
+        """Write the answer, then let the Verifier pass it, send it back once for a rewrite, or refuse it."""
+        prompt = self._build_llm_prompt(question, evidence, regulations, logged_in=session_token is not None)
+        draft = self._generate(prompt, history)
+        if draft:
+            text, outcome = draft.text, None
+            usage = Usage(input_tokens=draft.input_tokens, output_tokens=draft.output_tokens)
+        else:
+            text, outcome = self._synthesize_response(question, evidence, regulations), Outcome.ANSWER
+            usage = Usage(input_tokens=50, output_tokens=50)
+        text = _sanitize(text, session_token)
+
+        rounds: int | None = None
+        if self.verifier is not None:
+            rounds = 0
+            while True:
+                verdict = self.verifier.verify(_verification_request(question, text, evidence, regulations))
+                rounds += 1
+                usage = _add(usage, verdict.input_tokens, verdict.output_tokens)
+                self.traces.append(
+                    DecisionTrace(action=f"VERIFY_{verdict.status.name}", sources=["verifier"], created_at=time.time())
+                )
+                if verdict.status is VerdictStatus.PASS:
+                    break
+                rewrite = None
+                if verdict.status is VerdictStatus.REVISE and rounds < MAX_VERIFIER_ROUNDS:
+                    rewrite = self._generate(prompt + _revision_request(text, verdict), history)
+                if rewrite is None:
+                    return AgentResponse(
+                        text=_refusal(verdict),
+                        outcome=Outcome.REFUSE,
+                        tool_calls=tool_calls,
+                        citations=citations,
+                        usage=usage,
+                        verifier_rounds=rounds,
+                    )
+                usage = _add(usage, rewrite.input_tokens, rewrite.output_tokens)
+                text, outcome = _sanitize(rewrite.text, session_token), None
+
+        return AgentResponse(
+            text=text,
+            outcome=outcome,
+            tool_calls=tool_calls,
+            citations=citations,
+            usage=usage,
+            verifier_rounds=rounds,
+        )
+
+    def _generate(self, prompt: str, history: list[dict[str, str]]) -> LLMResult | None:
+        if not (self.llm_client and self.llm_client.is_available):
+            return None
+        result = self.llm_client.generate(prompt, history=history)
+        return result if result and result.text else None
 
     def _build_llm_prompt(
         self,
@@ -300,6 +376,57 @@ class AdvisorAgent:
             parts.insert(0, f"{verdict}:")
 
         return " ".join(parts) if parts else "Đã hoàn thành tra cứu thông tin học vụ theo yêu cầu của bạn."
+
+
+def _sanitize(text: str, session_token: str | None) -> str:
+    """Never echo the prompt canary (R6) or the session token."""
+    text = text.replace(CANARY_STRING, "")
+    if session_token and session_token in text:
+        text = text.replace(session_token, "[REDACTED_TOKEN]")
+    return text
+
+
+def _add(usage: Usage, input_tokens: int, output_tokens: int) -> Usage:
+    return Usage(
+        input_tokens=usage.input_tokens + input_tokens,
+        output_tokens=usage.output_tokens + output_tokens,
+    )
+
+
+def _describe(component: Any) -> Any:
+    describe = getattr(component, "describe", None)
+    return describe() if callable(describe) else (type(component).__name__ if component is not None else None)
+
+
+def _verification_request(
+    question: str, draft: str, evidence: Evidence, regulations: list[RegulationDocument]
+) -> VerificationRequest:
+    """Exactly the evidence the draft was written from; no token, no student id, no chat history."""
+    fields = (SUMMARY_FACTS if evidence.has_academic_summary else set()) | (
+        WARNING_FACTS if evidence.has_warnings else set()
+    )
+    excerpts = {doc.id: RegulationExcerpt(id=doc.id, title=doc.title, content=doc.content) for doc in regulations}
+    return VerificationRequest(
+        question=question,
+        draft=draft,
+        student_facts=evidence.model_dump(include=fields) if fields else {},
+        regulations=list(excerpts.values()),
+    )
+
+
+def _revision_request(draft: str, verdict: Verdict) -> str:
+    issues = "\n".join(f"- [{issue.code.value}] {issue.message}" for issue in verdict.issues)
+    return (
+        f"\n\nBản nháp trước của bạn:\n<draft>\n{draft}\n</draft>\n"
+        f"Bộ kiểm chứng trả lại bản nháp này vì:\n{issues}\n"
+        "Hãy viết lại câu trả lời và sửa các lỗi trên. Chỉ dùng bằng chứng đã cho; điều gì bằng chứng không nêu "
+        "thì nói rõ là chưa đủ căn cứ, không suy đoán."
+    )
+
+
+def _refusal(verdict: Verdict) -> str:
+    unverified = any(issue.code is IssueCode.UNVERIFIED for issue in verdict.issues)
+    return REFUSAL_UNVERIFIED if unverified else REFUSAL_UNGROUNDED
 
 
 def _english_status(evidence: Evidence) -> str:

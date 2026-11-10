@@ -49,7 +49,18 @@ kết luận có suy ra được từ bằng chứng không.
 - **Không phụ thuộc Advisor**: judge nhận LLM qua interface `JudgeLLM` (`is_available`, `generate`); `LLMClient` của
   Advisor được truyền vào ở chỗ ráp service.
 
-## Trạng thái
+## Nối với Advisor
 
-- Đã có: bộ khung gộp verdict, check theo luật, kiểm bằng LLM.
-- Chưa có: vòng lặp Advisor ↔ Verifier.
+`co5151_advisor.eval_adapter.make_verifier` dựng Verifier theo `ADVISOR_VERIFIER` (`llm` mặc định, `rules`, `off`) và
+truyền vào `AdvisorAgent(verifier=...)`. Vòng lặp (tối đa 2 lượt kiểm, 1 lần viết lại) nằm ở
+`AdvisorAgent._respond`; xem mục 2.D trong [README của Advisor](../advisor/README.md).
+
+## Chi phí LLM
+
+| Tình huống | Lần gọi LLM của Verifier |
+|---|---|
+| Luật đã bắt lỗi, hoặc `ADVISOR_VERIFIER=rules`, hoặc không có key | 0 |
+| Bản nháp đạt luật | 1 |
+| Bản nháp bị trả lại và được viết lại | 2 (cộng 1 lần viết lại của Advisor) |
+
+Prompt của judge đặt bằng chứng trước, bản nháp sau, nên lượt kiểm lại dùng chung phần đầu prompt với lượt đầu.

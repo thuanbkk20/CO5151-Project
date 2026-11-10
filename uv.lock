@@ -679,6 +679,7 @@ dependencies = [
     { name = "co5151-eval" },
     { name = "co5151-regulation-server" },
     { name = "co5151-student-server" },
+    { name = "co5151-verifier" },
     { name = "openai" },
     { name = "pydantic" },
 ]
@@ -689,6 +690,7 @@ requires-dist = [
     { name = "co5151-eval", editable = "eval" },
     { name = "co5151-regulation-server", editable = "mcp/regulation-server" },
     { name = "co5151-student-server", editable = "mcp/student-server" },
+    { name = "co5151-verifier", editable = "services/verifier" },
     { name = "openai", specifier = ">=1.0" },
     { name = "pydantic", specifier = ">=2" },
 ]

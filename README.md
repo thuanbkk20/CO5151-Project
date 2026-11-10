@@ -65,6 +65,22 @@ so sánh nhiều lần chạy trên một trang bằng `uv run co5151-eval repor
 `LLM generation failed, falling back to deterministic template` thì câu đó **không** do LLM trả lời (key sai, hết
 tiền, model không hỗ trợ tham số); `tokens` của câu đó là 100.
 
+Trước khi trả lời, bản nháp của Advisor đi qua **Compliance Verifier** ([services/verifier](services/verifier/README.md)):
+đạt thì gửi, sai sửa được thì Advisor viết lại đúng một lần, thiếu căn cứ thì từ chối. Chọn mức kiểm bằng
+`ADVISOR_VERIFIER` trong `.env`:
+
+| Giá trị | Verifier làm gì | Số lần gọi LLM thêm cho mỗi câu trả lời |
+| --- | --- | --- |
+| `llm` (mặc định) | Kiểm bằng luật, đạt rồi mới gọi LLM đối chiếu bản nháp với bằng chứng | 1; tối đa 3 nếu phải viết lại (1 viết lại + 1 kiểm lại) |
+| `rules` | Chỉ kiểm bằng luật: trích dẫn phải có trong đoạn quy chế đã tra, không lộ token | 0; 1 nếu phải viết lại |
+| `off` | Không kiểm (agent đơn) | 0 |
+
+`VERIFIER_LLM_MODEL` cho Verifier dùng model khác (rẻ hơn) của cùng provider. Baseline "agent đơn không Verifier":
+
+```bash
+uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent_no_verifier --seeds 0 1 2
+```
+
 Chạy từng MCP server riêng để thử bằng MCP client:
 
 ```bash

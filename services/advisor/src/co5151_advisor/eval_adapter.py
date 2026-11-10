@@ -5,10 +5,11 @@ from typing import Any
 
 import regulation_server
 from co5151_eval.gold import RecordOracle
+from co5151_verifier import ComplianceVerifier, LLMJudge, rule_checks
 from regulation_server.regulation_service_v2 import RegulationServiceV2
 
 from .agent import AdvisorAgent
-from .llm import LLMClient
+from .llm import CANARY_STRING, LLMClient
 from .mcp_clients import McpRegulationService, McpStudentService
 from .regulations import RegulationSource, StaticRegulationSource, ToolRegulationSource
 
@@ -54,6 +55,32 @@ def regulation_ids(question: str) -> list[str]:
     return [doc.id for doc in regulation_source().search(question)]
 
 
+def make_verifier(llm: LLMClient | None = None) -> ComplianceVerifier | None:
+    """The Compliance Verifier the Advisor answers through, chosen by `ADVISOR_VERIFIER`.
+
+    `llm` (default): free rule checks, then one LLM judge call for a draft that passed them.
+    `rules`: rule checks only, no extra LLM call. `off`: no Verifier (the single-agent baseline).
+    The judge uses the Advisor's `llm` unless `VERIFIER_LLM_MODEL` names another model of the same provider.
+    """
+    mode = os.environ.get("ADVISOR_VERIFIER", "llm").strip().lower()
+    if mode == "off":
+        return None
+    checks = rule_checks(secrets=[CANARY_STRING])
+    if mode == "rules":
+        return ComplianceVerifier(checks)
+    model = os.environ.get("VERIFIER_LLM_MODEL", "").strip()
+    if llm is None or model:
+        llm = LLMClient(provider=llm.provider if llm else None, model=model or None)
+    return ComplianceVerifier(checks, judge=LLMJudge(llm, canary=CANARY_STRING))
+
+
 def make_agent(seed: int = 0) -> AdvisorAgent:
+    oracle = RecordOracle()
+    llm = LLMClient()
+    return AdvisorAgent(oracle.service, regulation_source(), llm_client=llm, verifier=make_verifier(llm))
+
+
+def make_agent_no_verifier(seed: int = 0) -> AdvisorAgent:
+    """Baseline of the proposal: the same Advisor as a single agent, whatever `ADVISOR_VERIFIER` says."""
     oracle = RecordOracle()
     return AdvisorAgent(oracle.service, regulation_source(), llm_client=LLMClient())
