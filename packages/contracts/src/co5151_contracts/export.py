@@ -12,6 +12,7 @@ from pathlib import Path
 from .auth import SessionClaims
 from .envelope import ToolErrorBody
 from .tools import STUDENT_RECORD_TOOLS
+from .verification import Verdict, VerificationRequest
 
 DEFAULT_OUT = Path(__file__).resolve().parents[2] / "schemas"
 
@@ -21,6 +22,8 @@ def render() -> dict[str, str]:
         "common/tool-error.json": ToolErrorBody.model_json_schema(),
         "common/session-claims.json": SessionClaims.model_json_schema(),
         "student-record/tools.json": [t.manifest() for t in STUDENT_RECORD_TOOLS.values()],
+        "verifier/verification-request.json": VerificationRequest.model_json_schema(),
+        "verifier/verdict.json": Verdict.model_json_schema(),
     }
     for t in STUDENT_RECORD_TOOLS.values():
         files[f"student-record/{t.name}.input.json"] = t.input_schema()

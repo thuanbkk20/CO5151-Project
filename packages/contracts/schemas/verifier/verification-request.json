@@ -1,0 +1,76 @@
+{
+  "$defs": {
+    "RegulationExcerpt": {
+      "additionalProperties": false,
+      "description": "One retrieved provision, as the Advisor showed it to the LLM.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "content"
+      ],
+      "title": "RegulationExcerpt",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "question": {
+      "title": "Question",
+      "type": "string"
+    },
+    "draft": {
+      "title": "Draft",
+      "type": "string"
+    },
+    "student_facts": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "title": "Student Facts",
+      "type": "object"
+    },
+    "regulations": {
+      "items": {
+        "$ref": "#/$defs/RegulationExcerpt"
+      },
+      "title": "Regulations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "question",
+    "draft"
+  ],
+  "title": "VerificationRequest",
+  "type": "object"
+}
