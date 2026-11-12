@@ -17,6 +17,8 @@ def main(argv: list[str] | None = None) -> int:
     a = p.parse_args(argv)
     load_env_file(a.env_file or find_env_file())
     logging.basicConfig(level=os.environ.get("BACKEND_LOG_LEVEL", "INFO"), stream=sys.stderr)
+    for noisy in ("httpx", "httpx2", "mcp"):  # one line per MCP request otherwise
+        logging.getLogger(noisy).setLevel(logging.WARNING)
 
     import uvicorn
 
