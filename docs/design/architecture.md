@@ -45,3 +45,20 @@ Database, MCP và LLM đều là adapter sau một port; đổi adapter không p
    Student Record.
 8. **Database mới**, không migrate dữ liệu chat cũ (dữ liệu demo). Bảng mới không theo format của Chainlit.
 9. **eval dùng gateway trong process** (gọi thẳng service của MCP server) để chạy nhanh; app luôn đi qua MCP.
+
+## Verifier và chi phí LLM
+
+Verifier kiểm bản nháp hai lớp: luật trước (trích dẫn phải nằm trong các đoạn quy chế đã tra, không lộ token/canary),
+đạt rồi mới gọi LLM judge (số liệu hồ sơ khớp, kết luận suy ra được từ bằng chứng). `revise` → Advisor viết lại 1
+lần rồi kiểm lại; không đạt hoặc `refuse` → từ chối. Lời gọi LLM thêm cho mỗi câu: `llm` 1 (3 nếu viết lại),
+`rules` 0 (1 nếu viết lại), `off` 0. Đo một lần trên câu P02 (`gemini-3.1-flash-lite`, có viết lại, code cũ ngày
+2026-11-10): 7 lời gọi, 12.264 + 1.675 token, 12,6 s. Chưa có số liệu cả bộ 24 câu với Verifier.
+
+## Còn mở
+
+1. **Dữ liệu điểm trong lịch sử chat** mâu thuẫn với cam kết D1 (threat model A6): giữ, thêm hạn tự xóa, hay chỉ
+   lưu câu hỏi + trace?
+2. **Đổi cấu trúc bảng**: hiện chỉ tạo bảng còn thiếu; khi deploy thật thì thêm Alembic. PostgreSQL chưa chạy với
+   server thật.
+3. **Khách**: mỗi lần đăng nhập `khach` là một danh tính mới, đăng xuất là mất lịch sử.
+4. Đăng nhập qua endpoint của student-server (quyết định 5) chưa làm.

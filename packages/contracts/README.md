@@ -33,4 +33,4 @@ uv run python -m co5151_contracts.export          # sinh lại schemas/*.json sa
 uv run python -m co5151_contracts.export --check  # CI: báo lỗi nếu schemas/ đã cũ
 ```
 
-`schemas/` dành cho thành phần không viết bằng Python (ví dụ `apps/web`). **Không sửa tay** các file trong đó.
+`schemas/` dành cho thành phần không viết bằng Python (ví dụ một frontend không viết bằng Python). **Không sửa tay** các file trong đó.

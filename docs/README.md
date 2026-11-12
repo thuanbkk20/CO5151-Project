@@ -1,16 +1,14 @@
 # Tài liệu của nhóm G3
 
 Tài liệu dùng chung cho cả hệ thống. Tài liệu của riêng từng thành phần nằm trong README của thành phần đó
-(ví dụ [services/verifier](../services/verifier/README.md), [eval](../eval/README.md)).
+(ví dụ [frontend](../frontend/README.md), [eval](../eval/README.md)).
 
 ## `design/` — thiết kế
 
 | File | Nội dung |
 |---|---|
-| [architecture.md](design/architecture.md) | Kiến trúc frontend/backend, các tầng của backend và quyết định chính |
+| [architecture.md](design/architecture.md) | Kiến trúc frontend/backend, các tầng của backend, quyết định chính, Verifier, việc còn mở |
 | [threat-model.md](design/threat-model.md) | Threat model v1 (D2, mục 6): tài sản, điểm vào, kẻ tấn công, biện pháp và trạng thái từng biện pháp |
-| [chat-history.md](design/chat-history.md) | Lưu lịch sử chat theo user: bảng dữ liệu, trace id, cách đổi database, việc còn cần quyết |
-| [verifier-summary.md](design/verifier-summary.md) | Compliance Verifier: luồng Advisor ↔ Verifier, các file đã thay đổi và logic từng file, chi phí LLM |
 
 ## `eval/` — kết quả đánh giá
 

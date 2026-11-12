@@ -7,13 +7,11 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 
 | Thư mục | Thành phần | Mảng phụ trách |
 |---|---|---|
-| `packages/chat-store` | Lưu lâu dài lịch sử chat theo người dùng và trace mỗi câu trả lời, trên SQLite hoặc database server | 5. Kiểm thử & đánh giá |
-| `packages/contracts` | Hợp đồng dùng chung: envelope kết quả tool, mã lỗi, claims phiên đăng nhập, schema input/output của tool | 2. Student Data & MCP |
+| `packages/contracts` | Hợp đồng dùng chung: envelope kết quả tool, mã lỗi, claims phiên đăng nhập, schema input/output của tool, ký token | 2. Student Data & MCP |
 | `mcp/student-server` | **Student Record MCP**: mock DB điểm/tín chỉ/hồ sơ, scoped read-only, xác thực bằng Bearer token | 2. Student Data & MCP |
 | `mcp/regulation-server` | **Regulation MCP**: Knowledge Graph + GraphRAG tra cứu quy chế | 1. Data & GraphRAG & MCP |
-| `services/advisor` | Advisor Agent, decision-driven RAG, short-term & audit memory | 3. Advisor Agent & Memory |
-| `services/verifier` | Compliance Verifier, reflection & grounding loop, strict refusal | 4. Verifier & Security |
-| `apps/web` | **Giao diện chat** Chainlit: đăng nhập tài khoản demo, chọn LLM, chat nhiều lượt | 5. Kiểm thử & đánh giá |
+| `backend` | **Backend API** (FastAPI, clean architecture): đăng nhập, chat (thường và SSE), lịch sử hội thoại; Advisor Agent (planner, memory) và Compliance Verifier | 3. Advisor Agent & Memory, 4. Verifier & Security |
+| `frontend` | **Giao diện chat** Chainlit, chỉ gọi backend API | 5. Kiểm thử & đánh giá |
 | `eval` | **Evaluation**: bộ 24 task, metric, baseline, kiểm thử bảo mật & prompt injection | 5. Kiểm thử & đánh giá |
 | `docs` | Tài liệu thiết kế và báo cáo đánh giá, mục lục ở [docs/README.md](docs/README.md) | — |
 
@@ -26,97 +24,67 @@ uv run pytest           # chạy test (test không đọc .env)
 uv run ruff check .     # lint
 ```
 
-Cấu hình của cả app nằm trong một file `.env` ở gốc repo, gồm Student Record MCP, Regulation MCP và LLM của Advisor. Các lệnh
-`student-mcp` và `co5151-eval` tìm `.env` từ thư mục hiện tại ngược lên tới gốc repo; biến đã `export` trong shell được
-ưu tiên. Muốn dùng file khác thì truyền `--env-file <đường dẫn>`. Thành phần mới đọc cấu hình bằng
+Cấu hình của cả app nằm trong một file `.env` ở gốc repo (hai MCP server, backend, LLM, frontend). Mọi lệnh
+(`co5151-api`, `co5151-web`, `student-mcp`, `regulation-mcp`, `co5151-eval`) tìm `.env` từ thư mục hiện tại ngược
+lên tới gốc repo; biến đã `export` trong shell được ưu tiên. Muốn dùng file khác thì truyền `--env-file <đường dẫn>`. Thành phần mới đọc cấu hình bằng
 `co5151_contracts.env.load_env_file(find_env_file())` khi khởi động.
 
 Yêu cầu: Python ≥ 3.10, [uv](https://docs.astral.sh/uv/) ≥ 0.5.
 
 ## Chạy ứng dụng
 
-Chỉ cần điền key của provider LLM đang chọn trong `.env` (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`);
-các biến khác đã có giá trị mặc định chạy được. Danh sách đầy đủ và ý nghĩa từng biến nằm trong
-[.env.example](.env.example).
-
-Đổi provider cho một lần chạy mà không sửa `.env` (biến trong shell được ưu tiên):
-
-```bash
-LLM_PROVIDER=openai uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01 -v
+```
+frontend (Chainlit :8000) --HTTP/SSE--> backend (co5151-api :8100) --MCP HTTP--> student-mcp :8102, regulation-mcp :8103
 ```
 
-Provider OpenAI-compatible khác dùng được ngay bằng `LLM_BASE_URL`, `LLM_API_KEY` và `LLM_MODEL`. Muốn có tên riêng
-thì thêm một dòng vào `PROVIDERS` trong `services/advisor/src/co5151_advisor/llm.py`. Provider, model và cấu hình
-Advisor của mỗi lần chạy được ghi vào `summary.json` / `summary.md` (`agent_config`).
+Điền trong `.env`: key của provider LLM đang chọn (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`),
+`BACKEND_TOKEN_SECRET`, `STUDENT_MCP_TOKEN_SECRET`, `CHAINLIT_AUTH_SECRET`; các biến khác có mặc định chạy được
+([.env.example](.env.example)). Chạy cả 4 process bằng [Procfile](Procfile):
 
 ```bash
-# Advisor end-to-end trên 1 câu: Student Record + Regulation chạy in-process, LLM theo LLM_PROVIDER
-uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --only P01 -v
-
-# Cả bộ 24 câu, 3 seed; so với hệ thống không dùng LLM
-uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent --seeds 0 1 2
-uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2
-
-# Kiểm thử bảo mật Student Record MCP qua HTTP thật
-uv run co5151-eval security
+uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation-mcp, co5151-api, co5151-web
 ```
 
-Kết quả nằm ở `eval/results/<thời gian>-<agent>/` (`report.html` mở bằng trình duyệt, `summary.md`, `results.jsonl`);
-so sánh nhiều lần chạy trên một trang bằng `uv run co5151-eval report <thư mục 1> <thư mục 2> -o report.html`. Nếu terminal in
-`LLM generation failed, falling back to deterministic template` thì câu đó **không** do LLM trả lời (key sai, hết
-tiền, model không hỗ trợ tham số); `tokens` của câu đó là 100.
+Mở http://localhost:8000, đăng nhập `sv001` … `sv008` (mật khẩu `demo`) hoặc `khach` (chỉ hỏi quy chế). Nút cài
+đặt cạnh ô nhập chọn provider (chỉ bên đã có key) và model. Dưới mỗi câu trả lời có "Chi tiết xử lý": từng bước,
+tool, trích dẫn, Verifier, token, thời gian, trace id. Lịch sử chat theo tài khoản do backend lưu
+(`CHAT_DATABASE_URL`, mặc định SQLite `backend/.data/chat.db`). API: [backend/README.md](backend/README.md).
 
-Trước khi trả lời, bản nháp của Advisor đi qua **Compliance Verifier** ([services/verifier](services/verifier/README.md)):
-đạt thì gửi, sai sửa được thì Advisor viết lại đúng một lần, thiếu căn cứ thì từ chối. Chọn mức kiểm bằng
-`ADVISOR_VERIFIER` trong `.env`:
-
-| Giá trị | Verifier làm gì | Số lần gọi LLM thêm cho mỗi câu trả lời |
-| --- | --- | --- |
-| `llm` (mặc định) | Kiểm bằng luật, đạt rồi mới gọi LLM đối chiếu bản nháp với bằng chứng | 1; tối đa 3 nếu phải viết lại (1 viết lại + 1 kiểm lại) |
-| `rules` | Chỉ kiểm bằng luật: trích dẫn phải có trong đoạn quy chế đã tra, không lộ token | 0; 1 nếu phải viết lại |
-| `off` | Không kiểm (agent đơn) | 0 |
-
-`VERIFIER_LLM_MODEL` cho Verifier dùng model khác (rẻ hơn) của cùng provider. Baseline "agent đơn không Verifier":
-
-```bash
-uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent_no_verifier --seeds 0 1 2
-```
-
-Chạy từng MCP server riêng để thử bằng MCP client:
-
-```bash
-uv run student-mcp serve                 # Streamable HTTP http://127.0.0.1:8102/mcp, cần Bearer token
-uv run student-mcp issue-token sv001     # token cho tài khoản demo (mật khẩu: demo)
-uv run regulation-mcp --allow-draft      # Streamable HTTP http://127.0.0.1:8103/mcp; --stdio để chạy qua stdio
-```
-
-### Giao diện chat
-
-```bash
-uv run co5151-web          # http://localhost:8000
-```
-
-Đăng nhập bằng tài khoản demo `sv001` … `sv008` (mật khẩu `demo`), hoặc `khach` để hỏi quy chế chung không cần hồ
-sơ. Nút cài đặt cạnh ô nhập cho chọn nhà cung cấp LLM (chỉ những bên đã có key trong `.env`) và model. Dưới mỗi câu
-trả lời có mục "Chi tiết xử lý": tool đã gọi, trích dẫn, token, thời gian, model. Cần `CHAINLIT_AUTH_SECRET` trong
-`.env`; đổi cổng bằng `CHAINLIT_PORT` hoặc `--port`. Xem [apps/web/README.md](apps/web/README.md).
-
-Lịch sử chat được lưu theo từng tài khoản: thanh bên trái liệt kê các cuộc hội thoại cũ, bấm vào để mở lại và hỏi
-tiếp. Mỗi câu trả lời có một **trace id** (hiện trong "Chi tiết xử lý" và trong log). Mặc định lưu vào file SQLite
-`apps/web/.data/chat.db`; đổi sang database server bằng `CHAT_DATABASE_URL`, tắt bằng `CHAT_DATABASE_URL=off`. Xem
-[docs/design/chat-history.md](docs/design/chat-history.md).
-
-Mặc định web gọi Student Record và Regulation như hàm Python trong cùng process (`inprocess`), nên `student-mcp serve`
-không có log. Để Advisor đi qua giao thức MCP thật, đặt trong `.env`:
+Biến làm đổi cách chạy:
 
 | Biến | Giá trị | Ý nghĩa |
 | --- | --- | --- |
-| `ADVISOR_STUDENT_TRANSPORT` | `inprocess` (mặc định) / `mcp` | `mcp`: gọi `student-mcp serve` qua Streamable HTTP, token gửi trong header Bearer |
-| `STUDENT_MCP_URL` | mặc định `http://<STUDENT_MCP_HOST>:<STUDENT_MCP_PORT>/mcp` | Địa chỉ server khi dùng `mcp` |
-| `ADVISOR_REGULATION_TRANSPORT` | `inprocess` (mặc định) / `mcp` | `mcp`: web tự khởi động `regulation-mcp` làm process con qua stdio |
+| `ADVISOR_PLANNER_MODE` | `llm` (mặc định) / `laya` / `rule` | Planner kiểm luật trước; khi luật không quyết được thì hỏi LLM (1 lời gọi ngắn), Laya (`LAYA_SERVER_URL`), hoặc dùng bước mặc định |
+| `ADVISOR_VERIFIER` | `llm` (mặc định) / `rules` / `off` | Lời gọi LLM thêm mỗi câu: `llm` 1 (3 nếu viết lại), `rules` 0 (1 nếu viết lại), `off` 0 (agent đơn) |
+| `VERIFIER_LLM_MODEL` | tên model | Model riêng (rẻ hơn) cho Verifier, cùng provider |
+| `CHAT_DATABASE_URL` | trống / `off` / `postgresql+asyncpg://...` | SQLite mặc định / chỉ trong bộ nhớ / PostgreSQL (`uv sync --extra postgres`) |
 
-Chế độ `mcp` cần chạy `uv run student-mcp serve` trước, và `STUDENT_MCP_TOKEN_SECRET` phải giống nhau ở web và server
-(cả hai đọc cùng `.env`) vì web vẫn cấp token lúc đăng nhập.
+Provider OpenAI-compatible khác dùng được ngay bằng `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`; muốn có tên riêng
+thì thêm vào `PROVIDERS` trong `backend/src/co5151_backend/infrastructure/llm.py`.
+
+### Đánh giá
+
+eval gọi use case `AskQuestion` của backend trong cùng process (không cần chạy server), cấu hình đọc từ cùng `.env`:
+
+```bash
+uv run co5151-eval run --agent co5151_eval.backend_agent:make_agent --only P01 -v          # 1 câu
+uv run co5151-eval run --agent co5151_eval.backend_agent:make_agent --seeds 0 1 2          # 24 câu × 3 seed
+uv run co5151-eval run --agent co5151_eval.backend_agent:make_agent_no_verifier --seeds 0 1 2  # baseline agent đơn
+uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2         # không dùng LLM
+uv run co5151-eval security                                                                # bảo mật Student Record MCP
+```
+
+Kết quả ở `eval/results/<thời gian>-<agent>/` (`report.html`, `summary.md`, `results.jsonl`); provider, model,
+planner, Verifier của lần chạy ghi trong `agent_config`. Nếu terminal in `answer LLM call failed, falling back` thì
+câu đó **không** do LLM viết (key sai, hết tiền, model không nhận tham số) mà là template; `tokens` = 0 nghĩa là không
+gọi LLM lần nào. Xem [eval/README.md](eval/README.md).
+
+Thử từng MCP server bằng MCP client:
+
+```bash
+uv run student-mcp issue-token sv001     # token cho tài khoản demo (mật khẩu: demo), gửi trong header Bearer
+uv run regulation-mcp --stdio            # Regulation MCP qua stdio thay vì HTTP
+```
 
 Quy ước khi thêm code (biến môi trường, package, tool mới) nằm trong [CLAUDE.md](CLAUDE.md).
 

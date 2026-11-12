@@ -1,2 +1,4 @@
 student: uv run student-mcp serve
-web: ADVISOR_STUDENT_TRANSPORT=mcp ADVISOR_REGULATION_TRANSPORT=mcp uv run co5151-web
+regulation: uv run regulation-mcp
+api: uv run co5151-api
+web: uv run co5151-web
