@@ -143,3 +143,21 @@ async def test_first_message_and_thread_creation_can_race(store):
         conversation = await store.get_conversation(conversation_id)
         assert [s.id for s in conversation.steps] == [f"q{i}"], i
         assert (conversation.user_id, conversation.title) == (user.id, "Câu hỏi"), i
+
+
+async def test_any_write_with_an_owner_creates_an_owned_conversation(store):
+    sv1 = await store.get_or_create_user("sv001")
+    await store.upsert_step(step("q", "by-step"), owner_id=sv1.id)
+    await store.record_turn(Turn(trace_id=new_trace_id(), conversation_id="by-turn"), owner_id=sv1.id)
+    assert await store.conversation_owner("by-step") == "sv001"
+    assert await store.conversation_owner("by-turn") == "sv001"
+
+
+async def test_an_owner_is_set_once_and_never_replaced(store):
+    sv1, sv2 = await store.get_or_create_user("sv001"), await store.get_or_create_user("sv002")
+    await store.upsert_step(step("q", "c1"))  # written without an owner, e.g. by an older version
+    assert await store.conversation_owner("c1") is None
+    await store.upsert_conversation("c1", user_id=sv1.id)
+    await store.upsert_step(step("q2", "c1", seconds=1), owner_id=sv2.id)
+    await store.upsert_conversation("c1", user_id=sv2.id, title="đổi chủ?")
+    assert await store.conversation_owner("c1") == "sv001"

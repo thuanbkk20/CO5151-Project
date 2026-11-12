@@ -1,3 +1,14 @@
+"""Chat store: conversations of each user, their messages, and one trace per answer.
+
+Design rules, each one fixing a failure seen in practice:
+
+- Every write that can create a conversation takes its owner, so no code path leaves a conversation without one.
+  An owner is only set while it is empty and never replaced, so a conversation cannot change hands.
+- Creating a row is a single `INSERT ... ON CONFLICT` statement, never "read, then insert if missing": the chat UI
+  writes the first message and creates the thread concurrently, and both must succeed.
+- Only SQLite and PostgreSQL are accepted: they are the two databases these statements are written and tested for.
+"""
+
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -6,15 +17,21 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import and_, delete, event, func, or_, select
+from sqlalchemy import Table, and_, delete, event, func, or_, select, update
+from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.engine import make_url
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 from .models import Base, ConversationRow, FeedbackRow, StepRow, TurnRow, UserRow
 from .records import Conversation, Feedback, Page, Step, Turn, User
 
 MAX_TITLE = 255
+SUPPORTED_BACKENDS = ("sqlite", "postgresql")
+_INSERT = {"sqlite": sqlite.insert, "postgresql": postgresql.insert}
+
+
+class UnsupportedDatabase(ValueError):
+    pass
 
 
 def utcnow() -> datetime:
@@ -29,9 +46,12 @@ def as_utc(value: datetime | None) -> datetime | None:
 
 
 def create_engine(url: str) -> AsyncEngine:
-    """An async engine for `url`. A SQLite file gets its folder created and foreign keys enforced."""
+    """An async engine for `url`. A SQLite file gets its folder created, WAL and foreign keys."""
     parsed = make_url(url)
-    if parsed.get_backend_name() != "sqlite":
+    backend = parsed.get_backend_name()
+    if backend not in SUPPORTED_BACKENDS:
+        raise UnsupportedDatabase(f"CHAT_DATABASE_URL must be SQLite or PostgreSQL, got {backend!r}")
+    if backend == "postgresql":
         return create_async_engine(url, pool_pre_ping=True)
     if parsed.database and parsed.database != ":memory:":
         Path(parsed.database).expanduser().parent.mkdir(parents=True, exist_ok=True)
@@ -48,14 +68,11 @@ def create_engine(url: str) -> AsyncEngine:
 
 
 class ChatStore:
-    """Conversations of each user, their messages, and one trace per answer.
-
-    All methods are async and take plain values or the dataclasses of `records`, so callers never see SQLAlchemy.
-    Swap the database by changing the URL only.
-    """
+    """All methods are async and take plain values or the dataclasses of `records`; callers never see SQLAlchemy."""
 
     def __init__(self, engine: AsyncEngine):
         self.engine = engine
+        self.backend = engine.dialect.name
         self._sessions = async_sessionmaker(engine, expire_on_commit=False)
 
     @classmethod
@@ -75,6 +92,24 @@ class ChatStore:
         async with self._sessions() as session, session.begin():
             yield session
 
+    def _insert(self, table: Table):
+        return _INSERT[self.backend](table)
+
+    async def _ensure_conversation(self, s: AsyncSession, conversation_id: str, owner_id: str | None) -> None:
+        """Create the conversation if missing, and give it `owner_id` if it has no owner yet. Never changes an owner."""
+        now = utcnow()
+        await s.execute(
+            self._insert(ConversationRow.__table__)
+            .values(id=conversation_id, user_id=owner_id, metadata={}, tags=[], created_at=now, updated_at=now)
+            .on_conflict_do_nothing(index_elements=["id"])
+        )
+        if owner_id is not None:
+            await s.execute(
+                update(ConversationRow)
+                .where(ConversationRow.id == conversation_id, ConversationRow.user_id.is_(None))
+                .values(user_id=owner_id)
+            )
+
     # Users ---------------------------------------------------------------------------------------------------
 
     async def get_user(self, identifier: str) -> User | None:
@@ -84,16 +119,14 @@ class ChatStore:
 
     async def get_or_create_user(self, identifier: str, metadata: dict[str, Any] | None = None) -> User:
         async with self._session() as s:
-            existing = await s.scalar(select(UserRow).where(UserRow.identifier == identifier))
-            if existing is None:
-                new = UserRow(id=str(uuid.uuid4()), identifier=identifier, meta=metadata or {}, created_at=utcnow())
-                if not await _insert(s, new):  # created meanwhile by a concurrent request
-                    existing = await s.scalar(select(UserRow).where(UserRow.identifier == identifier))
-                else:
-                    return _user(new)
+            await s.execute(
+                self._insert(UserRow.__table__)
+                .values(id=str(uuid.uuid4()), identifier=identifier, metadata=metadata or {}, created_at=utcnow())
+                .on_conflict_do_nothing(index_elements=["identifier"])
+            )
             if metadata is not None:
-                existing.meta = metadata
-            return _user(existing)
+                await s.execute(update(UserRow).where(UserRow.identifier == identifier).values(meta=metadata))
+            return _user(await s.scalar(select(UserRow).where(UserRow.identifier == identifier)))
 
     # Conversations -------------------------------------------------------------------------------------------
 
@@ -106,18 +139,21 @@ class ChatStore:
         metadata: dict[str, Any] | None = None,
         tags: list[str] | None = None,
     ) -> None:
-        """Create the conversation or update the fields that are given; `None` leaves a field as it is."""
+        """Create the conversation or update the given fields; `None` leaves a field as it is.
+
+        `user_id` only takes effect while the conversation has no owner.
+        """
         async with self._session() as s:
-            row = await _conversation_row(s, conversation_id)
-            if user_id is not None:
-                row.user_id = user_id
+            await self._ensure_conversation(s, conversation_id, user_id)
+            values: dict[str, Any] = {"updated_at": utcnow()}
             if title is not None:
-                row.title = title[:MAX_TITLE]
-            if metadata is not None:
-                row.meta = {**(row.meta or {}), **metadata}
+                values["title"] = title[:MAX_TITLE]
             if tags is not None:
-                row.tags = tags
-            row.updated_at = utcnow()
+                values["tags"] = tags
+            if metadata is not None:
+                current = await s.scalar(select(ConversationRow.meta).where(ConversationRow.id == conversation_id))
+                values["meta"] = {**(current or {}), **metadata}
+            await s.execute(update(ConversationRow).where(ConversationRow.id == conversation_id).values(**values))
 
     async def get_conversation(self, conversation_id: str) -> Conversation | None:
         """The conversation with its steps in order, each step carrying its feedback."""
@@ -184,28 +220,30 @@ class ChatStore:
 
     # Steps ---------------------------------------------------------------------------------------------------
 
-    async def upsert_step(self, step: Step) -> None:
-        """Insert the step, or replace it if it exists. The conversation is created if needed and marked active."""
+    async def upsert_step(self, step: Step, *, owner_id: str | None = None) -> None:
+        """Insert the step, or replace it if it exists; its conversation is created for `owner_id` if needed."""
+        values = {
+            "id": step.id,
+            "conversation_id": step.conversation_id,
+            "parent_id": step.parent_id,
+            "type": step.type,
+            "name": step.name,
+            "input": step.input,
+            "output": step.output,
+            "is_error": step.is_error,
+            "metadata": step.metadata,
+            "display": step.display,
+            "created_at": step.created_at,
+            "start_at": step.start_at,
+            "end_at": step.end_at,
+        }
+        statement = self._insert(StepRow.__table__).values(**values)
+        replaced = {k: statement.excluded[k] for k in values if k not in ("id", "conversation_id", "created_at")}
         async with self._session() as s:
-            conversation = await _conversation_row(s, step.conversation_id)
-            conversation.updated_at = utcnow()
-            await s.flush()  # the conversation must exist before the step that points to it
-            await s.merge(
-                StepRow(
-                    id=step.id,
-                    conversation_id=step.conversation_id,
-                    parent_id=step.parent_id,
-                    type=step.type,
-                    name=step.name,
-                    input=step.input,
-                    output=step.output,
-                    is_error=step.is_error,
-                    meta=step.metadata,
-                    display=step.display,
-                    created_at=step.created_at,
-                    start_at=step.start_at,
-                    end_at=step.end_at,
-                )
+            await self._ensure_conversation(s, step.conversation_id, owner_id)
+            await s.execute(statement.on_conflict_do_update(index_elements=["id"], set_=replaced))
+            await s.execute(
+                update(ConversationRow).where(ConversationRow.id == step.conversation_id).values(updated_at=utcnow())
             )
 
     async def delete_step(self, step_id: str) -> None:
@@ -217,14 +255,23 @@ class ChatStore:
 
     async def upsert_feedback(self, feedback: Feedback) -> str:
         """One feedback per step: a new one replaces the previous. Returns the id of the stored feedback."""
+        conversation_id = select(StepRow.conversation_id).where(StepRow.id == feedback.step_id).scalar_subquery()
+        statement = self._insert(FeedbackRow.__table__).values(
+            id=feedback.id,
+            step_id=feedback.step_id,
+            conversation_id=conversation_id,
+            value=feedback.value,
+            comment=feedback.comment,
+            created_at=utcnow(),
+        )
         async with self._session() as s:
-            row = await s.scalar(select(FeedbackRow).where(FeedbackRow.step_id == feedback.step_id))
-            conversation_id = await s.scalar(select(StepRow.conversation_id).where(StepRow.id == feedback.step_id))
-            if row is None:
-                row = FeedbackRow(id=feedback.id, step_id=feedback.step_id, created_at=utcnow())
-                s.add(row)
-            row.value, row.comment, row.conversation_id = feedback.value, feedback.comment, conversation_id
-            return row.id
+            await s.execute(
+                statement.on_conflict_do_update(
+                    index_elements=["step_id"],
+                    set_={"value": statement.excluded.value, "comment": statement.excluded.comment},
+                )
+            )
+            return await s.scalar(select(FeedbackRow.id).where(FeedbackRow.step_id == feedback.step_id))
 
     async def delete_feedback(self, feedback_id: str) -> bool:
         async with self._session() as s:
@@ -233,13 +280,18 @@ class ChatStore:
 
     # Turns ---------------------------------------------------------------------------------------------------
 
-    async def record_turn(self, turn: Turn) -> None:
+    async def record_turn(self, turn: Turn, *, owner_id: str | None = None) -> None:
+        values = {f.name: getattr(turn, f.name) for f in fields(Turn)}
+        values["created_at"] = turn.created_at or utcnow()
+        statement = self._insert(TurnRow.__table__).values(**values)
         async with self._session() as s:
-            await _conversation_row(s, turn.conversation_id)
-            await s.flush()
-            values = {f.name: getattr(turn, f.name) for f in fields(Turn)}
-            values["created_at"] = turn.created_at or utcnow()
-            await s.merge(TurnRow(**values))
+            await self._ensure_conversation(s, turn.conversation_id, owner_id)
+            await s.execute(
+                statement.on_conflict_do_update(
+                    index_elements=["trace_id"],
+                    set_={k: statement.excluded[k] for k in values if k not in ("trace_id", "created_at")},
+                )
+            )
 
     async def list_turns(self, conversation_id: str) -> list[Turn]:
         async with self._session() as s:
@@ -252,28 +304,6 @@ class ChatStore:
         async with self._session() as s:
             row = await s.get(TurnRow, trace_id)
             return _turn(row) if row else None
-
-
-async def _insert(s: AsyncSession, row: Base) -> bool:
-    """Insert `row` in a savepoint; False if a concurrent writer inserted the same key first."""
-    try:
-        async with s.begin_nested():
-            s.add(row)
-    except IntegrityError:
-        return False
-    return True
-
-
-async def _conversation_row(s: AsyncSession, conversation_id: str) -> ConversationRow:
-    """The conversation, created if missing. Chainlit saves the first message and creates the thread concurrently,
-    so the insert may race with another one; the loser reads the winner's row instead of failing."""
-    row = await s.get(ConversationRow, conversation_id)
-    if row is None:
-        now = utcnow()
-        row = ConversationRow(id=conversation_id, meta={}, tags=[], created_at=now, updated_at=now)
-        if not await _insert(s, row):
-            row = await s.get(ConversationRow, conversation_id, populate_existing=True)
-    return row
 
 
 def _user(row: UserRow) -> User:
