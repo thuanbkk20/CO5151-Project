@@ -107,16 +107,20 @@ def http_app(service):
     """Starlette app serving the tools at /mcp. Stateless JSON responses: no session is kept between calls."""
     from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
     from starlette.applications import Starlette
-    from starlette.routing import Mount
+    from starlette.routing import Route
 
     manager = StreamableHTTPSessionManager(app=build_server(service), stateless=True, json_response=True)
+
+    class Endpoint:  # an ASGI app, so Route passes requests through unchanged (no redirect from /mcp to /mcp/)
+        async def __call__(self, scope, receive, send):
+            await manager.handle_request(scope, receive, send)
 
     @contextlib.asynccontextmanager
     async def lifespan(_app):
         async with manager.run():
             yield
 
-    return Starlette(routes=[Mount("/mcp", app=manager.handle_request)], lifespan=lifespan)
+    return Starlette(routes=[Route("/mcp", endpoint=Endpoint())], lifespan=lifespan)
 
 
 async def serve_stdio(service):

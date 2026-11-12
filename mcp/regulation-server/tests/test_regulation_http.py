@@ -14,7 +14,7 @@ BASE = Path(__file__).resolve().parents[1]
 def _rpc(client, method, params, id_=1):
     headers = {"Accept": "application/json, text/event-stream", "Content-Type": "application/json"}
     body = {"jsonrpc": "2.0", "id": id_, "method": method, "params": params}
-    return client.post("/mcp/", content=json.dumps(body), headers=headers)
+    return client.post("/mcp", content=json.dumps(body), headers=headers)
 
 
 def test_tools_over_http():
