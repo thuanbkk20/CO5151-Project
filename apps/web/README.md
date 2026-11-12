@@ -31,7 +31,7 @@ Tài khoản: `sv001` … `sv008` mật khẩu `demo` (sinh viên mô phỏng), 
 - Đăng nhập (cookie ký bằng `CHAINLIT_AUTH_SECRET`) và token Student Record là hai thứ riêng. Token chỉ ở bộ nhớ
   server, hạn ngắn (`STUDENT_MCP_TOKEN_TTL`); khi thiếu (server khởi động lại) hoặc sắp hết hạn, server cấp token mới
   cho đúng tài khoản đã đăng nhập (`backend.refresh_token`), nên không phải đăng nhập lại. Đăng nhập còn hiệu lực bao
-  lâu thì token được cấp lại bấy lâu: `user_session_timeout` trong `.chainlit/config.toml`, hiện 15 ngày.
+  lâu thì token được cấp lại bấy lâu: `user_session_timeout` trong `.chainlit/config.toml`, hiện 1 ngày.
 - Lịch sử chat lưu trong database (`CHAT_DATABASE_URL`). Không lưu token phiên hay object Advisor: metadata của một
   hội thoại chỉ giữ cài đặt LLM. Mỗi người chỉ thấy và mở được hội thoại của mình (Chainlit kiểm tra chủ hội thoại
   trước mỗi lần đọc). Mỗi lần đăng nhập `khach` là một danh tính riêng nên khách không thấy hội thoại của nhau.

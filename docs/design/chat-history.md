@@ -130,9 +130,8 @@ Bảng tự tạo ở lần chạy đầu. Database khác (MySQL...) dùng đư�
    PostgreSQL thật.
 4. **Bộ nhớ dài hạn của Advisor**: hiện chỉ lưu hội thoại. `MemoryGate` (nguyện vọng người dùng tự nói) vẫn chỉ nằm
    trong RAM. Có muốn lưu nó theo user luôn không?
-5. **Thời hạn đăng nhập**: đã sửa lỗi "Server vừa khởi động lại nên phiên đã hết" (token Student Record được cấp
-   lại cho tài khoản đã đăng nhập, không lưu token vào database). Hệ quả: cookie đăng nhập còn hạn thì đọc được hồ
-   sơ, mà hạn hiện là 15 ngày (`user_session_timeout`, mặc định của Chainlit). Có muốn rút ngắn, ví dụ 1 ngày?
+5. ~~Thời hạn đăng nhập~~: đã quyết 1 ngày (`user_session_timeout = 86400`). Token Student Record được cấp lại cho
+   tài khoản đã đăng nhập trong thời gian đó, không lưu vào database.
 6. **Khách**: mỗi lần đăng nhập `khach` là một người mới nên đăng xuất là mất lịch sử. Được không?
 7. **Thứ tự merge**: nhánh này nằm trên `feat/verifier`, nhánh đó nằm trên `feat/mcp-adapter`. Ba PR phải merge theo
    thứ tự đó.
