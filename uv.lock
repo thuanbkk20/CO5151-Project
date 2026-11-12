@@ -867,13 +867,17 @@ name = "co5151-eval"
 version = "0.1.0"
 source = { editable = "eval" }
 dependencies = [
+    { name = "co5151-backend" },
     { name = "co5151-contracts" },
+    { name = "co5151-regulation-server" },
     { name = "co5151-student-server" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "co5151-backend", editable = "backend" },
     { name = "co5151-contracts", editable = "packages/contracts" },
+    { name = "co5151-regulation-server", editable = "mcp/regulation-server" },
     { name = "co5151-student-server", editable = "mcp/student-server" },
 ]
 

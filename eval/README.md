@@ -13,7 +13,7 @@ uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1
 uv run co5151-eval run --agent <package.module>:make_agent --suite injection
 uv run co5151-eval report <thư mục run 1> <thư mục run 2> -o report.html   # so sánh nhiều cấu hình trên một trang
 # lần chạy cũ chưa ghi search_regulations: tra lại Regulation MCP để hiện trong phiếu chấm
-uv run co5151-eval report <thư mục advisor> -o report.html --regulation-lookup co5151_advisor.eval_adapter:regulation_ids
+uv run co5151-eval report <thư mục advisor> -o report.html --regulation-lookup co5151_eval.backend_agent:regulation_ids
 ```
 
 `run` in bảng markdown ra màn hình và ghi `eval/results/<thời gian>-<agent>/` gồm `results.jsonl` (từng câu, từng seed),
@@ -101,7 +101,7 @@ uv run co5151-eval run --agent advisor.eval_adapter:make_agent --seeds 0 1 2
 ```
 
 Ba baseline của proposal (zero-shot, RAG một bước, agent đơn không Verifier) cắm vào theo cùng cách. Baseline thứ ba
-đã có: `--agent co5151_advisor.eval_adapter:make_agent_no_verifier` (cùng Advisor, không Verifier). Khi chạy với
+đã có: `--agent co5151_eval.backend_agent:make_agent_no_verifier` (cùng Advisor, không Verifier). Khi chạy với
 server Student Record thật (HTTP), đặt `STUDENT_MCP_TOKEN_SECRET` giống server để token harness cấp hợp lệ ở đó.
 
 Quy ước cho agent: đặt chuỗi canary `G3-CANARY-7F3A` trong system prompt của Advisor và Verifier. Ca `PI01` kiểm tra
@@ -123,9 +123,10 @@ Danh sách ca và kết quả dùng cho [docs/design/threat-model.md](../docs/de
 
 ## Giới hạn hiện tại
 
-- Advisor chạy được qua `co5151_advisor.eval_adapter:make_agent` (Student Record và Regulation MCP in-process).
-  Khi LLM lỗi, Advisor tự chuyển sang template mà không báo lỗi cho harness; xem cảnh báo trên terminal và cột
-  token (100 = template) trước khi dùng số liệu.
+- Advisor chạy qua `co5151_eval.backend_agent:make_agent`: gọi use case `AskQuestion` của backend trong cùng
+  process (bộ nhớ chat in-memory, Student Record và Regulation gọi trực tiếp service, không qua HTTP); cấu hình
+  đọc từ cùng biến môi trường như `co5151-api`. Khi LLM lỗi, Advisor trả lời bằng template mà không báo lỗi cho
+  harness; xem cột token (0 = không gọi LLM) trước khi dùng số liệu.
 - Trích dẫn của 24 câu chưa được xác nhận. Nhóm cơ bản hiện chỉ chấm được kết cục và chấm tay.
 - Ca `PI05` (indirect injection) cần Regulation MCP nạp đoạn văn độc mô tả trong `notes` vào kho thử nghiệm.
 - Chưa có LLM-as-judge. Nếu thêm, phải đo độ khớp với nhãn người trên một mẫu (yêu cầu D2).
