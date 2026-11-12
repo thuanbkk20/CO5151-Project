@@ -13,6 +13,7 @@ resolution-markers = [
 [manifest]
 members = [
     "co5151-advisor",
+    "co5151-backend",
     "co5151-chat-store",
     "co5151-contracts",
     "co5151-eval",
@@ -787,6 +788,46 @@ requires-dist = [
     { name = "openai", specifier = ">=1.0" },
     { name = "pydantic", specifier = ">=2" },
 ]
+
+[[package]]
+name = "co5151-backend"
+version = "0.1.0"
+source = { editable = "backend" }
+dependencies = [
+    { name = "aiosqlite" },
+    { name = "co5151-contracts" },
+    { name = "co5151-student-server" },
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "mcp" },
+    { name = "openai" },
+    { name = "pydantic" },
+    { name = "pyjwt" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+    { name = "uvicorn" },
+]
+
+[package.optional-dependencies]
+postgres = [
+    { name = "asyncpg" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiosqlite", specifier = ">=0.20" },
+    { name = "asyncpg", marker = "extra == 'postgres'", specifier = ">=0.29" },
+    { name = "co5151-contracts", editable = "packages/contracts" },
+    { name = "co5151-student-server", editable = "mcp/student-server" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "mcp", specifier = ">=1.30,<3" },
+    { name = "openai", specifier = ">=1.0" },
+    { name = "pydantic", specifier = ">=2" },
+    { name = "pyjwt", specifier = ">=2.8" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.30,<2.1" },
+    { name = "uvicorn", specifier = ">=0.30" },
+]
+provides-extras = ["postgres"]
 
 [[package]]
 name = "co5151-chat-store"
