@@ -10,13 +10,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from chainlit.context import ChainlitContextException, context
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.utils import queue_until_user_message
 from chainlit.types import Feedback as ChainlitFeedback
 from chainlit.types import PageInfo, PaginatedResponse, Pagination, ThreadDict, ThreadFilter
 from chainlit.user import PersistedUser, User
 
-from co5151_chat_store import ChatStore, Conversation, Feedback, Step, database_url, utcnow
+from co5151_chat_store import ChatStore, Conversation, Feedback, Step, Turn, database_url, utcnow
 
 DEFAULT_DATABASE_FILE = Path(__file__).resolve().parents[2] / ".data" / "chat.db"
 # The only session values worth restoring with a conversation. Chainlit would otherwise save the whole user session.
@@ -118,6 +119,22 @@ class ChatHistoryDataLayer(BaseDataLayer):
         self._schema_ready = False
         self._schema_lock = asyncio.Lock()
 
+    async def _owner_id(self) -> str | None:
+        """Id of the signed-in user of the current chat session: the owner of whatever it writes.
+
+        Chainlit sets a thread's owner only once, on the first message of a session. Passing the owner with every
+        write keeps a conversation owned even when it is recreated later, e.g. deleted from the sidebar while open.
+        """
+        try:
+            user = context.session.user
+        except ChainlitContextException:
+            return None
+        if user is None:
+            return None
+        if isinstance(user, PersistedUser):
+            return user.id
+        return (await (await self.ready()).get_or_create_user(user.identifier)).id
+
     async def ready(self) -> ChatStore:
         """The store, with its tables created on first use."""
         if not self._schema_ready:
@@ -142,8 +159,10 @@ class ChatHistoryDataLayer(BaseDataLayer):
         return await (await self.ready()).conversation_owner(thread_id) or ""
 
     async def get_thread(self, thread_id: str) -> ThreadDict | None:
+        """A conversation without an owner (left by an older version) is treated as missing: nobody may read it, and
+        Chainlit would otherwise refuse every connection to it and keep the browser reconnecting."""
         conversation = await (await self.ready()).get_conversation(thread_id)
-        return thread_to_dict(conversation) if conversation else None
+        return thread_to_dict(conversation) if conversation and conversation.user_id else None
 
     async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> PaginatedResponse[ThreadDict]:
         if not filters.userId:  # Chainlit always sets it to the signed-in user; never list everybody's chats
@@ -170,8 +189,9 @@ class ChatHistoryDataLayer(BaseDataLayer):
         tags: list[str] | None = None,
     ):
         await (await self.ready()).upsert_conversation(
-            thread_id, user_id=user_id, title=name, metadata=_kept_metadata(metadata), tags=tags
-        )
+            thread_id, user_id=user_id or await self._owner_id(), title=name, metadata=_kept_metadata(metadata),
+            tags=tags,
+        )  # fmt: skip
 
     async def delete_thread(self, thread_id: str):
         await (await self.ready()).delete_conversation(thread_id)
@@ -180,13 +200,19 @@ class ChatHistoryDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def create_step(self, step_dict: dict[str, Any]):
-        if step_dict.get("type") not in TRANSIENT_TYPES:
-            await (await self.ready()).upsert_step(step_from_dict(step_dict))
+        await self._save_step(step_dict)
 
     @queue_until_user_message()
     async def update_step(self, step_dict: dict[str, Any]):
+        await self._save_step(step_dict)
+
+    async def _save_step(self, step_dict: dict[str, Any]) -> None:
         if step_dict.get("type") not in TRANSIENT_TYPES:
-            await (await self.ready()).upsert_step(step_from_dict(step_dict))
+            await (await self.ready()).upsert_step(step_from_dict(step_dict), owner_id=await self._owner_id())
+
+    async def record_turn(self, turn: Turn) -> None:
+        """Save the trace of one answered question in the current session's conversation."""
+        await (await self.ready()).record_turn(turn, owner_id=await self._owner_id())
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):

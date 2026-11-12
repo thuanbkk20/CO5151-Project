@@ -6,7 +6,7 @@ from chainlit.session import HTTPSession
 from chainlit.types import Feedback, Pagination, ThreadFilter
 from chainlit.user import User
 
-from co5151_chat_store import ChatStore
+from co5151_chat_store import ChatStore, Turn
 from co5151_web import history
 
 pytestmark = pytest.mark.anyio
@@ -149,3 +149,44 @@ async def test_notices_are_not_saved_and_old_saved_ones_are_not_shown(layer, tmp
     steps = (await layer.get_thread("c1"))["steps"]
     assert [s["type"] for s in steps] == ["user_message", "assistant_message"]
     assert "c1-n" not in [s.id for s in (await layer.store.get_conversation("c1")).steps]
+
+
+def signed_in(user):
+    """Run the next data-layer calls as if they came from `user`'s chat session."""
+    context_var.set(ChainlitContext(HTTPSession(id="s2", thread_id="t", user=user, client_type="webapp")))
+
+
+async def test_deleting_an_open_thread_and_chatting_on_keeps_it_owned(layer):
+    """What the user hit: Chainlit does not set the owner again, so the next connection was refused."""
+    user = await layer.create_user(User(identifier="sv001"))
+    signed_in(user)
+    await chat(layer, user.id)
+    await layer.delete_thread("c1")
+    await layer.create_step(message("c1-q2", "c1", "user_message", "Còn ngoại ngữ thì sao?", "2026-11-12T08:01:00Z"))
+    thread = await layer.get_thread("c1")
+    assert thread["userIdentifier"] == "sv001"
+    assert await layer.get_thread_author("c1") == "sv001"
+
+
+async def test_the_owner_comes_from_the_session_even_for_a_plain_user(layer):
+    signed_in(User(identifier="sv002"))  # not yet a PersistedUser
+    await layer.create_step(message("q", "c9", "user_message", "Xin chào", "2026-11-12T08:00:00Z"))
+    assert await layer.get_thread_author("c9") == "sv002"
+
+
+async def test_a_trace_is_saved_in_the_sessions_conversation_with_its_owner(layer):
+    user = await layer.create_user(User(identifier="sv001"))
+    signed_in(user)
+    await layer.record_turn(Turn(trace_id="cd" * 16, conversation_id="c7", outcome="answer"))
+    assert await layer.get_thread_author("c7") == "sv001"
+    assert (await layer.store.get_turn("cd" * 16)).outcome == "answer"
+
+
+async def test_an_ownerless_thread_left_by_an_older_version_is_hidden(layer):
+    from co5151_chat_store import Step, utcnow
+
+    await (await layer.ready()).upsert_step(
+        Step(id="q", conversation_id="orphan", type="user_message", created_at=utcnow())
+    )
+    assert await layer.get_thread("orphan") is None
+    assert await layer.get_thread_author("orphan") == ""

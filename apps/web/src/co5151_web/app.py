@@ -114,7 +114,7 @@ async def _record(turn: Turn) -> None:
     if not isinstance(layer, history.ChatHistoryDataLayer):
         return
     try:
-        await (await layer.ready()).record_turn(turn)
+        await layer.record_turn(turn)
     except Exception:
         logger.exception("could not save trace %s", turn.trace_id)
 
