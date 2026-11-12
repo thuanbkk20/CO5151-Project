@@ -12,14 +12,11 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "co5151-advisor",
     "co5151-backend",
-    "co5151-chat-store",
     "co5151-contracts",
     "co5151-eval",
     "co5151-regulation-server",
     "co5151-student-server",
-    "co5151-verifier",
     "co5151-web",
 ]
 
@@ -765,31 +762,6 @@ wheels = [
 ]
 
 [[package]]
-name = "co5151-advisor"
-version = "0.1.0"
-source = { editable = "services/advisor" }
-dependencies = [
-    { name = "co5151-contracts" },
-    { name = "co5151-eval" },
-    { name = "co5151-regulation-server" },
-    { name = "co5151-student-server" },
-    { name = "co5151-verifier" },
-    { name = "openai" },
-    { name = "pydantic" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "co5151-contracts", editable = "packages/contracts" },
-    { name = "co5151-eval", editable = "eval" },
-    { name = "co5151-regulation-server", editable = "mcp/regulation-server" },
-    { name = "co5151-student-server", editable = "mcp/student-server" },
-    { name = "co5151-verifier", editable = "services/verifier" },
-    { name = "openai", specifier = ">=1.0" },
-    { name = "pydantic", specifier = ">=2" },
-]
-
-[[package]]
 name = "co5151-backend"
 version = "0.1.0"
 source = { editable = "backend" }
@@ -826,28 +798,6 @@ requires-dist = [
     { name = "pyjwt", specifier = ">=2.8" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.30,<2.1" },
     { name = "uvicorn", specifier = ">=0.30" },
-]
-provides-extras = ["postgres"]
-
-[[package]]
-name = "co5151-chat-store"
-version = "0.1.0"
-source = { editable = "packages/chat-store" }
-dependencies = [
-    { name = "aiosqlite" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-]
-
-[package.optional-dependencies]
-postgres = [
-    { name = "asyncpg" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiosqlite", specifier = ">=0.20" },
-    { name = "asyncpg", marker = "extra == 'postgres'", specifier = ">=0.29" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.30,<2.1" },
 ]
 provides-extras = ["postgres"]
 
@@ -910,17 +860,6 @@ requires-dist = [
     { name = "co5151-contracts", editable = "packages/contracts" },
     { name = "mcp", specifier = ">=1.30,<3" },
 ]
-
-[[package]]
-name = "co5151-verifier"
-version = "0.1.0"
-source = { editable = "services/verifier" }
-dependencies = [
-    { name = "co5151-contracts" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "co5151-contracts", editable = "packages/contracts" }]
 
 [[package]]
 name = "co5151-web"

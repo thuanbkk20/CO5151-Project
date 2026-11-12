@@ -3,12 +3,9 @@
 [tool.uv.workspace]
 members = [
     "packages/contracts",
-    "packages/chat-store",
     "mcp/student-server",
     "mcp/regulation-server",
     "eval",
-    "services/advisor",
-    "services/verifier",
     "frontend",
     "backend",
 ]
@@ -23,7 +20,7 @@ dev = [
 line-length = 120
 target-version = "py310"
 # Explicit, otherwise the top-level mcp/ folder makes ruff treat the MCP SDK as first-party.
-src = ["packages/contracts/src", "packages/chat-store/src", "mcp/student-server/src", "mcp/regulation-server/src", "eval/src", "services/advisor/src", "services/verifier/src", "frontend/src", "backend/src"]
+src = ["packages/contracts/src", "mcp/student-server/src", "mcp/regulation-server/src", "eval/src", "frontend/src", "backend/src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
@@ -32,8 +29,8 @@ select = ["E", "F", "I", "B", "UP"]
 # Default (prepend) import mode: importlib mode would synthesize a `mcp` package from the
 # `mcp/` folder and shadow the MCP SDK. Keep test file names unique across packages.
 addopts = "-q"
-testpaths = ["packages/contracts/tests", "packages/chat-store/tests", "mcp/student-server/tests", "mcp/regulation-server/tests", "eval/tests", "services/advisor/tests", "services/verifier/tests", "frontend/tests", "backend/tests"]
+testpaths = ["packages/contracts/tests", "mcp/student-server/tests", "mcp/regulation-server/tests", "eval/tests", "frontend/tests", "backend/tests"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["co5151_contracts", "co5151_chat_store", "student_server", "regulation_server", "co5151_eval", "co5151_advisor", "co5151_verifier", "co5151_web", "co5151_backend"]
+known-first-party = ["co5151_contracts", "student_server", "regulation_server", "co5151_eval", "co5151_web", "co5151_backend"]
 
