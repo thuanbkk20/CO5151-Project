@@ -23,7 +23,7 @@ def _secret(env: Mapping[str, str], name: str) -> bytes:
 class Settings:
     token_secret: bytes  # signs the backend's access tokens
     student_token_secret: bytes  # signs Student Record tokens, shared with student-mcp
-    token_ttl: int = 8 * 3600
+    token_ttl: int = 24 * 3600  # as long as a Chainlit sign-in (user_session_timeout)
     student_token_ttl: int = 300
     host: str = "127.0.0.1"
     port: int = 8100

@@ -6,7 +6,7 @@ user_env = []
 session_timeout = 3600
 
 # Duration (in seconds) of the user session expiry
-# How long a sign-in lasts; the Student Record token is re-issued for that long (apps/web/README.md, Bảo mật)
+# How long a sign-in lasts; keep BACKEND_TOKEN_TTL (backend access token) the same
 user_session_timeout = 86400  # 1 day
 
 # Enable third parties caching (e.g., LangChain cache)

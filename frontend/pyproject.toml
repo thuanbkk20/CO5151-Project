@@ -1,15 +1,13 @@
 [project]
 name = "co5151-web"
 version = "0.1.0"
-description = "Chainlit chat UI for the Advisor: demo login, model picker, multi-turn chat"
+description = "Chainlit chat UI: a client of the backend API (sign-in, conversations, streamed answers)"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "chainlit>=2.12,<3",
+    "httpx>=0.27",
     "co5151-contracts",
-    "co5151-student-server",
-    "co5151-advisor",
-    "co5151-chat-store",
 ]
 
 [project.scripts]
@@ -17,9 +15,6 @@ co5151-web = "co5151_web.cli:main"
 
 [tool.uv.sources]
 co5151-contracts = { workspace = true }
-co5151-student-server = { workspace = true }
-co5151-advisor = { workspace = true }
-co5151-chat-store = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

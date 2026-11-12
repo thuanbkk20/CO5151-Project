@@ -921,22 +921,18 @@ requires-dist = [{ name = "co5151-contracts", editable = "packages/contracts" }]
 [[package]]
 name = "co5151-web"
 version = "0.1.0"
-source = { editable = "apps/web" }
+source = { editable = "frontend" }
 dependencies = [
     { name = "chainlit" },
-    { name = "co5151-advisor" },
-    { name = "co5151-chat-store" },
     { name = "co5151-contracts" },
-    { name = "co5151-student-server" },
+    { name = "httpx" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "chainlit", specifier = ">=2.12,<3" },
-    { name = "co5151-advisor", editable = "services/advisor" },
-    { name = "co5151-chat-store", editable = "packages/chat-store" },
     { name = "co5151-contracts", editable = "packages/contracts" },
-    { name = "co5151-student-server", editable = "mcp/student-server" },
+    { name = "httpx", specifier = ">=0.27" },
 ]
 
 [[package]]
