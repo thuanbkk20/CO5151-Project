@@ -10,6 +10,23 @@ def test_demo_account_signs_in_with_a_verifiable_token():
     assert ok and signer.verify(token).student_id == "2310001"
 
 
+def test_an_authenticated_user_gets_a_new_token_after_a_restart_or_expiry():
+    _, token = backend.sign_in("sv001", "demo")
+    assert backend.token_is_fresh(token)
+    refreshed = backend.refresh_token("sv001")
+    claims = backend.student_service().signer.verify(refreshed)
+    assert (claims.sub, claims.student_id) == ("sv001", "2310001")
+    assert backend.refresh_token("khach") is None and backend.refresh_token("nobody") is None
+    assert not backend.token_is_fresh(None) and not backend.token_is_fresh("garbage")
+
+
+def test_a_token_about_to_expire_is_not_fresh():
+    signer = backend.student_service().signer
+    claims = {"sub": "sv001", "role": "student", "student_id": "2310001"}
+    assert not backend.token_is_fresh(signer.issue(claims, ttl=backend.TOKEN_REFRESH_MARGIN_S - 5))
+    assert backend.token_is_fresh(signer.issue(claims, ttl=backend.TOKEN_REFRESH_MARGIN_S + 60))
+
+
 def test_wrong_password_is_rejected():
     assert backend.sign_in("sv001", "sai") == (False, None)
 

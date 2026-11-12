@@ -10,7 +10,8 @@ from co5151_web import backend, history
 
 logger = logging.getLogger(__name__)
 
-SESSION_TOKENS: dict[str, str | None] = {}
+# Student Record access tokens by user, kept on the server only. Lost on restart and short-lived: see _student_token.
+SESSION_TOKENS: dict[str, str] = {}
 
 STARTERS = [
     ("Điều kiện làm luận văn", "Với bảng điểm hiện tại em có đủ điều kiện làm luận văn tốt nghiệp kỳ tới không?"),
@@ -34,11 +35,23 @@ async def sign_in(username: str, password: str) -> cl.User | None:
     if not ok:
         return None
     if token is None:
-        identifier = history.guest_identifier()
-        SESSION_TOKENS[identifier] = None
-        return cl.User(identifier=identifier, display_name="Khách", metadata={"guest": True})
+        return cl.User(identifier=history.guest_identifier(), display_name="Khách", metadata={"guest": True})
     SESSION_TOKENS[username] = token
     return cl.User(identifier=username, metadata={"guest": False})
+
+
+def _student_token(user: cl.User | None) -> str | None:
+    """The user's Student Record token, re-issued when missing (server restart) or about to expire."""
+    if user is None or (user.metadata or {}).get("guest") or user.identifier.startswith("khach-"):
+        return None
+    token = SESSION_TOKENS.get(user.identifier)
+    if not backend.token_is_fresh(token):
+        token = backend.refresh_token(user.identifier)
+        if token is None:
+            SESSION_TOKENS.pop(user.identifier, None)
+            return None
+        SESSION_TOKENS[user.identifier] = token
+    return token
 
 
 @cl.set_starters
@@ -77,9 +90,6 @@ async def _prepare(saved_settings: dict | None, chat: list[dict[str, str]], *, r
     cl.user_session.set("history", chat)
     if not providers and not resumed:  # a resumed conversation already shows it
         await _notice("Chưa có key LLM nào trong `.env`. Advisor sẽ trả lời bằng mẫu (template), không qua LLM.")
-    user = cl.user_session.get("user")
-    if user and user.identifier not in SESSION_TOKENS:
-        await _notice("Server vừa khởi động lại nên phiên đã hết. Hãy đăng xuất rồi đăng nhập lại.")
 
 
 @cl.on_chat_start
@@ -112,7 +122,7 @@ async def _record(turn: Turn) -> None:
 @cl.on_message
 async def reply(message: cl.Message) -> None:
     user = cl.user_session.get("user")
-    token = SESSION_TOKENS.get(user.identifier) if user else None
+    token = await asyncio.to_thread(_student_token, user)
     chat: list[dict[str, str]] = cl.user_session.get("history")
     conversation_id = cl.context.session.thread_id
     trace_id = new_trace_id()

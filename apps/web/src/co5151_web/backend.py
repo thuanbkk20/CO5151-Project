@@ -9,7 +9,7 @@ from co5151_advisor.eval_adapter import make_verifier, regulation_source
 from co5151_advisor.eval_adapter import student_service as advisor_student_service
 from co5151_advisor.llm import DEFAULT_PROVIDER, PROVIDERS, LLMClient
 from co5151_chat_store import Turn, new_trace_id
-from student_server.auth import AuthError, login
+from student_server.auth import AuthError, claims_for, login
 from student_server.config import Settings
 from student_server.server import build_service
 
@@ -32,6 +32,31 @@ def sign_in(username: str, password: str) -> tuple[bool, str | None]:
         return True, login(service.db, service.signer, username, password)
     except AuthError:
         return False, None
+
+
+# Refresh a token this long before it expires, so it cannot expire in the middle of an answer
+TOKEN_REFRESH_MARGIN_S = 120
+
+
+def token_is_fresh(token: str | None) -> bool:
+    if not token:
+        return False
+    try:
+        student_service().signer.verify(token, now=time.time() + TOKEN_REFRESH_MARGIN_S)
+    except AuthError:
+        return False
+    return True
+
+
+def refresh_token(username: str) -> str | None:
+    """A new Student Record token for a user the chat app has already authenticated, or None for unknown users.
+
+    The signed login session of the chat app proves who the user is; the Student Record token is the short-lived
+    access token issued for it, so it is re-issued after it expires or after a server restart.
+    """
+    service = student_service()
+    claims = claims_for(service.db, username)
+    return service.signer.issue(claims) if claims else None
 
 
 def configured_providers() -> list[str]:
