@@ -57,9 +57,15 @@ async def test_feedback_targets_the_backend_message(layer, backend):
                                 ("DELETE", "/messages/m2/feedback", None)]  # fmt: skip
 
 
-def test_app_registers_the_data_layer():
-    from chainlit.data import get_data_layer
+def test_app_loads_as_chainlit_loads_it():
+    """Chainlit runs app.py by file path, not as part of the package: relative imports would fail there."""
+    import importlib.util
+    from pathlib import Path
 
-    from co5151_web import app
+    import co5151_web
 
-    assert get_data_layer() is app.LAYER
+    path = Path(co5151_web.__file__).with_name("app.py")
+    spec = importlib.util.spec_from_file_location(str(path), path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert isinstance(module.LAYER, BackendDataLayer)

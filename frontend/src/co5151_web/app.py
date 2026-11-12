@@ -6,9 +6,9 @@ import chainlit as cl
 import httpx
 from chainlit.input_widget import Select, TextInput
 
-from .client import BackendClient, BackendError, SessionExpired
-from .history import TOKEN_KEY, BackendDataLayer
-from .present import chat_settings_body, details_markdown, progress_line
+from co5151_web.client import BackendClient, BackendError, SessionExpired
+from co5151_web.history import TOKEN_KEY, BackendDataLayer
+from co5151_web.present import chat_settings_body, details_markdown, pick_provider, progress_line
 
 logger = logging.getLogger(__name__)
 
@@ -66,18 +66,16 @@ async def _settings_form(saved: dict | None) -> dict:
         choices = await CLIENT.llm_providers(_token())
     except (BackendError, httpx.HTTPError):
         choices = {"providers": [], "default": ""}
-    providers = choices["providers"] or [choices["default"] or "-"]
-    provider = saved.get("provider") if saved.get("provider") in providers else providers[0]
-    if choices["default"] in choices["providers"] and not saved.get("provider"):
-        provider = choices["default"]
-    settings = await cl.ChatSettings([
-        Select(id="provider", label="Nhà cung cấp LLM", values=providers, initial_value=provider),
+    providers = choices["providers"]
+    if not providers:  # nothing to choose: the backend answers from templates
+        await _notice("Backend chưa có key LLM nào. Advisor sẽ trả lời bằng mẫu (template), không qua LLM.")
+        return {}
+    return await cl.ChatSettings([
+        Select(id="provider", label="Nhà cung cấp LLM", values=providers,
+               initial_value=pick_provider(saved.get("provider"), providers, choices["default"])),
         TextInput(id="model", label="Model", initial=saved.get("model") or "",
                   placeholder="để trống = model mặc định của nhà cung cấp"),
     ]).send()  # fmt: skip
-    if not choices["providers"]:
-        await _notice("Backend chưa có key LLM nào. Advisor sẽ trả lời bằng mẫu (template), không qua LLM.")
-    return settings
 
 
 @cl.on_chat_start

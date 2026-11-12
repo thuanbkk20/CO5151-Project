@@ -81,3 +81,10 @@ def chat_settings_body(settings: dict[str, Any] | None) -> dict[str, Any]:
     """The Chainlit settings form as backend conversation settings (empty model = provider default)."""
     settings = settings or {}
     return {"provider": settings.get("provider") or None, "model": (settings.get("model") or "").strip() or None}
+
+
+def pick_provider(saved: str | None, providers: list[str], default: str) -> str:
+    """The conversation's provider if it still has a key on the backend, else the backend default, else the first."""
+    if saved in providers:
+        return saved
+    return default if default in providers else providers[0]

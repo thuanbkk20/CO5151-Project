@@ -1,6 +1,6 @@
 from web_fakes import CONVERSATION, TRACE
 
-from co5151_web.present import chat_settings_body, details_markdown, progress_line, thread_dict
+from co5151_web.present import chat_settings_body, details_markdown, pick_provider, progress_line, thread_dict
 
 
 def test_progress_lines():
@@ -28,3 +28,9 @@ def test_thread_keeps_backend_message_ids_and_feedback():
 def test_settings_body_maps_an_empty_model_to_the_default():
     assert chat_settings_body({"provider": "gemini", "model": "  "}) == {"provider": "gemini", "model": None}
     assert chat_settings_body(None) == {"provider": None, "model": None}
+
+
+def test_provider_falls_back_when_its_key_is_gone():
+    assert pick_provider("openai", ["gemini", "openai"], "gemini") == "openai"
+    assert pick_provider("kimi", ["gemini", "openai"], "openai") == "openai"
+    assert pick_provider(None, ["openai"], "gemini") == "openai"
