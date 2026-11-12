@@ -21,6 +21,9 @@ from co5151_chat_store import ChatStore, Conversation, Feedback, Step, database_
 DEFAULT_DATABASE_FILE = Path(__file__).resolve().parents[2] / ".data" / "chat.db"
 # The only session values worth restoring with a conversation. Chainlit would otherwise save the whole user session.
 KEPT_METADATA = ("chat_settings", "chat_profile", "client_type")
+# Notices of the app (missing LLM key...) describe the server's state when they were sent, not the conversation:
+# they are never saved, and ones saved by earlier versions are not shown again when a conversation is reopened.
+TRANSIENT_TYPES = frozenset({"system_message"})
 DISPLAY_FIELDS = ("showInput", "language", "defaultOpen", "autoCollapse", "tags", "generation", "command", "modes")
 
 
@@ -98,7 +101,7 @@ def thread_to_dict(conversation: Conversation) -> ThreadDict:
         "userIdentifier": conversation.user_identifier,
         "tags": conversation.tags,
         "metadata": conversation.metadata,
-        "steps": [step_to_dict(step) for step in conversation.steps],
+        "steps": [step_to_dict(step) for step in conversation.steps if step.type not in TRANSIENT_TYPES],
         "elements": [],
     }
 
@@ -177,11 +180,13 @@ class ChatHistoryDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def create_step(self, step_dict: dict[str, Any]):
-        await (await self.ready()).upsert_step(step_from_dict(step_dict))
+        if step_dict.get("type") not in TRANSIENT_TYPES:
+            await (await self.ready()).upsert_step(step_from_dict(step_dict))
 
     @queue_until_user_message()
     async def update_step(self, step_dict: dict[str, Any]):
-        await (await self.ready()).upsert_step(step_from_dict(step_dict))
+        if step_dict.get("type") not in TRANSIENT_TYPES:
+            await (await self.ready()).upsert_step(step_from_dict(step_dict))
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str):

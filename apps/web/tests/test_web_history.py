@@ -126,7 +126,6 @@ async def test_a_resumed_conversation_gives_the_advisor_its_earlier_turns(layer)
     user = await layer.create_user(User(identifier="sv001"))
     await chat(layer, user.id)
     await layer.create_step(message("c1-tool", "c1", "tool", "- **Kết cục:** answer", "2026-11-12T08:00:04Z"))
-    await layer.create_step(message("c1-n", "c1", "system_message", "Chưa có key LLM", "2026-11-12T07:59:00Z"))
     assert history.chat_history(await layer.get_thread("c1")) == [
         {"role": "user", "content": "Em đủ điều kiện làm luận văn chưa?"},
         {"role": "assistant", "content": "Bạn đã tích lũy 92/128 tín chỉ."},
@@ -136,3 +135,17 @@ async def test_a_resumed_conversation_gives_the_advisor_its_earlier_turns(layer)
 def test_every_guest_sign_in_is_a_separate_identity():
     first, second = history.guest_identifier(), history.guest_identifier()
     assert first != second and first.startswith("khach-")
+
+
+async def test_notices_are_not_saved_and_old_saved_ones_are_not_shown(layer, tmp_path):
+    user = await layer.create_user(User(identifier="sv001"))
+    await chat(layer, user.id)
+    await layer.create_step(message("c1-n", "c1", "system_message", "Chưa có key LLM", "2026-11-12T08:00:06Z"))
+    # A notice saved by an earlier version of the app, straight into the store
+    from co5151_chat_store import Step, utcnow
+
+    await layer.store.upsert_step(Step(id="old-n", conversation_id="c1", type="system_message", created_at=utcnow(),
+                                       output="Server vừa khởi động lại nên phiên đã hết."))  # fmt: skip
+    steps = (await layer.get_thread("c1"))["steps"]
+    assert [s["type"] for s in steps] == ["user_message", "assistant_message"]
+    assert "c1-n" not in [s.id for s in (await layer.store.get_conversation("c1")).steps]

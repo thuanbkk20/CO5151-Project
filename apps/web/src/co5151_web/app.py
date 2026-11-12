@@ -79,7 +79,7 @@ def _use_settings(settings: dict) -> None:
 
 
 async def _notice(text: str) -> None:
-    """A system notice: shown and saved, but not an Advisor answer, so it never enters the Advisor's history."""
+    """A notice about the app's state: shown now, never saved with the conversation nor sent to the Advisor."""
     await cl.Message(content=text, type="system_message").send()
 
 
