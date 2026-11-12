@@ -27,7 +27,7 @@ class ConversationRepository(Protocol):
     async def get(self, conversation_id: str, owner_id: str) -> Conversation | None:
         """With its messages, oldest first."""
 
-    async def list(
+    async def list_by_owner(
         self, owner_id: str, *, limit: int = 20, cursor: str | None = None, search: str | None = None
     ) -> ConversationPage:
         """Most recently active first; `cursor` is the `next_cursor` of the previous page."""
