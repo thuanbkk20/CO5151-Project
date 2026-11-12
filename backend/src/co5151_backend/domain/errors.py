@@ -23,3 +23,11 @@ class InvalidRequest(DomainError):
 
 class LLMError(DomainError):
     """An LLM call failed (network, quota, refused parameter) or its reply could not be used."""
+
+
+class AnswerFailed(DomainError):
+    """The answer could not be produced; its trace (with the error) is saved under `trace_id`."""
+
+    def __init__(self, trace_id: str):
+        super().__init__(trace_id)
+        self.trace_id = trace_id
