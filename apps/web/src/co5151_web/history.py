@@ -223,3 +223,18 @@ class ChatHistoryDataLayer(BaseDataLayer):
 
     async def close(self) -> None:
         await self.store.close()
+
+
+def chat_history(thread: ThreadDict) -> list[dict[str, str]]:
+    """The question / answer turns of a saved conversation, in the form the Advisor takes as `history`."""
+    roles = {"user_message": "user", "assistant_message": "assistant"}
+    return [
+        {"role": roles[step["type"]], "content": step["output"]}
+        for step in thread.get("steps", [])
+        if step.get("type") in roles and step.get("output")
+    ]
+
+
+def guest_identifier() -> str:
+    """Guests share one login, so each guest sign-in gets its own identity and never sees another guest's chats."""
+    return f"khach-{uuid.uuid4().hex[:12]}"

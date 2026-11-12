@@ -120,3 +120,19 @@ def test_history_is_stored_in_the_web_data_folder_unless_configured(monkeypatch,
     assert str(history.open_store().engine.url).endswith("x.db")
     monkeypatch.setenv("CHAT_DATABASE_URL", "off")
     assert history.open_store() is None
+
+
+async def test_a_resumed_conversation_gives_the_advisor_its_earlier_turns(layer):
+    user = await layer.create_user(User(identifier="sv001"))
+    await chat(layer, user.id)
+    await layer.create_step(message("c1-tool", "c1", "tool", "- **Kết cục:** answer", "2026-11-12T08:00:04Z"))
+    await layer.create_step(message("c1-n", "c1", "system_message", "Chưa có key LLM", "2026-11-12T07:59:00Z"))
+    assert history.chat_history(await layer.get_thread("c1")) == [
+        {"role": "user", "content": "Em đủ điều kiện làm luận văn chưa?"},
+        {"role": "assistant", "content": "Bạn đã tích lũy 92/128 tín chỉ."},
+    ]
+
+
+def test_every_guest_sign_in_is_a_separate_identity():
+    first, second = history.guest_identifier(), history.guest_identifier()
+    assert first != second and first.startswith("khach-")

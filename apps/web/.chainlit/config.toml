@@ -56,7 +56,8 @@ reaction_on_message_received = false
 
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
-    enabled = true
+    # Off: the Advisor does not read uploaded files, and the chat history does not store them
+    enabled = false
     # Define accepted file types using MIME types
     # Examples:
     # 1. For specific file types:
