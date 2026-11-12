@@ -884,6 +884,7 @@ source = { editable = "apps/web" }
 dependencies = [
     { name = "chainlit" },
     { name = "co5151-advisor" },
+    { name = "co5151-chat-store" },
     { name = "co5151-contracts" },
     { name = "co5151-student-server" },
 ]
@@ -892,6 +893,7 @@ dependencies = [
 requires-dist = [
     { name = "chainlit", specifier = ">=2.12,<3" },
     { name = "co5151-advisor", editable = "services/advisor" },
+    { name = "co5151-chat-store", editable = "packages/chat-store" },
     { name = "co5151-contracts", editable = "packages/contracts" },
     { name = "co5151-student-server", editable = "mcp/student-server" },
 ]

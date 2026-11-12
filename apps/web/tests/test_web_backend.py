@@ -53,6 +53,23 @@ def test_details_report_how_many_times_the_verifier_checked_the_answer(monkeypat
     assert "**Verifier:** không kiểm" in backend.details_markdown(reply.details)
 
 
+def test_every_turn_gets_a_trace_id_shown_in_the_details():
+    _, token = backend.sign_in("sv001", "demo")
+    first = backend.ask(backend.new_advisor(), GRADUATION_Q, token=token, history=[])
+    second = backend.ask(backend.new_advisor(), GRADUATION_Q, token=token, history=[], trace_id="ab" * 16)
+    assert len(first.details["trace_id"]) == 32 and second.details["trace_id"] == "ab" * 16
+    assert f"**Trace ID:** `{'ab' * 16}`" in backend.details_markdown(second.details)
+
+
+def test_turn_record_carries_the_trace_and_its_cost():
+    _, token = backend.sign_in("sv001", "demo")
+    reply = backend.ask(backend.new_advisor(), GRADUATION_Q, token=token, history=[])
+    turn = backend.to_turn(reply.details, conversation_id="c1", user_message_id="m1", answer_message_id="m2")
+    assert (turn.trace_id, turn.conversation_id, turn.answer_message_id) == (reply.details["trace_id"], "c1", "m2")
+    assert turn.tool_calls == reply.details["tool_calls"] and turn.verifier_rounds == 1
+    assert turn.latency_ms == round(reply.details["seconds"] * 1000)
+
+
 def test_guest_question_does_not_touch_the_student_record():
     reply = backend.ask(
         backend.new_advisor(), "Điều kiện để được xét công nhận tốt nghiệp gồm những gì?", token=None, history=[]
