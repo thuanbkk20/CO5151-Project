@@ -11,6 +11,7 @@ from typing import Any, Protocol
 from co5151_contracts import ToolResult
 
 from ..domain.conversation import ChatSettings, Conversation, ConversationPage, Feedback, Message
+from ..domain.evidence import Action
 from ..domain.principal import Account, Principal
 from ..domain.trace import Trace
 from .events import AnswerEvent
@@ -135,6 +136,23 @@ class ChatModels(Protocol):
 
     def create(self, provider: str | None, model: str | None) -> ChatModel | None:
         """None when that provider has no key; raises InvalidRequest for an unknown provider."""
+
+
+class ActionRouter(Protocol):
+    """Picks the Advisor's next step when the rules cannot (an LLM or the Laya decision engine)."""
+
+    name: str
+
+    async def route(self, question: str, state: dict[str, bool], choices: list[Action]) -> "Routed":
+        """Never raises: a failed call comes back with `action=None` and `error` set."""
+
+
+@dataclass(frozen=True)
+class Routed:
+    action: Action | None
+    input_tokens: int = 0
+    output_tokens: int = 0
+    error: str | None = None
 
 
 # Streaming -----------------------------------------------------------------------------------------------------
