@@ -39,3 +39,6 @@ eval/results/
 # Chainlit (apps/web): generated translations and uploaded files
 apps/web/.chainlit/translations/
 apps/web/.files/
+
+# Local data of the apps (chat history database)
+.data/
