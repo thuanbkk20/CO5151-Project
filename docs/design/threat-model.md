@@ -56,7 +56,7 @@ D2 chưa yêu cầu chạy thử prompt injection lên agent. Các ca đã soạ
 | E1 | Lộ system prompt / token | Token chỉ ở host, không vào ngữ cảnh LLM (đã cài ở tầng MCP); chuỗi canary trong system prompt của Advisor và Verifier; Advisor xoá canary/token khỏi câu trả lời, Verifier kiểm lại (`no_secrets`) | Đã cài + có test; chưa đo trên ca `PI` | `PI01`, `PI06` |
 | E2 | Lịch sử hội thoại giả "chế độ quản trị" | Quyền chỉ đến từ token; bộ nhớ ngắn hạn không mang quyền; Verifier không nhận lịch sử hội thoại | Một phần: Verifier đã cài; Advisor vẫn đọc lịch sử, chưa đo | `PI09` |
 | E3 | Đoạn văn độc trong tài liệu quy chế | Coi kết quả Regulation MCP là dữ liệu, không phải lệnh (đánh dấu ranh giới trong prompt); Verifier đối chiếu văn bản gốc | Một phần: prompt của Verifier đánh dấu ranh giới dữ liệu và đối chiếu với các đoạn đã tra (không tra lại corpus gốc); prompt của Advisor chưa đánh dấu | `PI05` |
-| A6 | Audit log thành bản sao dữ liệu cá nhân | Actor/target lưu dạng pseudonym HMAC; bộ nhớ dài hạn không lưu điểm | Tầng MCP: đã cài. Tầng agent: kế hoạch | `test_service.py::test_every_call_is_audited` |
+| A6 | Audit log thành bản sao dữ liệu cá nhân | Actor/target lưu dạng pseudonym HMAC; bộ nhớ dài hạn không lưu điểm | Tầng MCP: đã cài. **Lịch sử chat (`packages/chat-store`) lưu nguyên văn câu trả lời, có số liệu học vụ**: chỉ chủ tài khoản đọc được, chưa có thời hạn tự xóa; cần nhóm quyết | `test_service.py::test_every_call_is_audited`; `test_web_history.py` |
 
 ## 5. Kết quả kiểm thử tầng tool
 

@@ -7,6 +7,7 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 
 | Thư mục | Thành phần | Mảng phụ trách |
 |---|---|---|
+| `packages/chat-store` | Lưu lâu dài lịch sử chat theo người dùng và trace mỗi câu trả lời, trên SQLite hoặc database server | 5. Kiểm thử & đánh giá |
 | `packages/contracts` | Hợp đồng dùng chung: envelope kết quả tool, mã lỗi, claims phiên đăng nhập, schema input/output của tool | 2. Student Data & MCP |
 | `mcp/student-server` | **Student Record MCP**: mock DB điểm/tín chỉ/hồ sơ, scoped read-only, xác thực bằng Bearer token | 2. Student Data & MCP |
 | `mcp/regulation-server` | **Regulation MCP**: Knowledge Graph + GraphRAG tra cứu quy chế | 1. Data & GraphRAG & MCP |
@@ -99,6 +100,11 @@ uv run co5151-web          # http://localhost:8000
 sơ. Nút cài đặt cạnh ô nhập cho chọn nhà cung cấp LLM (chỉ những bên đã có key trong `.env`) và model. Dưới mỗi câu
 trả lời có mục "Chi tiết xử lý": tool đã gọi, trích dẫn, token, thời gian, model. Cần `CHAINLIT_AUTH_SECRET` trong
 `.env`; đổi cổng bằng `CHAINLIT_PORT` hoặc `--port`. Xem [apps/web/README.md](apps/web/README.md).
+
+Lịch sử chat được lưu theo từng tài khoản: thanh bên trái liệt kê các cuộc hội thoại cũ, bấm vào để mở lại và hỏi
+tiếp. Mỗi câu trả lời có một **trace id** (hiện trong "Chi tiết xử lý" và trong log). Mặc định lưu vào file SQLite
+`apps/web/.data/chat.db`; đổi sang database server bằng `CHAT_DATABASE_URL`, tắt bằng `CHAT_DATABASE_URL=off`. Xem
+[docs/design/chat-history.md](docs/design/chat-history.md).
 
 Mặc định web gọi Student Record và Regulation như hàm Python trong cùng process (`inprocess`), nên `student-mcp serve`
 không có log. Để Advisor đi qua giao thức MCP thật, đặt trong `.env`:

@@ -17,7 +17,8 @@ Tài khoản: `sv001` … `sv008` mật khẩu `demo` (sinh viên mô phỏng), 
 | File | Vai trò |
 |---|---|
 | `src/co5151_web/backend.py` | Logic không phụ thuộc Chainlit, có test: đăng nhập, provider đã có key, tạo Advisor, chạy một lượt chat |
-| `src/co5151_web/app.py` | Phần Chainlit: đăng nhập, cài đặt LLM, lịch sử hội thoại, hiển thị chi tiết |
+| `src/co5151_web/app.py` | Phần Chainlit: đăng nhập, cài đặt LLM, lịch sử hội thoại, mở lại hội thoại cũ, hiển thị chi tiết |
+| `src/co5151_web/history.py` | Data layer của Chainlit trên `co5151-chat-store`: danh sách hội thoại theo user, mở lại, đổi tên, xóa, đánh giá |
 | `src/co5151_web/cli.py` | Lệnh `co5151-web`: nạp `.env`, kiểm tra secret, chạy Chainlit với `apps/web` làm thư mục gốc |
 | `chainlit.md` | Trang chào (nút Readme) |
 | `.chainlit/config.toml` | Cấu hình giao diện Chainlit (tên ứng dụng, ...) |
@@ -28,3 +29,7 @@ Tài khoản: `sv001` … `sv008` mật khẩu `demo` (sinh viên mô phỏng), 
   prompt của LLM; Advisor chỉ đọc được hồ sơ của tài khoản đang đăng nhập.
 - Key LLM chỉ nằm trong `.env` ở server; giao diện chỉ hiện tên nhà cung cấp.
 - Token phiên giữ trong bộ nhớ: khởi động lại server thì cần đăng nhập lại.
+- Lịch sử chat lưu trong database (`CHAT_DATABASE_URL`). Không lưu token phiên hay object Advisor: metadata của một
+  hội thoại chỉ giữ cài đặt LLM. Mỗi người chỉ thấy và mở được hội thoại của mình (Chainlit kiểm tra chủ hội thoại
+  trước mỗi lần đọc). Mỗi lần đăng nhập `khach` là một danh tính riêng nên khách không thấy hội thoại của nhau.
+- Tắt tải file lên: Advisor không đọc file và lịch sử không lưu file.
