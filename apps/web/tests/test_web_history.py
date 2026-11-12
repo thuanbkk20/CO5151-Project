@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from chainlit.context import ChainlitContext, context_var
 from chainlit.session import HTTPSession
@@ -100,6 +102,15 @@ async def test_rename_feedback_and_delete(layer):
     assert await layer.delete_feedback(feedback_id)
     await layer.delete_thread("c1")
     assert await layer.get_thread("c1") is None
+
+
+def test_importing_chainlit_did_not_load_any_env_file():
+    import chainlit
+
+    from co5151_advisor.llm import PROVIDERS
+
+    assert chainlit.env_found is False
+    assert not any(os.environ.get(p.key_env) for p in PROVIDERS.values())
 
 
 def test_history_is_stored_in_the_web_data_folder_unless_configured(monkeypatch, tmp_path):

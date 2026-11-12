@@ -3,7 +3,11 @@ from pathlib import Path
 
 import pytest
 
-# Importing chainlit reads (and, if missing, writes) `.chainlit/` in its app root; point it at apps/web, which has one.
+# Importing chainlit has two side effects, both blocked before any test module imports it:
+# - it loads `<current directory>/.env`, i.e. the developer's real LLM keys when pytest runs from the repo root,
+#   for the whole test session (other packages' tests would then call the LLM with that key);
+# - it reads, and writes if missing, `.chainlit/` in its app root; apps/web already has one.
+os.environ["CHAINLIT_ENV_FILE"] = os.devnull
 os.environ.setdefault("CHAINLIT_APP_ROOT", str(Path(__file__).resolve().parents[1]))
 
 from co5151_advisor.llm import PROVIDERS
