@@ -42,3 +42,7 @@ apps/web/.files/
 
 # Local data of the apps (chat history database)
 .data/
+
+# Personal Claude Code settings and agents
+.claude/settings.local.json
+.claude/agents/researcher.md
