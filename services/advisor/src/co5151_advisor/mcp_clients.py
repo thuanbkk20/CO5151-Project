@@ -85,7 +85,9 @@ class McpRegulationService:
     """Regulation MCP as a stdio subprocess, started on first use and kept for the life of this object."""
 
     def __init__(self, *, allow_draft: bool = True):
-        self._args = ["-m", "regulation_server.regulation_mcp_v2"] + (["--allow-draft"] if allow_draft else [])
+        self._args = ["-m", "regulation_server.regulation_mcp_v2", "--stdio"] + (
+            ["--allow-draft"] if allow_draft else []
+        )
         self._lock = threading.Lock()
         self._loop: asyncio.AbstractEventLoop | None = None
         self._session: ClientSession | None = None

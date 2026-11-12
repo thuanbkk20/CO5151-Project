@@ -87,7 +87,7 @@ Chạy từng MCP server riêng để thử bằng MCP client:
 ```bash
 uv run student-mcp serve                 # Streamable HTTP http://127.0.0.1:8102/mcp, cần Bearer token
 uv run student-mcp issue-token sv001     # token cho tài khoản demo (mật khẩu: demo)
-uv run regulation-mcp --allow-draft      # stdio; dữ liệu quy chế hiện là bản nháp
+uv run regulation-mcp --allow-draft      # Streamable HTTP http://127.0.0.1:8103/mcp; --stdio để chạy qua stdio
 ```
 
 ### Giao diện chat

@@ -1,9 +1,15 @@
-"""Draft integration entry point; local read-only MCP stdio (mcp==2.3.0)."""
+"""Regulation MCP: read-only tools over Streamable HTTP (default, at /mcp) or stdio (`--stdio`, dev only).
+
+The tools need no identity: regulations are public, so there is no Bearer token as on Student Record.
+"""
 
 import argparse
+import contextlib
 import inspect
 import json
 import logging
+import os
+import sys
 from pathlib import Path
 
 import anyio
@@ -17,7 +23,12 @@ from mcp.types import (
     ToolAnnotations,
 )
 
+from co5151_contracts.env import find_env_file, load_env_file
+
 from .regulation_service_v2 import INPUTS, RegulationServiceV2
+
+BASE = Path(__file__).resolve().parents[2]
+TRUE_VALUES = {"1", "true", "yes", "on"}
 
 DESCRIPTIONS = {
     "search_regulations": (
@@ -92,20 +103,49 @@ def build_server(service):
     )
 
 
-async def serve(base, allow_draft):
-    service = RegulationServiceV2(base, allow_draft)
+def http_app(service):
+    """Starlette app serving the tools at /mcp. Stateless JSON responses: no session is kept between calls."""
+    from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+    from starlette.applications import Starlette
+    from starlette.routing import Mount
+
+    manager = StreamableHTTPSessionManager(app=build_server(service), stateless=True, json_response=True)
+
+    @contextlib.asynccontextmanager
+    async def lifespan(_app):
+        async with manager.run():
+            yield
+
+    return Starlette(routes=[Mount("/mcp", app=manager.handle_request)], lifespan=lifespan)
+
+
+async def serve_stdio(service):
     server = build_server(service)
     async with stdio_server() as (read, write):
         await server.run(read, write, server.create_initialization_options())
 
 
-def main():
-    p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--base", type=Path, default=Path(__file__).resolve().parents[2])
-    p.add_argument("--allow-draft", action="store_true")
-    a = p.parse_args()
-    logging.basicConfig(level=logging.WARNING)
-    anyio.run(serve, a.base.resolve(), a.allow_draft)
+def main(argv=None):
+    p = argparse.ArgumentParser(prog="regulation-mcp", description=__doc__)
+    p.add_argument("--env-file", type=Path, help="mặc định: file .env gần nhất, tìm ngược lên tới gốc repo")
+    p.add_argument("--base", type=Path, default=BASE)
+    p.add_argument("--allow-draft", action="store_true", help="mặc định theo REGULATION_ALLOW_DRAFT")
+    p.add_argument("--stdio", action="store_true", help="dev: chạy qua stdio thay vì HTTP")
+    p.add_argument("--host")
+    p.add_argument("--port", type=int)
+    a = p.parse_args(argv)
+    load_env_file(a.env_file or find_env_file())
+    logging.basicConfig(level=os.environ.get("REGULATION_MCP_LOG_LEVEL", "WARNING"), stream=sys.stderr)
+    allow = a.allow_draft or os.environ.get("REGULATION_ALLOW_DRAFT", "false").strip().lower() in TRUE_VALUES
+    service = RegulationServiceV2(a.base.resolve(), allow)
+    if a.stdio:
+        anyio.run(serve_stdio, service)
+        return
+    import uvicorn
+
+    host = a.host or os.environ.get("REGULATION_MCP_HOST", "127.0.0.1")
+    port = a.port or int(os.environ.get("REGULATION_MCP_PORT", "8103"))
+    uvicorn.run(http_app(service), host=host, port=port, log_level="warning")
 
 
 if __name__ == "__main__":
