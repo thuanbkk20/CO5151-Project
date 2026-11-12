@@ -8,6 +8,7 @@ from typing import Any
 
 from sqlalchemy import and_, delete, event, func, or_, select
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 from .models import Base, ConversationRow, FeedbackRow, StepRow, TurnRow, UserRow
@@ -83,13 +84,16 @@ class ChatStore:
 
     async def get_or_create_user(self, identifier: str, metadata: dict[str, Any] | None = None) -> User:
         async with self._session() as s:
-            row = await s.scalar(select(UserRow).where(UserRow.identifier == identifier))
-            if row is None:
-                row = UserRow(id=str(uuid.uuid4()), identifier=identifier, meta=metadata or {}, created_at=utcnow())
-                s.add(row)
-            elif metadata is not None:
-                row.meta = metadata
-            return _user(row)
+            existing = await s.scalar(select(UserRow).where(UserRow.identifier == identifier))
+            if existing is None:
+                new = UserRow(id=str(uuid.uuid4()), identifier=identifier, meta=metadata or {}, created_at=utcnow())
+                if not await _insert(s, new):  # created meanwhile by a concurrent request
+                    existing = await s.scalar(select(UserRow).where(UserRow.identifier == identifier))
+                else:
+                    return _user(new)
+            if metadata is not None:
+                existing.meta = metadata
+            return _user(existing)
 
     # Conversations -------------------------------------------------------------------------------------------
 
@@ -250,12 +254,25 @@ class ChatStore:
             return _turn(row) if row else None
 
 
+async def _insert(s: AsyncSession, row: Base) -> bool:
+    """Insert `row` in a savepoint; False if a concurrent writer inserted the same key first."""
+    try:
+        async with s.begin_nested():
+            s.add(row)
+    except IntegrityError:
+        return False
+    return True
+
+
 async def _conversation_row(s: AsyncSession, conversation_id: str) -> ConversationRow:
+    """The conversation, created if missing. Chainlit saves the first message and creates the thread concurrently,
+    so the insert may race with another one; the loser reads the winner's row instead of failing."""
     row = await s.get(ConversationRow, conversation_id)
     if row is None:
         now = utcnow()
         row = ConversationRow(id=conversation_id, meta={}, tags=[], created_at=now, updated_at=now)
-        s.add(row)
+        if not await _insert(s, row):
+            row = await s.get(ConversationRow, conversation_id, populate_existing=True)
     return row
 
 

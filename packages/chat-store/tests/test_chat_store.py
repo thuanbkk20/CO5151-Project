@@ -126,3 +126,20 @@ def test_database_url_comes_from_the_environment(monkeypatch, tmp_path):
 def test_trace_ids_are_32_hex_characters_and_unique():
     ids = {new_trace_id() for _ in range(100)}
     assert len(ids) == 100 and all(len(i) == 32 and int(i, 16) >= 0 for i in ids)
+
+
+async def test_first_message_and_thread_creation_can_race(store):
+    """Chainlit saves the first message and creates the thread at the same time; neither write may be lost."""
+    import asyncio
+
+    user = await store.get_or_create_user("sv001")
+    for i in range(20):
+        conversation_id = f"race-{i}"
+        await asyncio.gather(
+            store.upsert_step(step(f"q{i}", conversation_id, output="Câu hỏi")),
+            store.upsert_conversation(conversation_id, user_id=user.id, title="Câu hỏi"),
+            store.record_turn(Turn(trace_id=new_trace_id(), conversation_id=conversation_id)),
+        )
+        conversation = await store.get_conversation(conversation_id)
+        assert [s.id for s in conversation.steps] == [f"q{i}"], i
+        assert (conversation.user_id, conversation.title) == (user.id, "Câu hỏi"), i
