@@ -6,8 +6,8 @@ nối package này vào giao diện chat.
 
 ## Đổi database bằng URL
 
-Mọi thứ đi qua SQLAlchemy 2 (async), chỉ dùng kiểu dữ liệu chung (String, Text, Integer, Boolean, DateTime, JSON),
-nên đổi database chỉ cần đổi `CHAT_DATABASE_URL`:
+Mọi thứ đi qua SQLAlchemy 2 (async). Hỗ trợ **SQLite và PostgreSQL** (URL khác bị từ chối khi khởi động), đổi bằng
+`CHAT_DATABASE_URL`:
 
 | `CHAT_DATABASE_URL` | Dùng khi |
 |---|---|
@@ -42,6 +42,13 @@ await store.upsert_conversation("<uuid>", user_id=user.id, title="Điều kiện
 await store.record_turn(Turn(trace_id=new_trace_id(), conversation_id="<uuid>", outcome="answer"))
 page = await store.list_conversations(user.id, limit=20)
 ```
+
+## Quy tắc ghi
+
+- Mọi lệnh ghi có thể tạo hội thoại (tin nhắn, trace, cập nhật thread) đều nhận `owner_id`. Chủ chỉ được gán khi
+  hội thoại chưa có chủ, không bao giờ bị thay.
+- Tạo dòng bằng một câu `INSERT ... ON CONFLICT`, không "đọc rồi mới insert", vì Chainlit ghi tin nhắn đầu và tạo
+  thread cùng lúc.
 
 ## Giới hạn
 

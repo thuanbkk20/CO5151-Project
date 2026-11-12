@@ -1,7 +1,7 @@
 [project]
 name = "co5151-chat-store"
 version = "0.1.0"
-description = "Long-term chat history per user: conversations, messages and one trace per answer, on any SQLAlchemy database"
+description = "Long-term chat history per user: conversations, messages and one trace per answer, on SQLite or PostgreSQL"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
