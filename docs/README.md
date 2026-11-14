@@ -17,6 +17,12 @@ Tài liệu dùng chung cho cả hệ thống. Tài liệu của riêng từng t
 | [d2-notes.md](eval/d2-notes.md) | Ghi chú lần chạy đánh giá D2 (25/10/2026): cấu hình, số liệu máy chấm, chấm tay, phân tích thất bại |
 | [d2-report.html](eval/d2-report.html) | Report HTML từng câu của lần chạy D2; tải về rồi mở bằng trình duyệt |
 
+## Tiến độ
+
+| File | Nội dung |
+|---|---|
+| [remaining-work.md](remaining-work.md) | Việc còn lại đến bảo vệ final, chia theo task |
+
 ## Quy ước
 
 - Tài liệu thiết kế đặt trong `design/`; kết quả của một lần chạy đánh giá đặt trong `eval/`, tên file bắt đầu bằng
