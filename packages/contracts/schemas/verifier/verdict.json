@@ -1,0 +1,72 @@
+{
+  "$defs": {
+    "IssueCode": {
+      "enum": [
+        "UNSUPPORTED_CITATION",
+        "FACT_MISMATCH",
+        "UNGROUNDED_CLAIM",
+        "MISSING_EVIDENCE",
+        "LEAK",
+        "UNVERIFIED"
+      ],
+      "title": "IssueCode",
+      "type": "string"
+    },
+    "VerdictStatus": {
+      "enum": [
+        "pass",
+        "revise",
+        "refuse"
+      ],
+      "title": "VerdictStatus",
+      "type": "string"
+    },
+    "VerificationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/IssueCode"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "VerificationIssue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "`pass` carries no issues; `revise` and `refuse` carry at least one.",
+  "properties": {
+    "status": {
+      "$ref": "#/$defs/VerdictStatus"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/VerificationIssue"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "input_tokens": {
+      "default": 0,
+      "title": "Input Tokens",
+      "type": "integer"
+    },
+    "output_tokens": {
+      "default": 0,
+      "title": "Output Tokens",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "status"
+  ],
+  "title": "Verdict",
+  "type": "object"
+}

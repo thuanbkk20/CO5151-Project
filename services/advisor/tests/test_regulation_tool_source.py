@@ -1,11 +1,44 @@
 from co5151_advisor.eval_adapter import regulation_ids, regulation_source
 from co5151_advisor.regulations import StaticRegulationSource, ToolRegulationSource
-from co5151_contracts import ErrorCode, err
+from co5151_contracts import ErrorCode, err, ok
 
 
 class _Forbidden:
     def call(self, name, arguments):
         return err(ErrorCode.FORBIDDEN, "draft")
+
+
+class _Results:
+    def __init__(self, *evidence):
+        self._results = [{"id": e["provision_id"], "evidence": e} for e in evidence]
+
+    def call(self, name, arguments):
+        return ok({"results": self._results})
+
+
+def test_text_is_read_from_whichever_field_the_evidence_carries():
+    source = ToolRegulationSource(
+        _Results(
+            {"provision_id": "QD-CL5.5", "fragments": [{"text": "5.5 Đăng ký"}, {"text": "học phần"}]},
+            {"provision_id": "A2-THESIS", "fragments": None, "source_text": "Khi xét\n\nđiều kiện"},
+            {"provision_id": "FAQ-6", "text": "Hỏi đáp tốt nghiệp", "source_text": "bản gốc"},
+        )
+    )
+    assert [d.content for d in source.search("luận văn")] == [
+        "5.5 Đăng ký học phần",
+        "Khi xét điều kiện",
+        "Hỏi đáp tốt nghiệp",
+    ]
+
+
+def test_every_result_for_the_eval_questions_has_text(monkeypatch):
+    from co5151_eval.tasks import load_tasks
+
+    monkeypatch.delenv("ADVISOR_REGULATION_SOURCE", raising=False)
+    monkeypatch.delenv("REGULATION_ALLOW_DRAFT", raising=False)
+    source = regulation_source()
+    docs = [d for task in load_tasks() for d in source.search(task.question)]
+    assert docs and all(d.content for d in docs)
 
 
 def test_adapter_reads_the_real_regulation_corpus(monkeypatch):

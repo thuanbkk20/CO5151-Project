@@ -9,6 +9,7 @@ dependencies = [
     "co5151-student-server",
     "co5151-regulation-server",
     "co5151-eval",
+    "co5151-verifier",
     "openai>=1.0",
     "pydantic>=2",
 ]
@@ -18,6 +19,7 @@ co5151-contracts = { workspace = true }
 co5151-student-server = { workspace = true }
 co5151-regulation-server = { workspace = true }
 co5151-eval = { workspace = true }
+co5151-verifier = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

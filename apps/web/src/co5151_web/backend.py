@@ -4,7 +4,7 @@ from functools import cache
 from typing import Any
 
 from co5151_advisor.agent import AdvisorAgent
-from co5151_advisor.eval_adapter import regulation_source
+from co5151_advisor.eval_adapter import make_verifier, regulation_source
 from co5151_advisor.eval_adapter import student_service as advisor_student_service
 from co5151_advisor.llm import DEFAULT_PROVIDER, PROVIDERS, LLMClient
 from student_server.auth import AuthError, login
@@ -40,7 +40,12 @@ def default_provider(providers: list[str]) -> str:
 
 def new_advisor(provider: str | None = None, model: str | None = None) -> AdvisorAgent:
     llm = LLMClient(provider=provider, model=model or None)
-    return AdvisorAgent(advisor_student_service(student_service()), regulation_source(), llm_client=llm)
+    return AdvisorAgent(
+        advisor_student_service(student_service()),
+        regulation_source(),
+        llm_client=llm,
+        verifier=make_verifier(llm),
+    )
 
 
 @dataclass
@@ -59,6 +64,7 @@ def ask(advisor: AdvisorAgent, question: str, *, token: str | None, history: lis
             "outcome": resp.outcome.value if resp.outcome else "do LLM viết",
             "tool_calls": resp.tool_calls,
             "citations": resp.citations,
+            "verifier_rounds": resp.verifier_rounds,
             "tokens": resp.usage.total,
             "seconds": round(time.perf_counter() - start, 2),
             "llm": f"{llm.get('provider', '-')}/{llm.get('model', '-')}",
@@ -66,11 +72,18 @@ def ask(advisor: AdvisorAgent, question: str, *, token: str | None, history: lis
     )
 
 
+def _verifier_label(rounds: int | None) -> str:
+    if rounds is None:
+        return "không kiểm (tắt, hoặc câu trả lời không qua bước soạn)"
+    return f"{rounds} lượt kiểm" + (", có viết lại" if rounds > 1 else "")
+
+
 def details_markdown(details: dict[str, Any]) -> str:
     rows = [
         ("Kết cục", details["outcome"]),
         ("Tool đã gọi", ", ".join(details["tool_calls"]) or "không"),
         ("Trích dẫn", ", ".join(details["citations"]) or "không"),
+        ("Verifier", _verifier_label(details.get("verifier_rounds"))),
         ("Token", details["tokens"]),
         ("Thời gian", f"{details['seconds']} s"),
         ("LLM", details["llm"]),

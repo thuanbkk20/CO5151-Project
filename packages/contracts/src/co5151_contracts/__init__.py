@@ -3,6 +3,14 @@
 from .auth import SCOPE_RECORDS_READ, Role, SessionClaims, StudentId
 from .envelope import ErrorCode, ToolError, ToolErrorBody, ToolResult, err, ok
 from .tools import STUDENT_RECORD_TOOLS, Permission, ToolSpec
+from .verification import (
+    IssueCode,
+    RegulationExcerpt,
+    Verdict,
+    VerdictStatus,
+    VerificationIssue,
+    VerificationRequest,
+)
 
 __all__ = [
     "SCOPE_RECORDS_READ",
@@ -18,5 +26,11 @@ __all__ = [
     "STUDENT_RECORD_TOOLS",
     "Permission",
     "ToolSpec",
+    "IssueCode",
+    "RegulationExcerpt",
+    "Verdict",
+    "VerdictStatus",
+    "VerificationIssue",
+    "VerificationRequest",
 ]
 __version__ = "0.1.0"

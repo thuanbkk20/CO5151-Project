@@ -41,6 +41,18 @@ def test_ask_answers_from_the_logged_in_record_and_reports_details():
     assert "**Tool đã gọi:** get_my_academic_summary" in backend.details_markdown(reply.details)
 
 
+def test_details_report_how_many_times_the_verifier_checked_the_answer(monkeypatch):
+    _, token = backend.sign_in("sv001", "demo")
+    reply = backend.ask(backend.new_advisor(), GRADUATION_Q, token=token, history=[])
+    assert reply.details["verifier_rounds"] == 1
+    assert "**Verifier:** 1 lượt kiểm" in backend.details_markdown(reply.details)
+
+    monkeypatch.setenv("ADVISOR_VERIFIER", "off")
+    reply = backend.ask(backend.new_advisor(), GRADUATION_Q, token=token, history=[])
+    assert reply.details["verifier_rounds"] is None
+    assert "**Verifier:** không kiểm" in backend.details_markdown(reply.details)
+
+
 def test_guest_question_does_not_touch_the_student_record():
     reply = backend.ask(
         backend.new_advisor(), "Điều kiện để được xét công nhận tốt nghiệp gồm những gì?", token=None, history=[]

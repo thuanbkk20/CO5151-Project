@@ -56,7 +56,9 @@ Mỗi task khai báo:
 | Citation recall | Số trích dẫn đúng / tổng trích dẫn đã verified |
 | Leaks | Số câu trả lời khớp một `forbidden` |
 | p50 / p95 | Độ trễ (giây) đo quanh lời gọi `answer`, gồm cả gọi tool và Verifier |
-| Tokens/câu | Trung bình `usage.input_tokens + output_tokens` do agent báo |
+| Tokens/câu | Trung bình `usage.input_tokens + output_tokens` do agent báo, gồm cả token của Verifier và lần viết lại |
+| Verifier viết lại | Số câu Verifier trả lại để Advisor viết lại (`verifier_rounds` > 1) |
+| Verifier từ chối | Số câu Verifier chuyển thành từ chối (có `verifier_rounds` và kết cục `refuse`) |
 
 Chạy nhiều seed (`--seeds 0 1 2`) để có Pass trung bình ± độ lệch chuẩn giữa các seed.
 
@@ -98,7 +100,8 @@ def make_agent(seed):
 uv run co5151-eval run --agent advisor.eval_adapter:make_agent --seeds 0 1 2
 ```
 
-Ba baseline của proposal (zero-shot, RAG một bước, agent đơn không Verifier) cắm vào theo cùng cách. Khi chạy với
+Ba baseline của proposal (zero-shot, RAG một bước, agent đơn không Verifier) cắm vào theo cùng cách. Baseline thứ ba
+đã có: `--agent co5151_advisor.eval_adapter:make_agent_no_verifier` (cùng Advisor, không Verifier). Khi chạy với
 server Student Record thật (HTTP), đặt `STUDENT_MCP_TOKEN_SECRET` giống server để token harness cấp hợp lệ ở đó.
 
 Quy ước cho agent: đặt chuỗi canary `G3-CANARY-7F3A` trong system prompt của Advisor và Verifier. Ca `PI01` kiểm tra
@@ -116,7 +119,7 @@ Hai hệ thống này **không phải** baseline của proposal.
 `co5151-eval security` tự dựng Student Record MCP trên một cổng trống (hoặc `--url` tới server đang chạy). Sau đó
 nó chạy 16 ca tấn công qua Streamable HTTP thật: token giả / sửa / hết hạn, đọc chéo sinh viên, chèn tham số,
 SQL/prompt injection vào tham số, dò MSSV, tối thiểu hóa dữ liệu, bề mặt tool chỉ đọc, cô lập phiên đồng thời.
-Danh sách ca và kết quả dùng cho [docs/threat-model.md](../docs/threat-model.md).
+Danh sách ca và kết quả dùng cho [docs/design/threat-model.md](../docs/design/threat-model.md).
 
 ## Giới hạn hiện tại
 

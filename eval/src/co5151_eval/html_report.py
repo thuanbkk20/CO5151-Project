@@ -431,10 +431,12 @@ def _scorecard(record: dict, task: Task, run: Run, lookup: RegulationLookup | No
     if run.uses_llm and record["tokens"] == TEMPLATE_TOKENS:
         flags = " <span class='flag bad'>nghi trả lời bằng template</span>"
     record_tools = [t for t in record["tool_calls"] if t != REGULATION_TOOL]
+    rounds = record.get("verifier_rounds")  # absent in runs recorded before the Verifier existed
+    verifier = f" · Verifier kiểm {rounds} lượt" if rounds else ""
     regulation, reconstructed = _regulation_line(record, task, run, lookup)
     meta = (
         f"Lần hỏi {record['seed'] + 1} (seed {record['seed']}) · {record['latency_s']:.2f} s · {record['tokens']} token"
-        f" · tool Student Record: {escape(', '.join(record_tools) or 'không gọi')}{flags}{regulation}"
+        f"{verifier} · tool Student Record: {escape(', '.join(record_tools) or 'không gọi')}{flags}{regulation}"
     )
     if record["error"]:
         meta += f"<br><span class='flag bad'>lỗi: {escape(record['error'])}</span>"

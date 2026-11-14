@@ -120,7 +120,13 @@ class ToolRegulationSource:
         pages = citation.get("pdf_pages") or []
         source = citation.get("file_name", "")
         where = f"{source}, trang {pages[0]}-{pages[-1]}" if pages else source
-        text = " ".join(f.get("text", "") for f in evidence.get("fragments", []))
+        # Decisions carry `fragments`; language rules only `source_text`; handbook / FAQ units `text`.
+        text = (
+            " ".join(f.get("text", "") for f in evidence.get("fragments") or [])
+            or evidence.get("text")
+            or evidence.get("source_text")
+            or ""
+        )
         return RegulationDocument(
             id=evidence.get("provision_id") or result["id"],
             title=f"{evidence.get('title', result['id'])} ({where})" if where else evidence.get("title", result["id"]),

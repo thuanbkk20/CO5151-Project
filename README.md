@@ -11,10 +11,10 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 | `mcp/student-server` | **Student Record MCP**: mock DB điểm/tín chỉ/hồ sơ, scoped read-only, xác thực bằng Bearer token | 2. Student Data & MCP |
 | `mcp/regulation-server` | **Regulation MCP**: Knowledge Graph + GraphRAG tra cứu quy chế | 1. Data & GraphRAG & MCP |
 | `services/advisor` | Advisor Agent, decision-driven RAG, short-term & audit memory | 3. Advisor Agent & Memory |
-| `verifier` | Compliance Verifier, reflection & grounding loop, strict refusal | 4. Verifier & Security |
+| `services/verifier` | Compliance Verifier, reflection & grounding loop, strict refusal | 4. Verifier & Security |
 | `apps/web` | **Giao diện chat** Chainlit: đăng nhập tài khoản demo, chọn LLM, chat nhiều lượt | 5. Kiểm thử & đánh giá |
 | `eval` | **Evaluation**: bộ 24 task, metric, baseline, kiểm thử bảo mật & prompt injection | 5. Kiểm thử & đánh giá |
-| `docs` | Tài liệu kiến trúc, báo cáo | — |
+| `docs` | Tài liệu thiết kế và báo cáo đánh giá, mục lục ở [docs/README.md](docs/README.md) | — |
 
 ## Bắt đầu
 
@@ -64,6 +64,22 @@ Kết quả nằm ở `eval/results/<thời gian>-<agent>/` (`report.html` mở 
 so sánh nhiều lần chạy trên một trang bằng `uv run co5151-eval report <thư mục 1> <thư mục 2> -o report.html`. Nếu terminal in
 `LLM generation failed, falling back to deterministic template` thì câu đó **không** do LLM trả lời (key sai, hết
 tiền, model không hỗ trợ tham số); `tokens` của câu đó là 100.
+
+Trước khi trả lời, bản nháp của Advisor đi qua **Compliance Verifier** ([services/verifier](services/verifier/README.md)):
+đạt thì gửi, sai sửa được thì Advisor viết lại đúng một lần, thiếu căn cứ thì từ chối. Chọn mức kiểm bằng
+`ADVISOR_VERIFIER` trong `.env`:
+
+| Giá trị | Verifier làm gì | Số lần gọi LLM thêm cho mỗi câu trả lời |
+| --- | --- | --- |
+| `llm` (mặc định) | Kiểm bằng luật, đạt rồi mới gọi LLM đối chiếu bản nháp với bằng chứng | 1; tối đa 3 nếu phải viết lại (1 viết lại + 1 kiểm lại) |
+| `rules` | Chỉ kiểm bằng luật: trích dẫn phải có trong đoạn quy chế đã tra, không lộ token | 0; 1 nếu phải viết lại |
+| `off` | Không kiểm (agent đơn) | 0 |
+
+`VERIFIER_LLM_MODEL` cho Verifier dùng model khác (rẻ hơn) của cùng provider. Baseline "agent đơn không Verifier":
+
+```bash
+uv run co5151-eval run --agent co5151_advisor.eval_adapter:make_agent_no_verifier --seeds 0 1 2
+```
 
 Chạy từng MCP server riêng để thử bằng MCP client:
 

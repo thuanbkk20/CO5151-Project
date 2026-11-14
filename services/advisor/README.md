@@ -98,6 +98,19 @@ Thành phần **Mảng 3** trong hệ thống tư vấn học tập cá nhân h�
 - **Không tìm thấy căn cứ quy chế**: Trả về **`Action.REFUSE`** với thông điệp chuẩn mực:
   > *"Tôi chưa có nguồn quy chế đáng tin cậy để kết luận điều kiện này."*
 
+### D. Vòng kiểm chứng với Compliance Verifier
+Chỉ áp dụng cho bước `Action.RESPOND`; các câu Planner đã `REFUSE` / `CLARIFY` không qua Verifier.
+1. Advisor soạn bản nháp (LLM, hoặc template khi không có LLM), xoá canary và token khỏi bản nháp.
+2. Gửi `VerificationRequest` (câu hỏi, bản nháp, số liệu hồ sơ đã đọc, các đoạn quy chế đã tra) cho Verifier.
+   Request không chứa token, MSSV hay lịch sử hội thoại.
+3. `pass` $\rightarrow$ trả lời. `revise` $\rightarrow$ Advisor viết lại **một lần** kèm danh sách lỗi rồi kiểm lại.
+   `refuse`, hoặc viết lại xong vẫn chưa đạt, hoặc không có LLM để viết lại $\rightarrow$ **`Outcome.REFUSE`**.
+4. Tối đa `MAX_VERIFIER_ROUNDS = 2` lượt kiểm. `AgentResponse.verifier_rounds` ghi số lượt; token của Verifier và
+   của lần viết lại được cộng vào `usage`.
+
+Advisor chỉ biết interface `verify(request) -> Verdict`; Verifier thật được ráp vào ở `eval_adapter.make_verifier`
+theo biến `ADVISOR_VERIFIER` (`llm` / `rules` / `off`).
+
 ---
 
 ## 3. Kết quả Chạy Thực nghiệm trên Test Suite & Benchmark

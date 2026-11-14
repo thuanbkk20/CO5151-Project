@@ -52,6 +52,14 @@ def test_seed_is_not_sent_unless_given(monkeypatch):
     assert "seed" not in _sent_options(LLMClient(api_key="o-key"))
 
 
+def test_json_schema_is_sent_only_to_providers_that_accept_it():
+    schema = {"type": "json_schema", "json_schema": {"name": "verdict", "schema": {"type": "object"}}}
+    for provider, accepts in [("gemini", True), ("openai", True), ("kimi", False)]:
+        sent = _sent_options(LLMClient(provider=provider, api_key="k"), response_format=schema)
+        assert (sent.get("response_format") == schema) is accepts, provider
+    assert "response_format" not in _sent_options(LLMClient(provider="gemini", api_key="k"))
+
+
 def test_generic_overrides_point_any_provider_elsewhere(monkeypatch):
     monkeypatch.setenv("LLM_MODEL", "my-model")
     monkeypatch.setenv("LLM_BASE_URL", "http://localhost:11434/v1")

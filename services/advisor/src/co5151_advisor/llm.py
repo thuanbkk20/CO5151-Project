@@ -18,6 +18,8 @@ class Provider:
     key_env: str
     sends_seed: bool = True
     reasoning_effort: str | None = None
+    # Accepts `response_format={"type": "json_schema", ...}` (structured output)
+    json_schema: bool = False
 
 
 PROVIDERS: dict[str, Provider] = {
@@ -26,8 +28,11 @@ PROVIDERS: dict[str, Provider] = {
         model="gemini-3.5-flash-lite",
         key_env="GEMINI_API_KEY",
         sends_seed=False,
+        json_schema=True,
     ),
-    "openai": Provider(base_url="https://api.openai.com/v1", model="gpt-4.1-mini", key_env="OPENAI_API_KEY"),
+    "openai": Provider(
+        base_url="https://api.openai.com/v1", model="gpt-4.1-mini", key_env="OPENAI_API_KEY", json_schema=True
+    ),
     "kimi": Provider(base_url="https://opencode.ai/inference/openai/v1", model="kimi-k3", key_env="OPENCODE_API_KEY"),
 }
 DEFAULT_PROVIDER = "gemini"
@@ -73,6 +78,7 @@ class LLMClient:
         self.model = model or _env("LLM_MODEL") or profile.model
         self.reasoning_effort = _env("LLM_REASONING_EFFORT") or profile.reasoning_effort
         self.sends_seed = profile.sends_seed
+        self.sends_json_schema = profile.json_schema
         self.timeout = float(_env("LLM_TIMEOUT") or DEFAULT_TIMEOUT_S)
         self._client: Any = None
         if self.api_key:
@@ -93,6 +99,7 @@ class LLMClient:
         system_prompt: str | None = None,
         history: list[dict[str, str]] | None = None,
         seed: int | None = None,
+        response_format: dict[str, Any] | None = None,
     ) -> LLMResult | None:
         if not self.is_available:
             return None
@@ -113,6 +120,8 @@ class LLMClient:
             options["seed"] = seed
         if self.reasoning_effort:
             options["reasoning_effort"] = self.reasoning_effort
+        if response_format and self.sends_json_schema:
+            options["response_format"] = response_format
         try:
             response = self._client.chat.completions.create(model=self.model, messages=messages, **options)
             choice = response.choices[0]
