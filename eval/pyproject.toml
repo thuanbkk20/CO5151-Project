@@ -7,6 +7,8 @@ requires-python = ">=3.10"
 dependencies = [
     "co5151-contracts",
     "co5151-student-server",
+    "co5151-regulation-server",
+    "co5151-backend",
 ]
 
 [project.scripts]
@@ -15,6 +17,8 @@ co5151-eval = "co5151_eval.cli:main"
 [tool.uv.sources]
 co5151-contracts = { workspace = true }
 co5151-student-server = { workspace = true }
+co5151-regulation-server = { workspace = true }
+co5151-backend = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

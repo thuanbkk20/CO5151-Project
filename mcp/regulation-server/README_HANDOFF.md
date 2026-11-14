@@ -20,7 +20,7 @@ uv run python -m regulation_server.smoke_handoff_stdio
 Nếu chạy trực tiếp server, terminal sẽ chờ MCP client gửi yêu cầu; đây không phải lỗi:
 
 ```bat
-uv run regulation-mcp --allow-draft
+uv run regulation-mcp --allow-draft   # Streamable HTTP :8103/mcp (REGULATION_MCP_HOST/PORT); thêm --stdio để chạy qua stdio
 ```
 
 Dùng `regulation-mcp` (tức `regulation_server.regulation_mcp_v2`) cho tích hợp mới. `regulation-server` là package `co5151-regulation-server` trong uv workspace; script trong `src/regulation_server/` chạy bằng `uv run python -m regulation_server.<tên_module>`. Entry point cũ vẫn được giữ để đối chiếu. Hai entry point không nên cùng được đăng ký vào Agent với cùng tên tool.
