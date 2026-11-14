@@ -84,6 +84,18 @@ sơ. Nút cài đặt cạnh ô nhập cho chọn nhà cung cấp LLM (chỉ nh�
 trả lời có mục "Chi tiết xử lý": tool đã gọi, trích dẫn, token, thời gian, model. Cần `CHAINLIT_AUTH_SECRET` trong
 `.env`; đổi cổng bằng `CHAINLIT_PORT` hoặc `--port`. Xem [apps/web/README.md](apps/web/README.md).
 
+Mặc định web gọi Student Record và Regulation như hàm Python trong cùng process (`inprocess`), nên `student-mcp serve`
+không có log. Để Advisor đi qua giao thức MCP thật, đặt trong `.env`:
+
+| Biến | Giá trị | Ý nghĩa |
+| --- | --- | --- |
+| `ADVISOR_STUDENT_TRANSPORT` | `inprocess` (mặc định) / `mcp` | `mcp`: gọi `student-mcp serve` qua Streamable HTTP, token gửi trong header Bearer |
+| `STUDENT_MCP_URL` | mặc định `http://<STUDENT_MCP_HOST>:<STUDENT_MCP_PORT>/mcp` | Địa chỉ server khi dùng `mcp` |
+| `ADVISOR_REGULATION_TRANSPORT` | `inprocess` (mặc định) / `mcp` | `mcp`: web tự khởi động `regulation-mcp` làm process con qua stdio |
+
+Chế độ `mcp` cần chạy `uv run student-mcp serve` trước, và `STUDENT_MCP_TOKEN_SECRET` phải giống nhau ở web và server
+(cả hai đọc cùng `.env`) vì web vẫn cấp token lúc đăng nhập.
+
 Quy ước khi thêm code (biến môi trường, package, tool mới) nằm trong [CLAUDE.md](CLAUDE.md).
 
 ## Quy ước

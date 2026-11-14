@@ -7,11 +7,15 @@ import argparse
 import json
 import os
 import sys
+from datetime import timedelta
 from pathlib import Path
 
 import anyio
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
+# mcp 1.x expects a timedelta here; 2.x accepts it too
+READ_TIMEOUT = timedelta(seconds=30)
 
 
 def envelope(result):
@@ -30,7 +34,7 @@ async def check(base, draft):
         args.append("--allow-draft")
     parameters = StdioServerParameters(command=sys.executable, args=args, env={**os.environ, "PYTHONUTF8": "1"})
     async with stdio_client(parameters) as (read, write):  # noqa: SIM117 - keep client lifecycle explicit
-        async with ClientSession(read, write, read_timeout_seconds=30) as session:
+        async with ClientSession(read, write, read_timeout_seconds=READ_TIMEOUT) as session:
             await session.initialize()
             print("PASS initialize", "draft" if draft else "default", flush=True)
             listed = await session.list_tools()
