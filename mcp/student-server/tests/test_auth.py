@@ -1,7 +1,7 @@
 import pytest
 
 from co5151_contracts import Role
-from student_server.auth import AuthError, TokenSigner, authenticate, login
+from student_server.auth import AuthError, TokenSigner, authenticate, claims_for, login
 from student_server.auth.passwords import hash_password, verify_password
 from student_server.auth.tokens import _b64
 
@@ -67,6 +67,12 @@ def test_login_student_and_advisor(db, signer):
 def test_login_failures_share_one_message(db, user, pw):
     with pytest.raises(AuthError, match="^invalid credentials$"):
         authenticate(db, user, pw)
+
+
+def test_claims_for_an_authenticated_user_match_the_login_claims(db):
+    for username in ("sv002", "cvht01"):
+        assert claims_for(db, username) == authenticate(db, username, "demo")
+    assert claims_for(db, "nobody") is None
 
 
 def test_accounts_file_has_no_plaintext_passwords(db):

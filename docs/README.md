@@ -8,6 +8,7 @@ Tài liệu dùng chung cho cả hệ thống. Tài liệu của riêng từng t
 | File | Nội dung |
 |---|---|
 | [threat-model.md](design/threat-model.md) | Threat model v1 (D2, mục 6): tài sản, điểm vào, kẻ tấn công, biện pháp và trạng thái từng biện pháp |
+| [chat-history.md](design/chat-history.md) | Lưu lịch sử chat theo user: bảng dữ liệu, trace id, cách đổi database, việc còn cần quyết |
 | [verifier-summary.md](design/verifier-summary.md) | Compliance Verifier: luồng Advisor ↔ Verifier, các file đã thay đổi và logic từng file, chi phí LLM |
 
 ## `eval/` — kết quả đánh giá

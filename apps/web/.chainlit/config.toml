@@ -6,7 +6,8 @@ user_env = []
 session_timeout = 3600
 
 # Duration (in seconds) of the user session expiry
-user_session_timeout = 1296000  # 15 days
+# How long a sign-in lasts; the Student Record token is re-issued for that long (apps/web/README.md, Bảo mật)
+user_session_timeout = 86400  # 1 day
 
 # Enable third parties caching (e.g., LangChain cache)
 cache = false
@@ -56,7 +57,8 @@ reaction_on_message_received = false
 
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
-    enabled = true
+    # Off: the Advisor does not read uploaded files, and the chat history does not store them
+    enabled = false
     # Define accepted file types using MIME types
     # Examples:
     # 1. For specific file types:

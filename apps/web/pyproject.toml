@@ -9,6 +9,7 @@ dependencies = [
     "co5151-contracts",
     "co5151-student-server",
     "co5151-advisor",
+    "co5151-chat-store",
 ]
 
 [project.scripts]
@@ -18,6 +19,7 @@ co5151-web = "co5151_web.cli:main"
 co5151-contracts = { workspace = true }
 co5151-student-server = { workspace = true }
 co5151-advisor = { workspace = true }
+co5151-chat-store = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
