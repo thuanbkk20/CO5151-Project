@@ -1,4 +1,7 @@
-"""A fake backend admin API on httpx.MockTransport, answering like the real one. No network."""
+"""A fake backend (admin API and the user API) on httpx.MockTransport, answering like the real one. No network,
+no LLM."""
+
+import json
 
 import httpx
 
@@ -27,8 +30,12 @@ ITEM = {"trace": TRACE, "owner_id": "sv002", "question": "Điều kiện tốt n
 
 
 class FakeBackend:
-    def __init__(self, admin_enabled: bool = True):
+    def __init__(self, admin_enabled: bool = True, answers: dict[str, str] | None = None,
+                 fail_questions: tuple[str, ...] = ()):  # fmt: skip
         self.admin_enabled = admin_enabled
+        self.answers = answers or {}
+        self.fail_questions = fail_questions
+        self.logins: list[str] = []
         self.requests: list[httpx.Request] = []
 
     def handle(self, request: httpx.Request) -> httpx.Response:
@@ -38,6 +45,22 @@ class FakeBackend:
             return httpx.Response(404, json={"detail": "not found"})
         if path.startswith("/admin/") and request.headers.get("authorization") != f"Bearer {TOKEN}":
             return httpx.Response(401, json={"detail": "not signed in"})
+        if path == "/auth/login":
+            body = json.loads(request.content)
+            if body["password"] != "demo":
+                return httpx.Response(401, json={"detail": "invalid credentials"})
+            self.logins.append(body["username"])
+            return httpx.Response(200, json={"access_token": f"user-{body['username']}", "expires_in": 60})
+        if path == "/conversations":
+            return httpx.Response(201, json={"id": json.loads(request.content)["id"]})
+        if path.endswith("/messages"):
+            question = json.loads(request.content)["content"]
+            if question in self.fail_questions:
+                return httpx.Response(500, json={"detail": "answer failed", "trace_id": "t-failed"})
+            answer = self.answers.get(question, "Theo Điều 22...")
+            conversation = path.split("/")[2]
+            return httpx.Response(200, json={"message": {"id": "m2", "content": answer},
+                                             "trace": {**TRACE, "conversation_id": conversation}})  # fmt: skip
         if path == "/admin/traces":
             session = request.url.params.get("conversation_id")
             return httpx.Response(200, json={"items": [ITEM] if session in (None, SESSION) else []})

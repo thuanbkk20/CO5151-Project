@@ -3,6 +3,7 @@
 Services only see these: the backend's HTTP API or the SQLite file can change without touching a service.
 """
 
+from dataclasses import dataclass
 from typing import Any, Protocol
 
 from co5151_eval.tasks import Task
@@ -40,3 +41,19 @@ class QuestionSetStore(Protocol):
         """Add the task, or replace the task with the same id."""
 
     def delete_task(self, set_id: int, task_id: str) -> None: ...
+
+
+@dataclass(frozen=True)
+class AgentAnswer:
+    """One answer of the backend: the text and its trace (the API's TraceOut JSON), or the error."""
+
+    text: str
+    trace: dict[str, Any] | None
+    error: str | None = None
+
+
+class AnswerAgent(Protocol):
+    """Asks the backend one question as a user would: sign in, open a conversation, ask."""
+
+    def answer(self, question: str, *, user: str | None) -> AgentAnswer:
+        """`user`: a demo account, or None for a guest. Never raises: failures come back in `error`."""
