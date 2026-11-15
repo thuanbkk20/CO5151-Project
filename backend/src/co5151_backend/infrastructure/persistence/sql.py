@@ -6,7 +6,7 @@ Rules kept from the earlier chat store, each fixing a failure seen in practice:
   creates of the same conversation both succeed.
 """
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -28,8 +28,8 @@ from ...domain.conversation import (
     utcnow,
 )
 from ...domain.errors import NotFound
-from ...domain.trace import Outcome, Trace, Usage
-from .tables import Base, ConversationRow, MessageRow, TraceRow
+from ...domain.trace import Outcome, Span, Trace, Usage
+from .tables import Base, ConversationRow, MessageRow, SpanRow, TraceRow
 
 SUPPORTED_BACKENDS = ("sqlite", "postgresql")
 _INSERT = {"sqlite": sqlite.insert, "postgresql": postgresql.insert}
@@ -167,6 +167,8 @@ class SqlChatRepository:
         async with self._session() as s:
             if await s.scalar(select(ConversationRow.id).where(self._owned(conversation_id, owner_id))) is None:
                 return False
+            traces = select(TraceRow.trace_id).where(TraceRow.conversation_id == conversation_id)
+            await s.execute(delete(SpanRow).where(SpanRow.trace_id.in_(traces)))
             for table in (TraceRow, MessageRow):
                 await s.execute(delete(table).where(table.conversation_id == conversation_id))
             await s.execute(delete(ConversationRow).where(ConversationRow.id == conversation_id))
@@ -221,7 +223,7 @@ class SqlChatRepository:
 
     # Traces ------------------------------------------------------------------------------------------------
 
-    async def save(self, trace: Trace) -> None:
+    async def save(self, trace: Trace, spans: Sequence[Span] = ()) -> None:
         values = {
             "trace_id": trace.trace_id,
             "conversation_id": trace.conversation_id,
@@ -244,6 +246,8 @@ class SqlChatRepository:
         replaced = {k: statement.excluded[k] for k in values if k not in ("trace_id", "created_at")}
         async with self._session() as s:
             await s.execute(statement.on_conflict_do_update(index_elements=["trace_id"], set_=replaced))
+            await s.execute(delete(SpanRow).where(SpanRow.trace_id == trace.trace_id))
+            s.add_all(_span_row(trace.trace_id, seq, span) for seq, span in enumerate(spans))
 
     async def get_trace(self, trace_id: str, owner_id: str) -> Trace | None:
         async with self._session() as s:
@@ -254,6 +258,15 @@ class SqlChatRepository:
             )
             return _trace(row) if row else None
 
+    async def get_spans(self, trace_id: str, owner_id: str) -> list[Span] | None:
+        if await self.get_trace(trace_id, owner_id) is None:
+            return None
+        async with self._session() as s:
+            rows = await s.scalars(
+                select(SpanRow).where(SpanRow.trace_id == trace_id).order_by(SpanRow.start_ms, SpanRow.seq)
+            )
+            return [_span(row) for row in rows]
+
 
 class SqlTraceRepository:
     """The TraceRepository view of the same store (its `get` would clash with the conversations' `get`)."""
@@ -261,11 +274,14 @@ class SqlTraceRepository:
     def __init__(self, chats: SqlChatRepository):
         self._chats = chats
 
-    async def save(self, trace: Trace) -> None:
-        await self._chats.save(trace)
+    async def save(self, trace: Trace, spans: Sequence[Span] = ()) -> None:
+        await self._chats.save(trace, spans)
 
     async def get(self, trace_id: str, owner_id: str) -> Trace | None:
         return await self._chats.get_trace(trace_id, owner_id)
+
+    async def spans(self, trace_id: str, owner_id: str) -> list[Span] | None:
+        return await self._chats.get_spans(trace_id, owner_id)
 
 
 def _title(title: str | None) -> str | None:
@@ -316,3 +332,16 @@ def _trace(row: TraceRow) -> Trace:
         error=row.error,
         created_at=_utc(row.created_at),
     )
+
+
+def _span_row(trace_id: str, seq: int, span: Span) -> SpanRow:
+    return SpanRow(trace_id=trace_id, seq=seq, node=span.node, name=span.name[:255], input=span.input,
+                   output=span.output, start_ms=span.start_ms, duration_ms=span.duration_ms,
+                   input_tokens=span.usage.input_tokens, output_tokens=span.usage.output_tokens,
+                   error=span.error)  # fmt: skip
+
+
+def _span(row: SpanRow) -> Span:
+    return Span(node=row.node, name=row.name, input=row.input or {}, output=row.output or {},
+                start_ms=row.start_ms, duration_ms=row.duration_ms,
+                usage=Usage(row.input_tokens, row.output_tokens), error=row.error)  # fmt: skip

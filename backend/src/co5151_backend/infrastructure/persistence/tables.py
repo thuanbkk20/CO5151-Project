@@ -61,3 +61,22 @@ class TraceRow(Base):
     llm_error: Mapped[str | None] = mapped_column(Text)
     error: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime]
+
+
+class SpanRow(Base):
+    """What one node of an answer received and returned. Its own table: `create_all` adds it to an existing
+    database, and the trace rows the history and the evaluation read stay small."""
+
+    __tablename__ = "trace_spans"
+
+    trace_id: Mapped[str] = mapped_column(ForeignKey("traces.trace_id", ondelete="CASCADE"), primary_key=True)
+    seq: Mapped[int] = mapped_column(Integer, primary_key=True)
+    node: Mapped[str] = mapped_column(String(32))
+    name: Mapped[str] = mapped_column(String(255))
+    input: Mapped[dict[str, Any]] = mapped_column(default=dict)
+    output: Mapped[dict[str, Any]] = mapped_column(default=dict)
+    start_ms: Mapped[int] = mapped_column(Integer, default=0)
+    duration_ms: Mapped[int] = mapped_column(Integer, default=0)
+    input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    error: Mapped[str | None] = mapped_column(Text)

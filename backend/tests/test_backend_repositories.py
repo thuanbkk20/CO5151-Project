@@ -7,7 +7,7 @@ import pytest
 
 from co5151_backend.domain.conversation import ChatSettings, Conversation, Feedback, Message, MessageRole, utcnow
 from co5151_backend.domain.errors import NotFound
-from co5151_backend.domain.trace import Outcome, Trace, Usage
+from co5151_backend.domain.trace import Outcome, Span, Trace, Usage
 from co5151_backend.infrastructure.persistence.memory import InMemoryChatRepository, InMemoryTraceRepository
 from co5151_backend.infrastructure.persistence.sql import SqlChatRepository, SqlTraceRepository, UnsupportedDatabase
 
@@ -114,6 +114,20 @@ async def test_trace_round_trip_is_owner_scoped(repos):
     assert got.outcome is Outcome.REFUSE and got.usage.total == 15 and got.llm_error == "LLMError: 429"
     assert got.steps == ["REFUSE"] and got.citations == ["Dieu_24"] and got.verifier_rounds == 2
     assert await traces.get("a" * 32, "sv002") is None
+
+
+async def test_spans_are_saved_with_their_trace_owner_scoped_and_replaced(repos):
+    chats, traces = repos
+    await chats.create(conversation("c1"))
+    later = Span(node="verifier", name="round 1", output={"status": "pass"}, start_ms=20, usage=Usage(30, 2))
+    first = Span(node="planner", name="rules", input={"question": "q"}, start_ms=0, duration_ms=1)
+    await traces.save(Trace(trace_id="s" * 32, conversation_id="c1"), [later, first])
+    assert await traces.spans("s" * 32, "sv001") == [first, later]
+    assert await traces.spans("s" * 32, "sv002") is None and await traces.spans("x" * 32, "sv001") is None
+    await traces.save(Trace(trace_id="s" * 32, conversation_id="c1"), [first])
+    assert await traces.spans("s" * 32, "sv001") == [first]
+    await chats.delete("c1", "sv001")
+    assert await traces.spans("s" * 32, "sv001") is None
 
 
 async def test_concurrent_creates_of_one_conversation_both_succeed(tmp_path):

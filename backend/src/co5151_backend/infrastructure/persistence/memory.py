@@ -1,10 +1,11 @@
 """Chat history in process memory: for the evaluation (one fresh store per question) and for tests."""
 
+from collections.abc import Sequence
 from dataclasses import replace
 
 from ...domain.conversation import ChatSettings, Conversation, ConversationPage, Feedback, Message, MessageRole, utcnow
 from ...domain.errors import NotFound
-from ...domain.trace import Trace
+from ...domain.trace import Span, Trace
 
 
 class InMemoryChatRepository:
@@ -12,6 +13,7 @@ class InMemoryChatRepository:
         self._conversations: dict[str, Conversation] = {}
         self._messages: dict[str, list[Message]] = {}
         self._traces: dict[str, Trace] = {}
+        self._spans: dict[str, list[Span]] = {}
 
     def _owned(self, conversation_id: str, owner_id: str) -> Conversation | None:
         found = self._conversations.get(conversation_id)
@@ -61,6 +63,7 @@ class InMemoryChatRepository:
             return False
         del self._conversations[conversation_id], self._messages[conversation_id]
         self._traces = {k: t for k, t in self._traces.items() if t.conversation_id != conversation_id}
+        self._spans = {k: s for k, s in self._spans.items() if k in self._traces}
         return True
 
     async def add_message(self, message: Message) -> None:
@@ -81,20 +84,29 @@ class InMemoryChatRepository:
                     return True
         return False
 
-    async def save(self, trace: Trace) -> None:
+    async def save(self, trace: Trace, spans: Sequence[Span] = ()) -> None:
         self._traces[trace.trace_id] = trace
+        self._spans[trace.trace_id] = sorted(spans, key=lambda s: s.start_ms)
 
     async def get_trace(self, trace_id: str, owner_id: str) -> Trace | None:
         trace = self._traces.get(trace_id)
         return trace if trace and self._owned(trace.conversation_id, owner_id) else None
+
+    async def get_spans(self, trace_id: str, owner_id: str) -> list[Span] | None:
+        if await self.get_trace(trace_id, owner_id) is None:
+            return None
+        return list(self._spans.get(trace_id, []))
 
 
 class InMemoryTraceRepository:
     def __init__(self, chats: InMemoryChatRepository):
         self._chats = chats
 
-    async def save(self, trace: Trace) -> None:
-        await self._chats.save(trace)
+    async def save(self, trace: Trace, spans: Sequence[Span] = ()) -> None:
+        await self._chats.save(trace, spans)
 
     async def get(self, trace_id: str, owner_id: str) -> Trace | None:
         return await self._chats.get_trace(trace_id, owner_id)
+
+    async def spans(self, trace_id: str, owner_id: str) -> list[Span] | None:
+        return await self._chats.get_spans(trace_id, owner_id)
