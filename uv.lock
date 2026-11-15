@@ -808,6 +808,7 @@ version = "0.1.0"
 source = { editable = "console" }
 dependencies = [
     { name = "co5151-contracts" },
+    { name = "co5151-eval" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "jinja2" },
@@ -818,6 +819,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "co5151-contracts", editable = "packages/contracts" },
+    { name = "co5151-eval", editable = "eval" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "jinja2", specifier = ">=3.1" },
