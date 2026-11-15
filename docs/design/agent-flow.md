@@ -36,10 +36,10 @@ mất bao lâu, tốn bao nhiêu token. Gồm cả dữ liệu MCP Regulation v�
 
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
-| 1 | `feat(backend): span recorder for the nodes of an answer` | `Span` (domain), `SpanRecorder` + `clip` + test | đã code |
-| 2 | `feat(backend): store spans with their trace` | port `TraceRepository`, bảng `trace_spans`, memory/SQL + test | đã code |
-| 3 | `feat(backend): planner, tools, writer and verifier record spans` | Advisor, tools, `AskQuestion`, `Conversations.spans` + test | đã code |
-| 4 | `feat(backend): GET /traces/{id}/spans` | route, schema + test API | đã code |
+| 1 | `feat(backend): span recorder for the nodes of an answer` | `Span` (domain), `SpanRecorder` + `clip` + test | xong `ca015ea` |
+| 2 | `feat(backend): store spans with their trace` | port `TraceRepository`, bảng `trace_spans`, memory/SQL + test | xong `64638fc` |
+| 3 | `feat(backend): planner, tools, writer and verifier record spans` | Advisor, tools, `AskQuestion`, `Conversations.spans` + test | xong `74de7aa` |
+| 4 | `feat(backend): GET /traces/{id}/spans` | route, schema + test API | xong `bd3fbf5` |
 | 5 | `feat(web): client reads the spans of an answer` | `BackendClient.spans` + test | chưa |
 | 6 | `feat(web): agent flow in the right sidebar` | custom element JSX, `present.py` chuyển spans → props, mở sidebar sau mỗi câu trả lời + test | chưa |
 | 7 | `docs: agent flow` | README backend/frontend, architecture.md | chưa |
