@@ -22,7 +22,7 @@ from .application.ports import (
     TraceRepository,
 )
 from .application.usecases.ask import AskQuestion
-from .application.usecases.auth import Authenticate, SignIn
+from .application.usecases.auth import Authenticate, AuthenticateOperator, SignIn
 from .application.usecases.conversations import Conversations
 from .infrastructure.config import Settings
 from .infrastructure.identity import DemoAccountDirectory, JwtAccessTokens, SignedStudentTokens
@@ -53,6 +53,7 @@ class Container:
     settings: Settings
     sign_in: SignIn
     authenticate: Authenticate
+    authenticate_operator: AuthenticateOperator
     conversations: Conversations
     ask: AskQuestion
     chats: ConversationRepository
@@ -133,6 +134,7 @@ def build_container(settings: Settings, adapters: Adapters | None = None) -> Con
         settings=settings,
         sign_in=SignIn(accounts, access_tokens),
         authenticate=Authenticate(access_tokens),
+        authenticate_operator=AuthenticateOperator(settings.admin_token),
         conversations=Conversations(chats, traces, models),
         ask=AskQuestion(
             chats=chats,

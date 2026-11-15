@@ -3,8 +3,9 @@ from backend_fakes import GRADUATION, PASS, REFUSE, REVISE, UNVERIFIED, App, Scr
 
 from co5151_backend.application.agents.advisor import prompts
 from co5151_backend.application.usecases.ask import MAX_VERIFIER_ROUNDS
+from co5151_backend.application.usecases.auth import AuthenticateOperator
 from co5151_backend.domain.conversation import ChatSettings, Feedback, MessageRole
-from co5151_backend.domain.errors import AnswerFailed, InvalidCredentials, InvalidRequest, NotFound
+from co5151_backend.domain.errors import AnswerFailed, InvalidCredentials, InvalidRequest, NotFound, Unauthenticated
 from co5151_backend.domain.principal import Role
 from co5151_backend.domain.trace import Outcome
 
@@ -173,6 +174,16 @@ def test_sign_in():
     first, second = app.sign_in.execute("khach", ""), app.sign_in.execute("KHACH", "x")
     assert first.principal.user_id != second.principal.user_id and first.principal.is_guest
     assert app.authenticate.execute(first.access_token) == first.principal
+
+
+def test_operator_token_is_checked_and_the_admin_api_is_off_without_one():
+    operator = AuthenticateOperator("admin-token")
+    operator.execute("admin-token")
+    for wrong in ("", None, "admin-token2"):
+        with pytest.raises(Unauthenticated):
+            operator.execute(wrong)
+    with pytest.raises(NotFound):
+        AuthenticateOperator(None).execute("anything")
 
 
 async def test_conversation_settings_feedback_and_ids_are_checked():
