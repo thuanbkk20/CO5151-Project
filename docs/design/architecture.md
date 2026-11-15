@@ -45,6 +45,9 @@ Database, MCP và LLM đều là adapter sau một port; đổi adapter không p
    Student Record.
 8. **Database mới**, không migrate dữ liệu chat cũ (dữ liệu demo). Bảng mới không theo format của Chainlit.
 9. **eval dùng gateway trong process** (gọi thẳng service của MCP server) để chạy nhanh; app luôn đi qua MCP.
+10. **Span từng node** (planner, MCP, writer, Verifier) lưu cùng trace trong bảng `trace_spans`, đọc qua
+    `GET /traces/{id}/spans`, không stream: nháp bị Verifier loại chỉ thấy sau khi có câu trả lời cuối. Chi tiết:
+    [agent-flow.md](agent-flow.md).
 
 ## Verifier và chi phí LLM
 
@@ -57,7 +60,7 @@ lần rồi kiểm lại; không đạt hoặc `refuse` → từ chối. Lời g
 ## Còn mở
 
 1. **Dữ liệu điểm trong lịch sử chat** mâu thuẫn với cam kết D1 (threat model A6): giữ, thêm hạn tự xóa, hay chỉ
-   lưu câu hỏi + trace?
+   lưu câu hỏi + trace? Span (`trace_spans`) cũng lưu kết quả Student Record và nháp, nên cùng quyết định này.
 2. **Đổi cấu trúc bảng**: hiện chỉ tạo bảng còn thiếu; khi deploy thật thì thêm Alembic. PostgreSQL chưa chạy với
    server thật.
 3. **Khách**: mỗi lần đăng nhập `khach` là một danh tính mới, đăng xuất là mất lịch sử.

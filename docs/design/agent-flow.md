@@ -40,13 +40,13 @@ mất bao lâu, tốn bao nhiêu token. Gồm cả dữ liệu MCP Regulation v�
 | 2 | `feat(backend): store spans with their trace` | port `TraceRepository`, bảng `trace_spans`, memory/SQL + test | xong `64638fc` |
 | 3 | `feat(backend): planner, tools, writer and verifier record spans` | Advisor, tools, `AskQuestion`, `Conversations.spans` + test | xong `74de7aa` |
 | 4 | `feat(backend): GET /traces/{id}/spans` | route, schema + test API | xong `bd3fbf5` |
-| 5 | `feat(web): client reads the spans of an answer` | `BackendClient.spans` + test | chưa |
-| 6 | `feat(web): agent flow in the right sidebar` | custom element JSX, `present.py` chuyển spans → props, mở sidebar sau mỗi câu trả lời + test | chưa |
-| 7 | `docs: agent flow` | README backend/frontend, architecture.md | chưa |
+| 5 | `feat(web): client reads the spans of an answer` | `BackendClient.spans` + test | xong `7f7d187` |
+| 6 | `feat(web): agent flow in the right sidebar` | custom element JSX, `present.py` chuyển spans → props, mở sidebar sau mỗi câu trả lời + test | xong `b6c9f00` |
+| 7 | `docs: agent flow` | README backend/frontend, architecture.md | xong |
 
 Sau commit 6: chạy thử 1 câu bằng key thật (báo trước/sau số lần gọi LLM và token).
 
 ## Chưa quyết
 
-- Ai được thấy panel: hiện đề xuất bật/tắt bằng biến môi trường của frontend (chế độ demo), mặc định bật.
-- Mở lại luồng của câu trả lời cũ (nút trên từng tin nhắn): để sau.
+- Ai được thấy panel: tạm bật/tắt bằng `AGENT_FLOW_PANEL` (mặc định bật); theo role thì chưa làm.
+- Nút "Luồng agent" chỉ có trên câu trả lời của phiên hiện tại; mở lại hội thoại cũ thì chưa có nút.

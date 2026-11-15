@@ -41,8 +41,8 @@ Làm A trước.
 
 ### A. UI luồng agent
 Thiết kế và kế hoạch commit: [design/agent-flow.md](design/agent-flow.md).
-- [ ] A.1 Backend: ghi span từng node, lưu, API `GET /traces/{id}/spans` (commit 1–4)
-- [ ] A.2 Frontend: sidebar phải hiện luồng node (commit 5–6)
+- [x] A.1 Backend: ghi span từng node, lưu, API `GET /traces/{id}/spans` (commit 1–4)
+- [x] A.2 Frontend: sidebar phải hiện luồng node (commit 5–6)
 - [ ] A.3 Chạy thử một câu bằng key thật (báo số lần gọi/token)
 
 ### B. Trang đánh giá
@@ -55,3 +55,4 @@ Thiết kế và kế hoạch commit: [design/agent-flow.md](design/agent-flow.m
 
 - 2026-11-15: tạo file, ghi ý tưởng và hiện trạng.
 - 2026-11-15: chốt A1, A3; viết `design/agent-flow.md`.
+- 2026-11-15: xong A.1, A.2 (nhánh `feat/agent-flow-ui`); chờ xem trên trình duyệt.

@@ -47,7 +47,8 @@ uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation
 
 Mở http://localhost:8000, đăng nhập `sv001` … `sv008` (mật khẩu `demo`) hoặc `khach` (chỉ hỏi quy chế). Nút cài
 đặt cạnh ô nhập chọn provider (chỉ bên đã có key) và model. Dưới mỗi câu trả lời có "Chi tiết xử lý": từng bước,
-tool, trích dẫn, Verifier, token, thời gian, trace id. Lịch sử chat theo tài khoản do backend lưu
+tool, trích dẫn, Verifier, token, thời gian, trace id. Sidebar phải hiện "Luồng agent": từng node (Planner, MCP,
+Advisor viết, Verifier) nhận gì, trả gì ([docs/design/agent-flow.md](docs/design/agent-flow.md)). Lịch sử chat theo tài khoản do backend lưu
 (`CHAT_DATABASE_URL`, mặc định SQLite `backend/.data/chat.db`). API: [backend/README.md](backend/README.md).
 
 Biến làm đổi cách chạy:
@@ -58,6 +59,7 @@ Biến làm đổi cách chạy:
 | `ADVISOR_VERIFIER` | `llm` (mặc định) / `rules` / `off` | Lời gọi LLM thêm mỗi câu: `llm` 1 (3 nếu viết lại), `rules` 0 (1 nếu viết lại), `off` 0 (agent đơn) |
 | `VERIFIER_LLM_MODEL` | tên model | Model riêng (rẻ hơn) cho Verifier, cùng provider |
 | `CHAT_DATABASE_URL` | trống / `off` / `postgresql+asyncpg://...` | SQLite mặc định / chỉ trong bộ nhớ / PostgreSQL (`uv sync --extra postgres`) |
+| `AGENT_FLOW_PANEL` | `1` (mặc định) / `0` | Bật/tắt sidebar luồng agent trên giao diện |
 
 Provider OpenAI-compatible khác dùng được ngay bằng `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`; muốn có tên riêng
 thì thêm vào `PROVIDERS` trong `backend/src/co5151_backend/infrastructure/llm.py`.
