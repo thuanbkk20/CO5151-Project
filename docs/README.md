@@ -22,6 +22,7 @@ Tài liệu dùng chung cho cả hệ thống. Tài liệu của riêng từng t
 | File | Nội dung |
 |---|---|
 | [remaining-work.md](remaining-work.md) | Việc còn lại đến bảo vệ final, chia theo task |
+| [ui-and-eval-console.md](ui-and-eval-console.md) | Ý tưởng và các bước: UI hiển thị agent, trang đánh giá/chỉnh prompt |
 
 ## Quy ước
 
