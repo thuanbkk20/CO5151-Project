@@ -30,9 +30,9 @@ Làm A trước.
 
 | # | Câu hỏi | Đề xuất | Chốt |
 |---|---|---|---|
-| A1 | Hiện nháp + nhận xét Verifier có phá quyết định "không gửi nháp" không? | Chỉ hiện **sau khi** câu trả lời cuối đã qua Verifier, trong khung chi tiết; luồng stream vẫn không có nháp | |
+| A1 | Hiện nháp + nhận xét Verifier có phá quyết định "không gửi nháp" không? | Chỉ hiện **sau khi** câu trả lời cuối đã qua Verifier, trong khung chi tiết; luồng stream vẫn không có nháp | Hiện input/output từng node ở sidebar phải, lấy qua API riêng sau khi có câu trả lời (Kiên, 15/11) |
 | A2 | Ai được xem luồng agent? | Bật bằng biến môi trường (chế độ demo) hoặc theo role; sinh viên thường không thấy | |
-| A3 | Lưu luồng agent ở đâu? | Thêm danh sách "agent message" vào Trace, lấy lại qua `GET /traces/{id}` | |
+| A3 | Lưu luồng agent ở đâu? | Thêm danh sách "agent message" vào Trace, lấy lại qua `GET /traces/{id}` | Bảng `trace_spans` riêng, API riêng `GET /traces/{id}/spans` (Kiên, 15/11) |
 | B1 | Trang đánh giá là app riêng hay gắn vào backend? | App riêng (package mới), gọi eval trong process như hiện nay | |
 | B2 | Backend lấy prompt từ trang đó thế nào? | Port `PromptSource` + adapter HTTP, có cache và fallback về prompt trong code; ghi phiên bản prompt vào trace | |
 | B3 | Bảo vệ trang chỉnh prompt | Cần đăng nhập (sửa prompt = đổi hành vi hệ thống) | |
@@ -40,10 +40,10 @@ Làm A trước.
 ## 4. Các bước
 
 ### A. UI luồng agent
-- [ ] A.1 Backend: ghi các "agent message" (ai → ai, loại, nội dung rút gọn, token) vào Trace + test
-- [ ] A.2 API: trả các message đó trong trace, ẩn/hiện theo A2
-- [ ] A.3 Frontend: hiển thị dạng hội thoại giữa các agent (step lồng nhau của Chainlit) + test `present.py`
-- [ ] A.4 Chạy thử một câu bằng key thật (báo số lần gọi/token)
+Thiết kế và kế hoạch commit: [design/agent-flow.md](design/agent-flow.md).
+- [ ] A.1 Backend: ghi span từng node, lưu, API `GET /traces/{id}/spans` (commit 1–4)
+- [ ] A.2 Frontend: sidebar phải hiện luồng node (commit 5–6)
+- [ ] A.3 Chạy thử một câu bằng key thật (báo số lần gọi/token)
 
 ### B. Trang đánh giá
 - [ ] B.1 Trang chạy bộ câu hỏi và hiện bảng kết quả
@@ -54,3 +54,4 @@ Làm A trước.
 ## 5. Nhật ký
 
 - 2026-11-15: tạo file, ghi ý tưởng và hiện trạng.
+- 2026-11-15: chốt A1, A3; viết `design/agent-flow.md`.
