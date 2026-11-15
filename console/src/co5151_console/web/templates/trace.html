@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Trace {{ trace_id[:8] }}{% endblock %}
+{% block content %}
+<p><a href="/traces">← Traces</a></p>
+<h1>Trace <code>{{ trace_id }}</code></h1>
+{% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+{% if not error and not detail %}<p class="muted">Không có trace này.</p>{% endif %}
+{% if detail %}
+{% set r = detail.row %}
+<table class="kv">
+  <tr><th>Session</th><td><a href="/traces?session={{ r.session }}"><code>{{ r.session }}</code></a></td></tr>
+  <tr><th>Người hỏi</th><td>{{ r.owner }}</td></tr>
+  <tr><th>Thời gian (UTC)</th><td>{{ r.created_at }}</td></tr>
+  <tr><th>Kết cục</th><td class="{{ r.tone }}">{{ r.result }}</td></tr>
+  <tr><th>LLM</th><td>{{ detail.llm or "không có (mẫu)" }}</td></tr>
+  <tr><th>Token · thời gian</th><td>{{ r.tokens }} token · {{ r.seconds }} s</td></tr>
+  {% if detail.llm_error %}<tr><th>Lỗi LLM</th><td class="warn">{{ detail.llm_error }}</td></tr>{% endif %}
+  {% if detail.error %}<tr><th>Lỗi</th><td class="error">{{ detail.error }}</td></tr>{% endif %}
+</table>
+
+<h2>Câu hỏi</h2>
+<div class="notice">{{ detail.question or "(không có)" }}</div>
+
+<h2>Luồng node</h2>
+{% if not detail.nodes %}<p class="muted">Trace này không có span (câu trả lời cũ hơn tính năng ghi span).</p>{% endif %}
+<ol class="flow">
+  {% for n in detail.nodes %}
+  <li>
+    <details>
+      <summary>
+        <strong>{{ n.label }}</strong> <code>{{ n.name }}</code>
+        <span class="muted">· {{ n.ms }} ms{% if n.tokens %} · {{ n.tokens }} token{% endif %}</span><br>
+        <span class="{{ n.tone }}">{{ n.summary }}</span>
+      </summary>
+      <div class="muted">Input</div><pre>{{ n.input }}</pre>
+      <div class="muted">Output</div><pre>{{ n.output }}</pre>
+    </details>
+  </li>
+  {% endfor %}
+</ol>
+
+<h2>Câu trả lời gửi người dùng</h2>
+<div class="notice">{{ detail.answer or "(không có — xem lỗi ở trên)" }}</div>
+{% endif %}
+{% endblock %}

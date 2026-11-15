@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Traces{% endblock %}
+{% block content %}
+<h1>Traces</h1>
+<form class="inline" method="get" action="/traces">
+  <input name="session" value="{{ session }}" placeholder="Session id (Conversation ID)" size="42">
+  <select name="limit">
+    {% for n in (20, 50, 100, 200) %}<option value="{{ n }}" {{ "selected" if n == limit }}>{{ n }} trace</option>{% endfor %}
+  </select>
+  <button class="primary" type="submit">Lọc</button>
+  {% if session %}<a href="/traces">Bỏ lọc</a>{% endif %}
+</form>
+{% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+{% if not error and not rows %}<p class="muted">Không có trace nào{{ " cho session này" if session }}.</p>{% endif %}
+{% if rows %}
+<table>
+  <tr><th>Thời gian (UTC)</th><th>Người hỏi</th><th>Câu hỏi</th><th>Kết cục</th><th>Tool</th><th>Token</th><th>Giây</th><th>Session</th></tr>
+  {% for r in rows %}
+  <tr>
+    <td><a href="/traces/{{ r.trace_id }}">{{ r.created_at or r.trace_id[:8] }}</a></td>
+    <td>{{ r.owner }}</td>
+    <td>{{ r.question }}</td>
+    <td class="{{ r.tone }}">{{ r.result }}</td>
+    <td>{{ r.tools }}</td>
+    <td>{{ r.tokens }}</td>
+    <td>{{ r.seconds }}</td>
+    <td><a href="/traces?session={{ r.session }}" title="{{ r.session }}"><code>{{ r.session[:8] }}</code></a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

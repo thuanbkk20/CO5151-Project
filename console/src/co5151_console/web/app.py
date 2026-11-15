@@ -8,10 +8,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from ..container import Container
+from . import traces
 
 HERE = Path(__file__).parent
 # The sidebar: (path, label). A page is added here when it is built.
-NAV: list[tuple[str, str]] = [("/", "Tổng quan")]
+NAV: list[tuple[str, str]] = [("/", "Tổng quan"), ("/traces", "Traces")]
 
 
 def create_app(container: Container) -> FastAPI:
@@ -21,6 +22,7 @@ def create_app(container: Container) -> FastAPI:
     templates = Jinja2Templates(directory=HERE / "templates")
     templates.env.globals["nav"] = NAV
     app.state.templates = templates
+    app.include_router(traces.router)
 
     @app.get("/", response_class=HTMLResponse)
     def home(request: Request):

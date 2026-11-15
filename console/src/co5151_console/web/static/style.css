@@ -41,3 +41,5 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 .notice.error { border-color: var(--error); }
 details { border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; margin: 6px 0; }
 details summary { cursor: pointer; }
+ol.flow { padding-left: 22px; }
+ol.flow li { margin-bottom: 4px; }
