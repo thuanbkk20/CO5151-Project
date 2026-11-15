@@ -1,6 +1,13 @@
-from web_fakes import CONVERSATION, TRACE
+from web_fakes import CONVERSATION, SPANS, TRACE
 
-from co5151_web.present import chat_settings_body, details_markdown, pick_provider, progress_line, thread_dict
+from co5151_web.present import (
+    chat_settings_body,
+    details_markdown,
+    flow_props,
+    pick_provider,
+    progress_line,
+    thread_dict,
+)
 
 
 def test_progress_lines():
@@ -34,3 +41,27 @@ def test_provider_falls_back_when_its_key_is_gone():
     assert pick_provider("openai", ["gemini", "openai"], "gemini") == "openai"
     assert pick_provider("kimi", ["gemini", "openai"], "openai") == "openai"
     assert pick_provider(None, ["openai"], "gemini") == "openai"
+
+
+def test_flow_props_show_each_node_in_order():
+    props = flow_props("Điều kiện tốt nghiệp?", "Theo Điều 22...", SPANS, TRACE)
+    assert [n["label"] for n in props["nodes"]] == ["Planner", "MCP Student Record", "MCP Regulation",
+                                                    "Advisor viết câu trả lời", "Verifier"]  # fmt: skip
+    planner, student, regulation, writer, verifier = props["nodes"]
+    assert planner["summary"] == "→ SUMMARY (bởi rule)" and student["summary"] == "Trả về 1 trường hồ sơ"
+    assert regulation["summary"] == "1 điều khoản: QD-Đ22" and '"credits_earned": 113' in student["output"]
+    assert writer["summary"] == "[gemini/x] Theo Điều 22..." and writer["tokens"] == 1020
+    assert (verifier["summary"], verifier["tone"]) == ("PASS", "ok")
+    assert (props["total_ms"], props["total_tokens"], props["answer"]) == (2500, 1350, "Theo Điều 22...")
+
+
+def test_flow_props_flag_failures():
+    failed_tool = {**SPANS[2], "output": {"ok": False, "error": {"code": "INTERNAL", "message": "down"}}}
+    revise = {**SPANS[4], "output": {"status": "revise", "issues": [{"code": "X", "message": "Sai số tín chỉ."}]}}
+    crashed = {**SPANS[1], "error": "RuntimeError: db down"}
+    nodes = flow_props("q", None, [failed_tool, revise, crashed], None)["nodes"]
+    assert [(n["summary"], n["tone"]) for n in nodes] == [
+        ("Lỗi INTERNAL: down", "error"),
+        ("REVISE · Sai số tín chỉ.", "warn"),
+        ("RuntimeError: db down", "error"),
+    ]

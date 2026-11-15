@@ -1,6 +1,7 @@
 """Chainlit handlers: sign-in, LLM settings, chat. Every action is one call to the backend API."""
 
 import logging
+import os
 
 import chainlit as cl
 import httpx
@@ -8,7 +9,7 @@ from chainlit.input_widget import Select, TextInput
 
 from co5151_web.client import BackendClient, BackendError, SessionExpired
 from co5151_web.history import TOKEN_KEY, BackendDataLayer
-from co5151_web.present import chat_settings_body, details_markdown, pick_provider, progress_line
+from co5151_web.present import chat_settings_body, details_markdown, flow_props, pick_provider, progress_line
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,9 @@ STARTERS = [
 ]
 SIGN_IN_AGAIN = "Phiên đăng nhập đã hết hạn. Bạn vui lòng đăng xuất rồi đăng nhập lại."
 BACKEND_DOWN = "Không kết nối được backend (`co5151-api`). Kiểm tra backend đã chạy và `BACKEND_URL` trong `.env`."
+
+FLOW_TITLE = "Luồng agent"
+FLOW_ACTION = "agent_flow"
 
 CLIENT = BackendClient()
 LAYER = BackendDataLayer(CLIENT)
@@ -107,6 +111,44 @@ async def _ensure_conversation(token: str, conversation_id: str) -> None:
     cl.user_session.set("started", True)
 
 
+def _flow_enabled() -> bool:
+    return os.environ.get("AGENT_FLOW_PANEL", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
+async def _show_flow(token: str, trace_id: str) -> None:
+    """Open the right sidebar on what each node of that answer received and returned. Never breaks the chat."""
+    seen = (cl.user_session.get("flows") or {}).get(trace_id)
+    if seen is None:
+        return
+    try:
+        spans = await CLIENT.spans(token, trace_id)
+    except (BackendError, httpx.HTTPError):
+        logger.warning("spans of trace %s unavailable", trace_id, exc_info=True)
+        return
+    element = cl.CustomElement(name="AgentFlow", props=flow_props(seen["question"], seen["answer"], spans,
+                                                                   seen["trace"]), display="inline")  # fmt: skip
+    await cl.ElementSidebar.set_title(FLOW_TITLE)
+    await cl.ElementSidebar.set_elements([element], key=trace_id)
+
+
+def _remember_flow(trace_id: str | None, question: str, answer: str | None, trace: dict | None) -> list[cl.Action]:
+    """Keep what the sidebar needs for this answer (this session only); the button that reopens it, or none when
+    the panel is off (`AGENT_FLOW_PANEL=0`)."""
+    if not trace_id or not _flow_enabled():
+        return []
+    flows = cl.user_session.get("flows") or {}
+    flows[trace_id] = {"question": question, "answer": answer, "trace": trace}
+    cl.user_session.set("flows", flows)
+    return [cl.Action(name=FLOW_ACTION, payload={"trace_id": trace_id}, label=FLOW_TITLE, icon="workflow",
+                      tooltip="Xem từng node đã nhận và trả về gì")]  # fmt: skip
+
+
+@cl.action_callback(FLOW_ACTION)
+async def open_flow(action: cl.Action) -> None:
+    if token := _token():
+        await _show_flow(token, action.payload.get("trace_id", ""))
+
+
 @cl.on_message
 async def reply(message: cl.Message) -> None:
     token = _token()
@@ -125,12 +167,20 @@ async def reply(message: cl.Message) -> None:
                     await step.update()
                 elif event == "answer":
                     step.output = details_markdown(data["trace"])
+                    trace_id = data["trace"]["trace_id"]
+                    actions = _remember_flow(trace_id, message.content, data["message"]["content"], data["trace"])
                     await cl.Message(id=data["message"]["id"], content=data["message"]["content"],
-                                     metadata={"trace_id": data["trace"]["trace_id"]}).send()  # fmt: skip
+                                     metadata={"trace_id": trace_id}, actions=actions).send()  # fmt: skip
+                    if actions:
+                        await _show_flow(token, trace_id)
                 elif event == "error":
-                    trace = f" Mã trace: `{data['trace_id']}`" if data.get("trace_id") else ""
+                    trace_id = data.get("trace_id")
+                    trace = f" Mã trace: `{trace_id}`" if trace_id else ""
                     step.output = f"Lỗi: {data.get('detail')}"
-                    await cl.Message(content=f"Lỗi khi tạo câu trả lời.{trace}").send()
+                    actions = _remember_flow(trace_id, message.content, None, None)
+                    await cl.Message(content=f"Lỗi khi tạo câu trả lời.{trace}", actions=actions).send()
+                    if actions:
+                        await _show_flow(token, trace_id)
     except SessionExpired:
         await _notice(SIGN_IN_AGAIN)
     except httpx.HTTPError:
