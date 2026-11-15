@@ -20,9 +20,11 @@ def sessions(request: Request, limit: int = 50):
 
 
 @router.get("/{session_id}")
-def session(request: Request, session_id: str):
+def session(request: Request, session_id: str, panel: bool = False):
+    """The session as its own page, or with `panel=1` only its content, for the side panel (static/panel.js)."""
+    template = "session_panel.html" if panel else "session.html"
     try:
         detail = container(request).sessions.detail(session_id)
     except BackendError as e:
-        return render(request, "session.html", status_code=502, detail=None, session_id=session_id, error=str(e))
-    return render(request, "session.html", detail=detail, session_id=session_id, error=None)
+        return render(request, template, status_code=502, detail=None, session_id=session_id, error=str(e))
+    return render(request, template, detail=detail, session_id=session_id, error=None)

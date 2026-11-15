@@ -53,7 +53,7 @@ form.stack label.check { display: inline-flex; flex-direction: row; gap: 4px; ma
 .panel { position: fixed; top: 0; right: 0; width: min(66vw, 100vw); height: 100vh; overflow: auto; z-index: 20;
          background: var(--bg); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgb(0 0 0 / 0.2);
          padding: 0 24px 24px; }
-.panel[hidden], .panel-backdrop[hidden] { display: none; }
+.panel[hidden], .panel-backdrop[hidden], .panel [hidden] { display: none; }
 .panel-bar { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center;
              padding: 12px 0; background: var(--bg); border-bottom: 1px solid var(--line); margin-bottom: 12px; }
 @media (max-width: 800px) { .panel { width: 100vw; } }

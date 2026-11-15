@@ -34,6 +34,9 @@ def test_sessions_pages(tmp_path):
     session = c.get(f"/sessions/{SESSION}").text
     assert "Theo Điều 22..." in session and 'href="/traces/t1" data-panel' in session and "1 lượt" in session
     assert "chưa có lượt nào" in c.get("/sessions/khac").text
+    panel = c.get(f"/sessions/{SESSION}", params={"panel": 1}).text
+    assert "Theo Điều 22..." in panel and 'class="sidebar"' not in panel and "← Sessions" not in panel
+    assert f'href="/sessions/{SESSION}" data-panel' in page and 'id="panel-back"' in page
     assert f'href="/sessions/{SESSION}"' in c.get("/traces").text  # the Session column leads here
     down = TestClient(create_app(build_container(Settings(database=tmp_path / "d.db"), admin=admin(token="sai"))))
     assert "từ chối token admin" in down.get("/sessions").text

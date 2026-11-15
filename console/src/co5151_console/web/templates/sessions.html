@@ -17,7 +17,7 @@
   <tr>
     <td>{{ s.updated_at }}</td>
     <td>{{ s.owner }}</td>
-    <td><a href="/sessions/{{ s.id }}">{{ s.title }}</a></td>
+    <td><a href="/sessions/{{ s.id }}" data-panel>{{ s.title }}</a></td>
     <td>{{ s.turns }}</td>
     <td><code title="{{ s.id }}">{{ s.id[:8] }}</code></td>
   </tr>

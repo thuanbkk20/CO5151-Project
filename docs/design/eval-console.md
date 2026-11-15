@@ -73,7 +73,7 @@ App chat Chainlit bỏ sidebar luồng agent, chỉ hiện `Trace ID` và `Conve
 | 20 | `feat(backend): GET /admin/sessions` | danh sách hội thoại: chủ, tiêu đề, số lượt, lần cuối; port `TraceLog.sessions` + test | xong `4ad395f` |
 | 21 | `feat(console): sessions page` | danh sách session; một session = các lượt hỏi–đáp theo thứ tự thời gian, bấm lượt nào mở panel trace lượt đó | xong `346ee65` |
 | 22 | `docs: console side panel and sessions` | README console, plan | xong |
-| 23 | `feat(console): a session opens in the side panel too` | bấm session → panel; trong panel bấm "Xem trace" thì panel chuyển sang trace, nút "← Quay lại" về session | chưa |
+| 23 | `feat(console): a session opens in the side panel too` | bấm session → panel; trong panel bấm "Xem trace" thì panel chuyển sang trace, nút "← Quay lại" về session | xong |
 | | **P6. Prompt** (viết plan chi tiết trước khi làm) | | |
 | 15 | `feat(console): prompt versions` | lưu, sửa, kích hoạt phiên bản + API cho backend | chưa |
 | 16 | `feat(backend): prompts from the console` | port `PromptSource`, adapter HTTP, cache, fallback, ghi phiên bản vào trace | chưa |
