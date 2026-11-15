@@ -48,10 +48,10 @@ mất bao lâu, tốn bao nhiêu token. Gồm cả dữ liệu MCP Regulation v�
 
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
-| 8 | `feat(web): client reads one trace` | `BackendClient.trace` (tổng thời gian/token khi mở lại câu cũ) + test | chưa |
-| 9 | `feat(web): agent flow of any answer, also in a reopened conversation` | `present.answers_of_thread` (trace → câu hỏi, câu trả lời) + test; mở lại hội thoại thì gắn nút "Luồng agent" cho mọi câu trả lời; `_show_flow` tự lấy trace + spans | chưa |
-| 10 | `feat(web): the agent flow panel stays open` | mở sidebar ngay khi vào chat (chưa có câu nào thì hiện hướng dẫn) và khi mở lại hội thoại (câu cuối); ô chọn câu trả lời ngay trong panel | chưa |
-| 11 | `docs: agent flow panel stays open` | README frontend, plan | chưa |
+| 8 | `feat(web): client reads one trace` | `BackendClient.trace` (tổng thời gian/token khi mở lại câu cũ) + test | xong `87e55d1` |
+| 9 | `feat(web): agent flow of any answer, also in a reopened conversation` | `present.answers_of_thread` (trace → câu hỏi, câu trả lời) + test; mở lại hội thoại thì gắn nút "Luồng agent" cho mọi câu trả lời; `_show_flow` tự lấy trace + spans | xong `d062328` |
+| 10 | `feat(web): the agent flow panel stays open` | mở sidebar ngay khi vào chat (chưa có câu nào thì hiện hướng dẫn) và khi mở lại hội thoại (câu cuối); ô chọn câu trả lời ngay trong panel | xong `23dc521` |
+| 11 | `docs: agent flow panel stays open` | README frontend, plan | xong |
 
 Sau commit 6: chạy thử 1 câu bằng key thật (báo trước/sau số lần gọi LLM và token).
 

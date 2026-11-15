@@ -20,7 +20,7 @@ Tài khoản: `sv001` … `sv008` mật khẩu `demo` (sinh viên mô phỏng), 
 | `src/co5151_web/client.py` | `BackendClient`: gọi API backend (đăng nhập, hội thoại, đánh giá, stream SSE câu trả lời) |
 | `src/co5151_web/history.py` | Data layer của Chainlit chuyển tiếp sang backend: sidebar, mở lại, đổi tên, xóa, đánh giá |
 | `src/co5151_web/present.py` | Chuyển dữ liệu backend sang dạng hiển thị: tiến trình, chi tiết xử lý, thread của Chainlit |
-| `src/co5151_web/app.py` | Handler Chainlit: đăng nhập, cài đặt LLM, chat (hiện từng bước khi backend stream), sidebar luồng agent |
+| `src/co5151_web/app.py` | Handler Chainlit: đăng nhập, cài đặt LLM, chat (hiện từng bước khi backend stream), sidebar luồng agent (mở sẵn; nút "Luồng agent" trên mọi câu trả lời, cả hội thoại cũ; ô chọn câu trả lời trong panel) |
 | `public/elements/AgentFlow.jsx` | Custom element vẽ luồng agent ở sidebar phải; dữ liệu do `present.flow_props` dựng |
 | `src/co5151_web/cli.py` | Lệnh `co5151-web`: nạp `.env`, kiểm tra secret, chạy Chainlit với `frontend` làm thư mục gốc |
 

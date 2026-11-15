@@ -56,3 +56,4 @@ Thiết kế và kế hoạch commit: [design/agent-flow.md](design/agent-flow.m
 - 2026-11-15: tạo file, ghi ý tưởng và hiện trạng.
 - 2026-11-15: chốt A1, A3; viết `design/agent-flow.md`.
 - 2026-11-15: xong A.1, A.2 (nhánh `feat/agent-flow-ui`); chờ xem trên trình duyệt.
+- 2026-11-15: đợt 2: panel mở sẵn, chọn câu trả lời bất kỳ kể cả hội thoại cũ (commit 8–11).
