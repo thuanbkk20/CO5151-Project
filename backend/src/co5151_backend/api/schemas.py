@@ -9,7 +9,7 @@ from ..application.usecases.ask import Answer
 from ..application.usecases.auth import Session
 from ..domain.conversation import ChatSettings, Conversation, ConversationPage, Message
 from ..domain.principal import Principal
-from ..domain.trace import Span, Trace
+from ..domain.trace import Span, Trace, TraceRecord
 
 
 class _In(BaseModel):
@@ -167,6 +167,26 @@ class SpanOut(BaseModel):
 class SpansOut(BaseModel):
     trace_id: str
     spans: list[SpanOut]
+
+
+class TraceRecordOut(BaseModel):
+    """A trace for the operator console: whose conversation, the question, the answer, and (detail only) spans."""
+
+    trace: TraceOut
+    owner_id: str
+    question: str | None
+    answer: str | None
+    created_at: datetime | None
+    spans: list[SpanOut]
+
+    @classmethod
+    def of(cls, r: TraceRecord) -> "TraceRecordOut":
+        return cls(trace=TraceOut.of(r.trace), owner_id=r.owner_id, question=r.question, answer=r.answer,
+                   created_at=r.trace.created_at, spans=[SpanOut.of(s) for s in r.spans])  # fmt: skip
+
+
+class TraceListOut(BaseModel):
+    items: list[TraceRecordOut]
 
 
 class AnswerOut(BaseModel):
