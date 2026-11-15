@@ -43,3 +43,6 @@ details { border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; 
 details summary { cursor: pointer; }
 ol.flow { padding-left: 22px; }
 ol.flow li { margin-bottom: 4px; }
+form.stack { display: flex; flex-direction: column; gap: 10px; max-width: 720px; }
+form.stack label { display: flex; flex-direction: column; gap: 3px; }
+form.stack label.check { display: inline-flex; flex-direction: row; gap: 4px; margin-left: 10px; }

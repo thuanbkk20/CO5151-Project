@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Bộ câu hỏi{% endblock %}
+{% block content %}
+<h1>Bộ câu hỏi</h1>
+{% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+<form class="inline" method="post" action="/question-sets">
+  <input name="name" placeholder="Tên bộ mới" required>
+  <button class="primary" type="submit">Tạo bộ</button>
+</form>
+<form class="inline" method="post" action="/question-sets/import-default">
+  <button type="submit">Nhập bộ mặc định 24 câu (eval/tasks.json)</button>
+</form>
+{% if not sets %}<p class="muted">Chưa có bộ câu hỏi nào.</p>{% else %}
+<table>
+  <tr><th>Tên</th><th>Số câu</th><th>Tạo lúc (UTC)</th></tr>
+  {% for s in sets %}
+  <tr><td><a href="/question-sets/{{ s.id }}">{{ s.name }}</a></td><td>{{ s.size }}</td><td>{{ s.created_at }}</td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endblock %}
