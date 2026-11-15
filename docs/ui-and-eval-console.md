@@ -58,3 +58,4 @@ Thiết kế và kế hoạch commit: [design/agent-flow.md](design/agent-flow.m
 - 2026-11-15: xong A.1, A.2 (nhánh `feat/agent-flow-ui`); chờ xem trên trình duyệt.
 - 2026-11-15: đợt 2: panel mở sẵn, chọn câu trả lời bất kỳ kể cả hội thoại cũ (commit 8–11).
 - 2026-11-15: đổi hướng: luồng agent chuyển sang console riêng; plan [design/eval-console.md](design/eval-console.md).
+- 2026-11-15: console xong P0–P5 (traces, bộ câu hỏi, đánh giá); còn P6 prompt.

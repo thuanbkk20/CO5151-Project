@@ -51,6 +51,10 @@ tool, trích dẫn, Verifier, token, thời gian, trace id, conversation id (tra
 [docs/design/eval-console.md](docs/design/eval-console.md)). Lịch sử chat theo tài khoản do backend lưu
 (`CHAT_DATABASE_URL`, mặc định SQLite `backend/.data/chat.db`). API: [backend/README.md](backend/README.md).
 
+Console vận hành cho nhóm (http://127.0.0.1:8200, process `console` trong Procfile): xem trace theo session id,
+chạy đánh giá qua backend, sửa bộ câu hỏi ([console/README.md](console/README.md)). Cần đặt `BACKEND_ADMIN_TOKEN`
+trong `.env` (cùng một giá trị cho backend và console).
+
 Biến làm đổi cách chạy:
 
 | Biến | Giá trị | Ý nghĩa |

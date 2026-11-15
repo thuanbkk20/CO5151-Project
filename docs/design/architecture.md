@@ -13,6 +13,9 @@ frontend/  (Chainlit)  --HTTP/SSE-->  backend/ (FastAPI)  --MCP Streamable HTTP-
 - **frontend** chỉ hiển thị: đăng nhập, chat, sidebar lịch sử. Không biết Advisor, MCP, LLM hay database.
 - **backend** là nơi duy nhất ráp mọi thứ (`container.py`). Hai MCP server vẫn là hệ thống riêng.
 - **eval** gọi use case của backend trong cùng process (`co5151_eval.backend_agent`), không qua HTTP.
+- **console** (cho nhóm, không cho sinh viên) đọc trace qua API admin của backend (`/admin/*`, token
+  `BACKEND_ADMIN_TOKEN`) và chạy đánh giá qua API người dùng như app chat. Chi tiết:
+  [eval-console.md](eval-console.md).
 
 ## Tầng trong backend (`backend/src/co5151_backend/`)
 

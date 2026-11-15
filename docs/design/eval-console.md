@@ -47,25 +47,25 @@ App chat Chainlit bỏ sidebar luồng agent, chỉ hiện `Trace ID` và `Conve
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
 | | **P0. Bỏ sidebar Chainlit** | | |
-| 1 | `revert(web): drop the agent flow sidebar` | revert `7f7d187` `b6c9f00` `87e55d1` `d062328` `23dc521` | chưa |
-| 2 | `feat(web): show the conversation id in the answer details` | `details_markdown` + test | chưa |
-| 3 | `docs: agent flow moves to the operator console` | agent-flow.md, README, architecture | chưa |
+| 1 | `revert(web): drop the agent flow sidebar` | revert `7f7d187` `b6c9f00` `87e55d1` `d062328` `23dc521` | xong `74eb425` |
+| 2 | `feat(web): show the conversation id in the answer details` | `details_markdown` + test | xong `b1f63d7` |
+| 3 | `docs: agent flow moves to the operator console` | agent-flow.md, README, architecture | xong `0fadd8c` |
 | | **P1. API admin của backend** | | |
-| 4 | `feat(backend): admin token for the operator console` | `BACKEND_ADMIN_TOKEN`, dependency kiểm token, `.env.example` + test | chưa |
-| 5 | `feat(backend): trace log for operators` | port `TraceLog` (gần đây, theo hội thoại; chi tiết có câu hỏi/câu trả lời/spans), memory + SQL + test | chưa |
-| 6 | `feat(backend): GET /admin/traces and /admin/traces/{id}` | route, schema + test | chưa |
+| 4 | `feat(backend): admin token for the operator console` | `BACKEND_ADMIN_TOKEN`, dependency kiểm token, `.env.example` + test | xong `4ef3ada` |
+| 5 | `feat(backend): trace log for operators` | port `TraceLog` (gần đây, theo hội thoại; chi tiết có câu hỏi/câu trả lời/spans), memory + SQL + test | xong `0e6066a` |
+| 6 | `feat(backend): GET /admin/traces and /admin/traces/{id}` | route, schema + test | xong `e276aa8` |
 | | **P2. Khung console** | | |
-| 7 | `feat(console): package skeleton with the sidebar layout` | pyproject, workspace, settings, CLI, layout, Procfile + test | chưa |
+| 7 | `feat(console): package skeleton with the sidebar layout` | pyproject, workspace, settings, CLI, layout, Procfile + test | xong `0c3da8d` |
 | | **P3. Traces** | | |
-| 8 | `feat(console): backend admin client` | httpx + test (MockTransport) | chưa |
-| 9 | `feat(console): traces page` | danh sách, lọc theo session id, chi tiết luồng node + test | chưa |
+| 8 | `feat(console): backend admin client` | httpx + test (MockTransport) | xong `18bac6e` |
+| 9 | `feat(console): traces page` | danh sách, lọc theo session id, chi tiết luồng node + test | xong `cba2ace` |
 | | **P4. Bộ câu hỏi** | | |
-| 10 | `feat(console): question set store` | sqlite3, nhập bộ mặc định + test | chưa |
-| 11 | `feat(console): question set pages` | danh sách, tạo, sửa, xóa + test | chưa |
+| 10 | `feat(console): question set store` | sqlite3, nhập bộ mặc định + test | xong `9e652b2` |
+| 11 | `feat(console): question set pages` | danh sách, tạo, sửa, xóa + test | xong `ba43c37` |
 | | **P5. Đánh giá** | | |
-| 12 | `feat(console): answer a task through the backend API` | agent HTTP: đăng nhập, hội thoại, hỏi + test | chưa |
-| 13 | `feat(console): evaluation runs` | chạy nền, chấm điểm, lưu kết quả + test | chưa |
-| 14 | `feat(console): evaluation pages` | bắt đầu chạy (cảnh báo chi phí), danh sách lần chạy, bảng kết quả | chưa |
+| 12 | `feat(console): answer a task through the backend API` | agent HTTP: đăng nhập, hội thoại, hỏi + test | xong `b5903ab` |
+| 13 | `feat(console): evaluation runs` | chạy nền, chấm điểm, lưu kết quả + test | xong `7308caa` |
+| 14 | `feat(console): evaluation pages` | bắt đầu chạy (cảnh báo chi phí), danh sách lần chạy, bảng kết quả | xong `8fa838e` |
 | | **P6. Prompt** (viết plan chi tiết trước khi làm) | | |
 | 15 | `feat(console): prompt versions` | lưu, sửa, kích hoạt phiên bản + API cho backend | chưa |
 | 16 | `feat(backend): prompts from the console` | port `PromptSource`, adapter HTTP, cache, fallback, ghi phiên bản vào trace | chưa |
@@ -75,4 +75,7 @@ App chat Chainlit bỏ sidebar luồng agent, chỉ hiện `Trace ID` và `Conve
 
 - Đăng nhập vào console: tạm thời chỉ bind `127.0.0.1`, không có login. Deploy thật thì cần login hoặc reverse
   proxy có xác thực.
+- Cách đọc kết cục khi LLM viết câu trả lời (`trace.outcome` rỗng): console theo đúng `co5151_eval.backend_agent`
+  (coi là `answer`) để số liệu khớp CLI; nhưng docstring của `Trace` nói kết cục khi đó phải đọc từ câu chữ
+  (`scoring.classify`). Cần Kiên quyết định rồi sửa cả hai chỗ cùng lúc.
 - Câu hỏi có `history` không chạy được qua API (API không cho chèn lượt cũ); hiện bộ 24 câu không có câu nào như vậy.
