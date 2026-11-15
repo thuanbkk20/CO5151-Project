@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Chạy đánh giá{% endblock %}
+{% block content %}
+<p><a href="/eval">← Đánh giá</a></p>
+<h1>Chạy “{{ qs.name }}”?</h1>
+<div class="notice">
+  {{ qs.tasks|length }} câu, mỗi câu hỏi backend thật một lần: tối đa khoảng
+  <strong>{{ qs.tasks|length * max_calls }} lời gọi LLM</strong> (~{{ max_calls }}/câu: planner, viết, Verifier, viết lại)
+  bằng key đang cấu hình ở backend. Cần backend, hai MCP server đang chạy.
+</div>
+<form method="post" action="/eval/runs">
+  <input type="hidden" name="set_id" value="{{ qs.id }}">
+  <button class="primary" type="submit">Chạy</button>
+  <a href="/eval">Hủy</a>
+</form>
+{% endblock %}

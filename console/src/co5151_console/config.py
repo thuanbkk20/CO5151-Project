@@ -15,6 +15,7 @@ class Settings:
     backend_url: str = "http://127.0.0.1:8100"
     admin_token: str | None = None  # BACKEND_ADMIN_TOKEN, shared with the backend
     database: Path = DEFAULT_DATABASE  # question sets, evaluation runs, prompts
+    eval_password: str = "demo"  # password of the demo accounts an evaluation run signs in with
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> "Settings":
@@ -26,4 +27,5 @@ class Settings:
             backend_url=(env.get("BACKEND_URL", "").strip() or cls.backend_url).rstrip("/"),
             admin_token=env.get("BACKEND_ADMIN_TOKEN", "").strip() or None,
             database=Path(database) if database else DEFAULT_DATABASE,
+            eval_password=env.get("CONSOLE_EVAL_PASSWORD", cls.eval_password),
         )
