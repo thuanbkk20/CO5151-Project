@@ -48,3 +48,13 @@ ol.flow li { margin-bottom: 4px; }
 form.stack { display: flex; flex-direction: column; gap: 10px; max-width: 720px; }
 form.stack label { display: flex; flex-direction: column; gap: 3px; }
 form.stack label.check { display: inline-flex; flex-direction: row; gap: 4px; margin-left: 10px; }
+/* Side panel (panel.js): two thirds of the window, over the page; the page shows through the backdrop. */
+.panel-backdrop { position: fixed; inset: 0; background: rgb(0 0 0 / 0.3); z-index: 10; }
+.panel { position: fixed; top: 0; right: 0; width: min(66vw, 100vw); height: 100vh; overflow: auto; z-index: 20;
+         background: var(--bg); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgb(0 0 0 / 0.2);
+         padding: 0 24px 24px; }
+.panel[hidden], .panel-backdrop[hidden] { display: none; }
+.panel-bar { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center;
+             padding: 12px 0; background: var(--bg); border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+@media (max-width: 800px) { .panel { width: 100vw; } }
+tr.selected td { background: var(--panel); }

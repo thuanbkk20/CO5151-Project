@@ -44,7 +44,7 @@
     <td class="{{ {True: 'ok', False: 'error'}.get(x.passed, 'warn') }}">{{ {True: "đạt", False: "trượt"}.get(x.passed, "chấm tay") }}</td>
     <td>{{ x.tokens }}</td>
     <td>{{ x.latency_s|round(1) }}</td>
-    <td>{% if r.trace_id %}<a href="/traces/{{ r.trace_id }}"><code>{{ r.trace_id[:8] }}</code></a>{% endif %}</td>
+    <td>{% if r.trace_id %}<a href="/traces/{{ r.trace_id }}" data-panel><code>{{ r.trace_id[:8] }}</code></a>{% endif %}</td>
   </tr>
   {% endfor %}
 </table>

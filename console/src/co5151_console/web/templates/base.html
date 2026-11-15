@@ -17,5 +17,15 @@
   <main>
     {% block content %}{% endblock %}
   </main>
+  {# Side panel: links with data-panel open here (static/panel.js); click outside or Esc to close. #}
+  <div id="panel-backdrop" class="panel-backdrop" hidden></div>
+  <aside id="panel" class="panel" hidden>
+    <div class="panel-bar">
+      <a id="panel-page" href="#">Mở trang riêng</a>
+      <button id="panel-close" type="button">Đóng ✕</button>
+    </div>
+    <div id="panel-body"></div>
+  </aside>
+  <script src="{{ url_for('static', path='panel.js') }}"></script>
 </body>
 </html>

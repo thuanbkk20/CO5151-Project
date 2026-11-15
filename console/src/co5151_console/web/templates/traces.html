@@ -17,7 +17,7 @@
   <tr><th>Thời gian (UTC)</th><th>Người hỏi</th><th>Câu hỏi</th><th>Kết cục</th><th>Tool</th><th>Token</th><th>Giây</th><th>Session</th></tr>
   {% for r in rows %}
   <tr>
-    <td><a href="/traces/{{ r.trace_id }}">{{ r.created_at or r.trace_id[:8] }}</a></td>
+    <td><a href="/traces/{{ r.trace_id }}" data-panel>{{ r.created_at or r.trace_id[:8] }}</a></td>
     <td>{{ r.owner }}</td>
     <td>{{ r.question }}</td>
     <td class="{{ r.tone }}">{{ r.result }}</td>

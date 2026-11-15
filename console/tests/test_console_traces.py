@@ -57,6 +57,9 @@ def test_traces_pages(tmp_path):
     detail = c.get("/traces/t1").text
     assert "MCP Regulation" in detail and "Sai số tín chỉ." in detail and "Theo Điều 22..." in detail
     assert c.get("/traces/khong-co").status_code == 404
+    panel = c.get("/traces/t1", params={"panel": 1}).text
+    assert "MCP Regulation" in panel and 'class="sidebar"' not in panel and "← Traces" not in panel
+    assert 'class="sidebar"' in detail and "data-panel" in page and "panel.js" in page
 
 
 def test_configuration_problems_show_on_the_page(tmp_path):
