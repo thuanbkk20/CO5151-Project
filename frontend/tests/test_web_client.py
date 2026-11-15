@@ -1,7 +1,7 @@
 import pytest
-from web_fakes import CONVERSATION, TOKEN, FakeBackend
+from web_fakes import CONVERSATION, SPANS, TOKEN, FakeBackend
 
-from co5151_web.client import SessionExpired
+from co5151_web.client import BackendError, SessionExpired
 
 pytestmark = pytest.mark.anyio
 
@@ -37,3 +37,11 @@ async def test_ask_yields_the_server_sent_events_in_order():
     assert [name for name, _ in events] == ["step", "step", "answer"]
     assert events[1][1]["tool"] == "get_my_academic_summary"
     assert events[2][1]["message"]["id"] == "m2"
+
+
+async def test_spans_of_an_answer_and_404_for_an_unknown_trace():
+    client = FakeBackend().client()
+    assert await client.spans(TOKEN, "t1") == SPANS
+    with pytest.raises(BackendError) as missing:
+        await client.spans(TOKEN, "khong-co")
+    assert missing.value.status == 404

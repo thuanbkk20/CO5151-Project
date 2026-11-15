@@ -80,6 +80,10 @@ class BackendClient:
             await self._request("PUT", f"/messages/{message_id}/feedback", token,
                                 json={"value": value, "comment": comment})  # fmt: skip
 
+    async def spans(self, token: str, trace_id: str) -> list[dict[str, Any]]:
+        """What each node of that answer received and returned, in the order they started."""
+        return (await self._request("GET", f"/traces/{trace_id}/spans", token)).json()["spans"]
+
     async def ask(self, token: str, conversation_id: str, content: str) -> AsyncIterator[tuple[str, dict]]:
         """Server-sent events of one answer: (`step`, data)* then (`answer` | `error`, data)."""
         headers = {"Authorization": f"Bearer {token}", "Accept": "text/event-stream"}
