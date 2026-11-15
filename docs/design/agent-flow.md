@@ -44,9 +44,19 @@ mất bao lâu, tốn bao nhiêu token. Gồm cả dữ liệu MCP Regulation v�
 | 6 | `feat(web): agent flow in the right sidebar` | custom element JSX, `present.py` chuyển spans → props, mở sidebar sau mỗi câu trả lời + test | xong `b6c9f00` |
 | 7 | `docs: agent flow` | README backend/frontend, architecture.md | xong |
 
+Đợt 2 (Kiên, 15/11): panel luôn mở; chọn câu trả lời AI bất kỳ, kể cả hội thoại cũ, để xem luồng.
+
+| # | Commit | Nội dung | Trạng thái |
+|---|---|---|---|
+| 8 | `feat(web): client reads one trace` | `BackendClient.trace` (tổng thời gian/token khi mở lại câu cũ) + test | chưa |
+| 9 | `feat(web): agent flow of any answer, also in a reopened conversation` | `present.answers_of_thread` (trace → câu hỏi, câu trả lời) + test; mở lại hội thoại thì gắn nút "Luồng agent" cho mọi câu trả lời; `_show_flow` tự lấy trace + spans | chưa |
+| 10 | `feat(web): the agent flow panel stays open` | mở sidebar ngay khi vào chat (chưa có câu nào thì hiện hướng dẫn) và khi mở lại hội thoại (câu cuối); ô chọn câu trả lời ngay trong panel | chưa |
+| 11 | `docs: agent flow panel stays open` | README frontend, plan | chưa |
+
 Sau commit 6: chạy thử 1 câu bằng key thật (báo trước/sau số lần gọi LLM và token).
 
 ## Chưa quyết
 
 - Ai được thấy panel: tạm bật/tắt bằng `AGENT_FLOW_PANEL` (mặc định bật); theo role thì chưa làm.
-- Nút "Luồng agent" chỉ có trên câu trả lời của phiên hiện tại; mở lại hội thoại cũ thì chưa có nút.
+- Panel "cố định": Chainlit vẫn cho người dùng bấm X đóng sidebar; không chặn được. Mở lại bằng nút trên câu trả
+  lời hoặc khi có câu trả lời mới.
