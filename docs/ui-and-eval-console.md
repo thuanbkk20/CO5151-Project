@@ -33,7 +33,7 @@ Làm A trước.
 | A1 | Hiện nháp + nhận xét Verifier có phá quyết định "không gửi nháp" không? | Chỉ hiện **sau khi** câu trả lời cuối đã qua Verifier, trong khung chi tiết; luồng stream vẫn không có nháp | Hiện input/output từng node ở sidebar phải, lấy qua API riêng sau khi có câu trả lời (Kiên, 15/11) |
 | A2 | Ai được xem luồng agent? | Bật bằng biến môi trường (chế độ demo) hoặc theo role; sinh viên thường không thấy | |
 | A3 | Lưu luồng agent ở đâu? | Thêm danh sách "agent message" vào Trace, lấy lại qua `GET /traces/{id}` | Bảng `trace_spans` riêng, API riêng `GET /traces/{id}/spans` (Kiên, 15/11) |
-| B1 | Trang đánh giá là app riêng hay gắn vào backend? | App riêng (package mới), gọi eval trong process như hiện nay | |
+| B1 | Trang đánh giá là app riêng hay gắn vào backend? | App riêng (package mới), gọi eval trong process như hiện nay | App riêng `console/`, gộp luôn xem trace; eval chạy qua API backend; bỏ sidebar Chainlit (Kiên, 15/11) |
 | B2 | Backend lấy prompt từ trang đó thế nào? | Port `PromptSource` + adapter HTTP, có cache và fallback về prompt trong code; ghi phiên bản prompt vào trace | |
 | B3 | Bảo vệ trang chỉnh prompt | Cần đăng nhập (sửa prompt = đổi hành vi hệ thống) | |
 
@@ -57,3 +57,4 @@ Thiết kế và kế hoạch commit: [design/agent-flow.md](design/agent-flow.m
 - 2026-11-15: chốt A1, A3; viết `design/agent-flow.md`.
 - 2026-11-15: xong A.1, A.2 (nhánh `feat/agent-flow-ui`); chờ xem trên trình duyệt.
 - 2026-11-15: đợt 2: panel mở sẵn, chọn câu trả lời bất kỳ kể cả hội thoại cũ (commit 8–11).
+- 2026-11-15: đổi hướng: luồng agent chuyển sang console riêng; plan [design/eval-console.md](design/eval-console.md).
