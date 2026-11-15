@@ -1,9 +1,11 @@
 from web_fakes import CONVERSATION, SPANS, TRACE
 
 from co5151_web.present import (
+    answer_choices,
     answers_of_thread,
     chat_settings_body,
     details_markdown,
+    empty_flow_props,
     flow_props,
     pick_provider,
     progress_line,
@@ -72,3 +74,11 @@ def test_answers_of_a_reopened_thread_are_keyed_by_trace():
     answers = answers_of_thread(thread_dict(CONVERSATION, "sv002"))
     assert answers == {"t1": {"question": "Điều kiện tốt nghiệp?", "answer": "Theo Điều 22...", "message_id": "m2"}}
     assert answers_of_thread({"steps": []}) == {}
+
+
+def test_picker_lists_the_answers_by_question():
+    flows = {"t1": {"question": "Điều kiện tốt nghiệp?"}, "t2": {"question": "x" * 80}}
+    assert answer_choices(flows) == [{"trace_id": "t1", "label": "#1 Điều kiện tốt nghiệp?"},
+                                     {"trace_id": "t2", "label": "#2 " + "x" * 59 + "…"}]  # fmt: skip
+    empty = empty_flow_props(flows)
+    assert empty["empty"] and empty["nodes"] == [] and len(empty["answers"]) == 2

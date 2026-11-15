@@ -182,3 +182,13 @@ def answers_of_thread(thread: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if step.get("type") == "assistant_message" and trace_id:
             answers[trace_id] = {"question": question, "answer": step.get("output"), "message_id": step["id"]}
     return answers
+
+
+def answer_choices(flows: dict[str, dict[str, Any]]) -> list[dict[str, str]]:
+    """The answers of the conversation for the picker in the panel, oldest first, labelled by their question."""
+    return [{"trace_id": t, "label": f"#{i} {_short(f['question'], 60)}"} for i, (t, f) in enumerate(flows.items(), 1)]
+
+
+def empty_flow_props(flows: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """The panel before an answer is picked: a hint, and the picker when the conversation has answers."""
+    return {"empty": True, "question": None, "answer": None, "nodes": [], "answers": answer_choices(flows)}

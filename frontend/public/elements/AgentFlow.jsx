@@ -83,7 +83,36 @@ function Bubble({ title, text }) {
   );
 }
 
+// Ô chọn câu trả lời: gọi action `agent_flow` của app.py, server vẽ lại panel cho câu được chọn.
+function Picker({ answers, selected }) {
+  if (!answers || answers.length === 0) return null;
+  return (
+    <select
+      className="text-sm rounded-md border"
+      style={{ width: "100%", padding: "6px 8px", marginBottom: 10, background: "transparent", color: "inherit" }}
+      value={selected || ""}
+      onChange={(e) => e.target.value && callAction({ name: "agent_flow", payload: { trace_id: e.target.value } })}
+    >
+      {!selected && <option value="">Chọn câu trả lời để xem luồng…</option>}
+      {answers.map((a) => (
+        <option key={a.trace_id} value={a.trace_id}>{a.label}</option>
+      ))}
+    </select>
+  );
+}
+
 export default function AgentFlow() {
+  if (props.empty) {
+    return (
+      <div style={{ padding: 4 }}>
+        <Picker answers={props.answers} selected={null} />
+        <div className="text-sm text-muted-foreground">
+          Gửi một câu hỏi, hoặc bấm "Luồng agent" dưới một câu trả lời, để xem từng node (Planner, MCP, Advisor,
+          Verifier) đã nhận gì và trả về gì.
+        </div>
+      </div>
+    );
+  }
   const nodes = props.nodes || [];
   const totals = [
     props.total_ms != null ? `${(props.total_ms / 1000).toFixed(2)} s` : null,
@@ -92,6 +121,7 @@ export default function AgentFlow() {
   ].filter(Boolean);
   return (
     <div style={{ padding: 4 }}>
+      <Picker answers={props.answers} selected={props.selected} />
       {totals.length > 0 && <div className="text-xs text-muted-foreground" style={{ marginBottom: 8 }}>{totals.join(" · ")}</div>}
       <Bubble title="Câu hỏi" text={props.question} />
       {nodes.length === 0 && <div className="text-sm text-muted-foreground">Không có node nào được ghi lại.</div>}

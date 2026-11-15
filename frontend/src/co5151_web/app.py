@@ -11,9 +11,11 @@ from chainlit.input_widget import Select, TextInput
 from co5151_web.client import BackendClient, BackendError, SessionExpired
 from co5151_web.history import TOKEN_KEY, BackendDataLayer
 from co5151_web.present import (
+    answer_choices,
     answers_of_thread,
     chat_settings_body,
     details_markdown,
+    empty_flow_props,
     flow_props,
     pick_provider,
     progress_line,
@@ -94,6 +96,8 @@ async def _settings_form(saved: dict | None) -> dict:
 async def start() -> None:
     cl.user_session.set("settings", await _settings_form(None))
     cl.user_session.set("started", False)
+    if _flow_enabled():
+        await _open_empty_panel()
 
 
 @cl.on_chat_resume
@@ -135,9 +139,20 @@ async def _show_flow(token: str, trace_id: str) -> None:
         logger.warning("agent flow of trace %s unavailable", trace_id, exc_info=True)
         return
     props = flow_props(seen["question"], seen["answer"], spans, trace)
+    props.update(answers=answer_choices(cl.user_session.get("flows") or {}), selected=trace_id)
+    await _open_panel(props, key=trace_id)
+
+
+async def _open_panel(props: dict, key: str) -> None:
     element = cl.CustomElement(name="AgentFlow", props=props, display="inline")
     await cl.ElementSidebar.set_title(FLOW_TITLE)
-    await cl.ElementSidebar.set_elements([element], key=trace_id)
+    await cl.ElementSidebar.set_elements([element], key=key)
+
+
+async def _open_empty_panel() -> None:
+    """The panel stays open from the start: a hint until there is an answer to show."""
+    flows = cl.user_session.get("flows") or {}
+    await _open_panel(empty_flow_props(flows), key=f"empty-{len(flows)}")
 
 
 def _flow_button(trace_id: str) -> cl.Action:
@@ -157,13 +172,18 @@ def _remember_flow(trace_id: str | None, question: str, answer: str | None) -> l
 
 
 async def _restore_flows(thread: dict) -> None:
-    """A reopened conversation: every answer with a trace gets its button back."""
+    """A reopened conversation: every answer with a trace gets its button back; the panel shows the last one."""
     if not _flow_enabled():
         return
     answers = answers_of_thread(thread)
     cl.user_session.set("flows", answers)
     for trace_id, answer in answers.items():
         await _flow_button(trace_id).send(for_id=answer["message_id"])
+    token = _token()
+    if answers and token:
+        await _show_flow(token, list(answers)[-1])
+    else:
+        await _open_empty_panel()
 
 
 @cl.action_callback(FLOW_ACTION)
