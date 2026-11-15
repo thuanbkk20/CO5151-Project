@@ -13,6 +13,7 @@ resolution-markers = [
 [manifest]
 members = [
     "co5151-backend",
+    "co5151-console",
     "co5151-contracts",
     "co5151-eval",
     "co5151-regulation-server",
@@ -800,6 +801,29 @@ requires-dist = [
     { name = "uvicorn", specifier = ">=0.30" },
 ]
 provides-extras = ["postgres"]
+
+[[package]]
+name = "co5151-console"
+version = "0.1.0"
+source = { editable = "console" }
+dependencies = [
+    { name = "co5151-contracts" },
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "jinja2" },
+    { name = "python-multipart" },
+    { name = "uvicorn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "co5151-contracts", editable = "packages/contracts" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "jinja2", specifier = ">=3.1" },
+    { name = "python-multipart", specifier = ">=0.0.9" },
+    { name = "uvicorn", specifier = ">=0.30" },
+]
 
 [[package]]
 name = "co5151-contracts"
