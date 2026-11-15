@@ -25,6 +25,8 @@ TRACE = {"trace_id": "t1", "conversation_id": SESSION, "user_message_id": "m1", 
          "outcome": None, "steps": ["SUMMARY"], "tool_calls": ["search_regulations"], "citations": ["QD-Đ22"],
          "verifier_rounds": 1, "input_tokens": 1200, "output_tokens": 150, "latency_ms": 2500, "llm": "gemini/x",
          "llm_error": None, "error": None}  # fmt: skip
+SESSION_ITEM = {"conversation_id": SESSION, "owner_id": "sv002", "title": "Điều kiện tốt nghiệp?", "turns": 1,
+                "created_at": "2026-11-15T07:59:00Z", "updated_at": "2026-11-15T08:00:05Z"}  # fmt: skip
 ITEM = {"trace": TRACE, "owner_id": "sv002", "question": "Điều kiện tốt nghiệp?", "answer": "Theo Điều 22...",
         "created_at": "2026-11-15T08:00:00Z", "spans": []}  # fmt: skip
 
@@ -61,6 +63,8 @@ class FakeBackend:
             conversation = path.split("/")[2]
             return httpx.Response(200, json={"message": {"id": "m2", "content": answer},
                                              "trace": {**TRACE, "conversation_id": conversation}})  # fmt: skip
+        if path == "/admin/sessions":
+            return httpx.Response(200, json={"items": [SESSION_ITEM]})
         if path == "/admin/traces":
             session = request.url.params.get("conversation_id")
             return httpx.Response(200, json={"items": [ITEM] if session in (None, SESSION) else []})

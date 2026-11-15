@@ -63,7 +63,7 @@ class TraceBrowser:
 
     def recent(self, session: str | None = None, limit: int = 50) -> list[TraceRow]:
         """Raises BackendError."""
-        return [_row(item) for item in self._admin.traces(conversation_id=session or None, limit=limit)]
+        return [row_of(item) for item in self._admin.traces(conversation_id=session or None, limit=limit)]
 
     def detail(self, trace_id: str) -> TraceDetail | None:
         """Raises BackendError."""
@@ -72,7 +72,7 @@ class TraceBrowser:
             return None
         t = item["trace"]
         return TraceDetail(
-            row=_row(item),
+            row=row_of(item),
             question=item.get("question"),
             answer=item.get("answer"),
             llm=t.get("llm"),
@@ -87,7 +87,8 @@ def _short(text: Any, limit: int = 100) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
-def _row(item: dict[str, Any]) -> TraceRow:
+def row_of(item: dict[str, Any]) -> TraceRow:
+    """One admin API trace item as a table row (also a turn of the Sessions page)."""
     t = item["trace"]
     if t.get("error"):
         result, tone = "lỗi", "error"

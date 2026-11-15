@@ -9,6 +9,7 @@ from .config import Settings
 from .ports import AnswerAgent, BackendAdmin
 from .services.evaluation import Evaluation
 from .services.question_sets import QuestionSets
+from .services.sessions import SessionBrowser
 from .services.traces import TraceBrowser
 
 
@@ -16,6 +17,7 @@ from .services.traces import TraceBrowser
 class Container:
     settings: Settings
     traces: TraceBrowser
+    sessions: SessionBrowser
     question_sets: QuestionSets
     evaluation: Evaluation
 
@@ -29,5 +31,5 @@ def build_container(
     store = SqliteStore(settings.database)
     store.interrupt_running()  # a run cannot survive a restart of the console
     evaluation = Evaluation(store, store, agent, **({"background": background} if background else {}))
-    return Container(settings=settings, traces=TraceBrowser(admin), question_sets=QuestionSets(store),
-                     evaluation=evaluation)  # fmt: skip
+    return Container(settings=settings, traces=TraceBrowser(admin), sessions=SessionBrowser(admin),
+                     question_sets=QuestionSets(store), evaluation=evaluation)  # fmt: skip

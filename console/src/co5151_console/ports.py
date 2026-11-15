@@ -25,6 +25,10 @@ class BackendAdmin(Protocol):
     def trace(self, trace_id: str) -> dict[str, Any] | None:
         """The same item with its spans, or None when there is no such trace. Raises BackendError."""
 
+    def sessions(self, *, limit: int = 50) -> list[dict[str, Any]]:
+        """Conversations, most recently active first: `{conversation_id, owner_id, title, turns, created_at,
+        updated_at}`. Raises BackendError."""
+
 
 class QuestionSetStore(Protocol):
     def list_sets(self) -> list[QuestionSetSummary]:

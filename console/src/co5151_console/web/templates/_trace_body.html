@@ -5,7 +5,7 @@
 {% if detail %}
 {% set r = detail.row %}
 <table class="kv">
-  <tr><th>Session</th><td><a href="/traces?session={{ r.session }}"><code>{{ r.session }}</code></a></td></tr>
+  <tr><th>Session</th><td><a href="/sessions/{{ r.session }}"><code>{{ r.session }}</code></a></td></tr>
   <tr><th>Người hỏi</th><td>{{ r.owner }}</td></tr>
   <tr><th>Thời gian (UTC)</th><td>{{ r.created_at }}</td></tr>
   <tr><th>Kết cục</th><td class="{{ r.tone }}">{{ r.result }}</td></tr>

@@ -24,7 +24,7 @@
     <td>{{ r.tools }}</td>
     <td>{{ r.tokens }}</td>
     <td>{{ r.seconds }}</td>
-    <td><a href="/traces?session={{ r.session }}" title="{{ r.session }}"><code>{{ r.session[:8] }}</code></a></td>
+    <td><a href="/sessions/{{ r.session }}" title="{{ r.session }}"><code>{{ r.session[:8] }}</code></a></td>
   </tr>
   {% endfor %}
 </table>

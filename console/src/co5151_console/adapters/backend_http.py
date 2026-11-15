@@ -33,6 +33,13 @@ class HttpBackendAdmin:
         _raise_for(res)
         return res.json()["items"]
 
+    def sessions(self, *, limit: int = 50) -> list[dict[str, Any]]:
+        res = self._get("/admin/sessions", limit=limit)
+        if res.status_code == 404:
+            raise BackendError("Backend chưa bật API admin (BACKEND_ADMIN_TOKEN trống ở backend).")
+        _raise_for(res)
+        return res.json()["items"]
+
     def trace(self, trace_id: str) -> dict[str, Any] | None:
         res = self._get(f"/admin/traces/{trace_id}")
         if res.status_code == 404:

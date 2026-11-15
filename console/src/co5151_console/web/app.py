@@ -8,12 +8,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from ..container import Container
-from . import evaluation, question_sets, traces
+from . import evaluation, question_sets, sessions, traces
 
 HERE = Path(__file__).parent
 # The sidebar: (path, label). A page is added here when it is built.
 NAV: list[tuple[str, str]] = [
     ("/", "Tổng quan"),
+    ("/sessions", "Sessions"),
     ("/traces", "Traces"),
     ("/eval", "Đánh giá"),
     ("/question-sets", "Bộ câu hỏi"),
@@ -28,6 +29,7 @@ def create_app(container: Container) -> FastAPI:
     templates.env.globals["nav"] = NAV
     app.state.templates = templates
     app.include_router(traces.router)
+    app.include_router(sessions.router)
     app.include_router(question_sets.router)
     app.include_router(evaluation.router)
 
