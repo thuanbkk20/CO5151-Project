@@ -71,6 +71,8 @@ class FakeBackend:
             return httpx.Response(200, json={"items": [item], "next_cursor": "c2"})
         if path == "/conversations" and method == "POST":
             return httpx.Response(201, json={**CONVERSATION, "id": body["id"], "messages": []})
+        if path == "/traces/t1":
+            return httpx.Response(200, json=TRACE)
         if path == "/traces/t1/spans":
             return httpx.Response(200, json={"trace_id": "t1", "spans": SPANS})
         if path.startswith("/traces/"):

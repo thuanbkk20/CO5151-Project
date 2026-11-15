@@ -80,6 +80,10 @@ class BackendClient:
             await self._request("PUT", f"/messages/{message_id}/feedback", token,
                                 json={"value": value, "comment": comment})  # fmt: skip
 
+    async def trace(self, token: str, trace_id: str) -> dict[str, Any]:
+        """What one answer did and cost (outcome, tools, Verifier rounds, tokens, latency)."""
+        return (await self._request("GET", f"/traces/{trace_id}", token)).json()
+
     async def spans(self, token: str, trace_id: str) -> list[dict[str, Any]]:
         """What each node of that answer received and returned, in the order they started."""
         return (await self._request("GET", f"/traces/{trace_id}/spans", token)).json()["spans"]
