@@ -111,7 +111,8 @@ class AskQuestion:
         except Exception as e:
             logger.exception("trace=%s failed", trace_id)
             failed = Trace(trace_id=trace_id, conversation_id=conversation_id, user_message_id=asked.id,
-                           latency_ms=_ms(start), llm=llm, error=f"{type(e).__name__}: {e}")  # fmt: skip
+                           latency_ms=_ms(start), llm=llm, error=f"{type(e).__name__}: {e}",
+                           created_at=utcnow())  # fmt: skip
             await self._traces.save(failed, spans.spans)
             raise AnswerFailed(trace_id) from e
 

@@ -24,6 +24,7 @@ from .application.ports import (
 from .application.usecases.ask import AskQuestion
 from .application.usecases.auth import Authenticate, AuthenticateOperator, SignIn
 from .application.usecases.conversations import Conversations
+from .application.usecases.operator import OperatorTraces
 from .infrastructure.config import Settings
 from .infrastructure.identity import DemoAccountDirectory, JwtAccessTokens, SignedStudentTokens
 from .infrastructure.laya import LayaActionRouter
@@ -56,6 +57,7 @@ class Container:
     authenticate_operator: AuthenticateOperator
     conversations: Conversations
     ask: AskQuestion
+    operator_traces: OperatorTraces
     chats: ConversationRepository
     models: ChatModels
     _sql: SqlChatRepository | None = field(default=None, repr=False)
@@ -147,6 +149,7 @@ def build_container(settings: Settings, adapters: Adapters | None = None) -> Con
             verifier_for=verifier_factory(settings, models),
             history_messages=settings.history_messages,
         ),
+        operator_traces=OperatorTraces(traces),
         chats=chats,
         models=models,
         _sql=sql,

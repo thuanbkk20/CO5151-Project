@@ -130,6 +130,27 @@ async def test_spans_are_saved_with_their_trace_owner_scoped_and_replaced(repos)
     assert await traces.spans("s" * 32, "sv001") is None
 
 
+async def test_trace_log_reads_every_owner_newest_first_with_question_and_answer(repos):
+    chats, traces = repos
+    await chats.create(conversation("c1"))
+    await chats.create(conversation("c2", owner="sv002"))
+    await chats.add_message(message("q1", "c1"))
+    await chats.add_message(message("a1", "c1", MessageRole.ASSISTANT, seconds=1))
+    older = Trace(trace_id="1" * 32, conversation_id="c1", user_message_id="q1", answer_message_id="a1",
+                  created_at=utcnow())  # fmt: skip
+    newer = Trace(trace_id="2" * 32, conversation_id="c2", error="boom", created_at=utcnow() + timedelta(seconds=5))
+    await traces.save(older, [Span(node="planner", name="rules")])
+    await traces.save(newer)
+    assert [r.trace.trace_id for r in await traces.recent()] == ["2" * 32, "1" * 32]
+    [mine] = await traces.recent(conversation_id="c1", limit=10)
+    assert (mine.owner_id, mine.question, mine.answer, mine.spans) == ("sv001", "text q1", "text a1", [])
+    found = await traces.find("1" * 32)
+    assert [s.node for s in found.spans] == ["planner"] and found.trace.user_message_id == "q1"
+    failed = await traces.find("2" * 32)
+    assert (failed.owner_id, failed.question, failed.trace.error) == ("sv002", None, "boom")
+    assert await traces.find("x" * 32) is None and len(await traces.recent(limit=1)) == 1
+
+
 async def test_concurrent_creates_of_one_conversation_both_succeed(tmp_path):
     chats = SqlChatRepository.from_url(f"sqlite+aiosqlite:///{tmp_path / 'chat.db'}")
     await chats.create_schema()

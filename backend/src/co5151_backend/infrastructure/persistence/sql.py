@@ -16,6 +16,7 @@ from sqlalchemy import and_, delete, event, or_, select, update
 from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import aliased
 
 from ...domain.conversation import (
     MAX_TITLE,
@@ -28,7 +29,7 @@ from ...domain.conversation import (
     utcnow,
 )
 from ...domain.errors import NotFound
-from ...domain.trace import Outcome, Span, Trace, Usage
+from ...domain.trace import Outcome, Span, Trace, TraceRecord, Usage
 from .tables import Base, ConversationRow, MessageRow, SpanRow, TraceRow
 
 SUPPORTED_BACKENDS = ("sqlite", "postgresql")
@@ -267,6 +268,35 @@ class SqlChatRepository:
             )
             return [_span(row) for row in rows]
 
+    def _records(self):
+        """Traces with the owner of their conversation, the question and the answer (one query)."""
+        asked, answered = aliased(MessageRow), aliased(MessageRow)
+        return (
+            select(TraceRow, ConversationRow.owner_id, asked.content, answered.content)
+            .join(ConversationRow, ConversationRow.id == TraceRow.conversation_id)
+            .outerjoin(asked, asked.id == TraceRow.user_message_id)
+            .outerjoin(answered, answered.id == TraceRow.answer_message_id)
+        )
+
+    async def recent_traces(self, conversation_id: str | None, limit: int) -> list[TraceRecord]:
+        statement = self._records().order_by(TraceRow.created_at.desc()).limit(limit)
+        if conversation_id is not None:
+            statement = statement.where(TraceRow.conversation_id == conversation_id)
+        async with self._session() as s:
+            rows = (await s.execute(statement)).all()
+        return [TraceRecord(_trace(row), owner, question, answer) for row, owner, question, answer in rows]
+
+    async def find_trace(self, trace_id: str) -> TraceRecord | None:
+        async with self._session() as s:
+            found = (await s.execute(self._records().where(TraceRow.trace_id == trace_id))).first()
+            if found is None:
+                return None
+            spans = await s.scalars(
+                select(SpanRow).where(SpanRow.trace_id == trace_id).order_by(SpanRow.start_ms, SpanRow.seq)
+            )
+            row, owner, question, answer = found
+            return TraceRecord(_trace(row), owner, question, answer, [_span(span) for span in spans])
+
 
 class SqlTraceRepository:
     """The TraceRepository view of the same store (its `get` would clash with the conversations' `get`)."""
@@ -282,6 +312,12 @@ class SqlTraceRepository:
 
     async def spans(self, trace_id: str, owner_id: str) -> list[Span] | None:
         return await self._chats.get_spans(trace_id, owner_id)
+
+    async def recent(self, *, conversation_id: str | None = None, limit: int = 50) -> list[TraceRecord]:
+        return await self._chats.recent_traces(conversation_id, limit)
+
+    async def find(self, trace_id: str) -> TraceRecord | None:
+        return await self._chats.find_trace(trace_id)
 
 
 def _title(title: str | None) -> str | None:

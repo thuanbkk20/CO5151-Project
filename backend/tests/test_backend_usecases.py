@@ -4,6 +4,7 @@ from backend_fakes import GRADUATION, PASS, REFUSE, REVISE, UNVERIFIED, App, Scr
 from co5151_backend.application.agents.advisor import prompts
 from co5151_backend.application.usecases.ask import MAX_VERIFIER_ROUNDS
 from co5151_backend.application.usecases.auth import AuthenticateOperator
+from co5151_backend.application.usecases.operator import OperatorTraces
 from co5151_backend.domain.conversation import ChatSettings, Feedback, MessageRole
 from co5151_backend.domain.errors import AnswerFailed, InvalidCredentials, InvalidRequest, NotFound, Unauthenticated
 from co5151_backend.domain.principal import Role
@@ -164,6 +165,22 @@ async def test_a_crash_is_reported_with_a_saved_trace():
     assert trace.error == "RuntimeError: db down" and trace.answer_message_id is None
     *_, failed_span = await app.conversations.spans(principal, failed.value.trace_id)
     assert (failed_span.node, failed_span.error) == ("student_record", "RuntimeError: db down")
+
+
+async def test_operator_reads_every_users_traces():
+    app = App("Bạn đủ điều kiện.")
+    principal, conv = await started(app)
+    answer = await app.ask.execute(principal, conv.id, GRADUATION)
+    operator = OperatorTraces(app.traces)
+    [record] = await operator.recent(conversation_id=conv.id)
+    assert (record.owner_id, record.question, record.answer) == ("sv001", GRADUATION, "Bạn đủ điều kiện.")
+    detail = await operator.detail(answer.trace.trace_id)
+    assert detail.spans[0].node == "planner" and detail.trace.trace_id == answer.trace.trace_id
+    assert await operator.recent(conversation_id="khac") == []
+    with pytest.raises(NotFound):
+        await operator.detail("x" * 32)
+    with pytest.raises(InvalidRequest):
+        await operator.recent(limit=0)
 
 
 def test_sign_in():

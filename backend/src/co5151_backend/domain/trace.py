@@ -68,3 +68,15 @@ class Span:
     duration_ms: int = 0
     usage: Usage = field(default_factory=Usage)
     error: str | None = None
+
+
+@dataclass(frozen=True)
+class TraceRecord:
+    """A trace as the operator console sees it: with whose conversation it is, the question and the answer.
+    `spans` is only filled when one trace is looked up."""
+
+    trace: Trace
+    owner_id: str
+    question: str | None = None
+    answer: str | None = None
+    spans: list[Span] = field(default_factory=list)
