@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 
 def new_trace_id() -> str:
@@ -49,3 +50,21 @@ class Trace:
     llm_error: str | None = None  # an LLM call failed and a fallback was used
     error: str | None = None  # the answer could not be produced
     created_at: datetime | None = None
+
+
+@dataclass(frozen=True)
+class Span:
+    """What one node of an answer received and returned (the OpenTelemetry idea of a span, kept flat).
+
+    `input` and `output` are JSON values already cut to size; they never hold a token, a system prompt or the
+    canary. `start_ms` counts from the start of the answer.
+    """
+
+    node: str  # planner | student_record | regulation | writer | verifier
+    name: str
+    input: dict[str, Any] = field(default_factory=dict)
+    output: dict[str, Any] = field(default_factory=dict)
+    start_ms: int = 0
+    duration_ms: int = 0
+    usage: Usage = field(default_factory=Usage)
+    error: str | None = None
