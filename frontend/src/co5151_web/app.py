@@ -1,5 +1,6 @@
 """Chainlit handlers: sign-in, LLM settings, chat. Every action is one call to the backend API."""
 
+import asyncio
 import logging
 import os
 
@@ -9,7 +10,14 @@ from chainlit.input_widget import Select, TextInput
 
 from co5151_web.client import BackendClient, BackendError, SessionExpired
 from co5151_web.history import TOKEN_KEY, BackendDataLayer
-from co5151_web.present import chat_settings_body, details_markdown, flow_props, pick_provider, progress_line
+from co5151_web.present import (
+    answers_of_thread,
+    chat_settings_body,
+    details_markdown,
+    flow_props,
+    pick_provider,
+    progress_line,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +101,7 @@ async def resume(thread: dict) -> None:
     saved = (thread.get("metadata") or {}).get("chat_settings")
     cl.user_session.set("settings", await _settings_form(saved))
     cl.user_session.set("started", True)
+    await _restore_flows(thread)
 
 
 @cl.on_settings_update
@@ -121,26 +130,40 @@ async def _show_flow(token: str, trace_id: str) -> None:
     if seen is None:
         return
     try:
-        spans = await CLIENT.spans(token, trace_id)
+        trace, spans = await asyncio.gather(CLIENT.trace(token, trace_id), CLIENT.spans(token, trace_id))
     except (BackendError, httpx.HTTPError):
-        logger.warning("spans of trace %s unavailable", trace_id, exc_info=True)
+        logger.warning("agent flow of trace %s unavailable", trace_id, exc_info=True)
         return
-    element = cl.CustomElement(name="AgentFlow", props=flow_props(seen["question"], seen["answer"], spans,
-                                                                   seen["trace"]), display="inline")  # fmt: skip
+    props = flow_props(seen["question"], seen["answer"], spans, trace)
+    element = cl.CustomElement(name="AgentFlow", props=props, display="inline")
     await cl.ElementSidebar.set_title(FLOW_TITLE)
     await cl.ElementSidebar.set_elements([element], key=trace_id)
 
 
-def _remember_flow(trace_id: str | None, question: str, answer: str | None, trace: dict | None) -> list[cl.Action]:
-    """Keep what the sidebar needs for this answer (this session only); the button that reopens it, or none when
+def _flow_button(trace_id: str) -> cl.Action:
+    return cl.Action(name=FLOW_ACTION, payload={"trace_id": trace_id}, label=FLOW_TITLE, icon="workflow",
+                     tooltip="Xem từng node đã nhận và trả về gì")  # fmt: skip
+
+
+def _remember_flow(trace_id: str | None, question: str, answer: str | None) -> list[cl.Action]:
+    """Keep the question and answer of this trace for the sidebar; the button that opens its flow, or none when
     the panel is off (`AGENT_FLOW_PANEL=0`)."""
     if not trace_id or not _flow_enabled():
         return []
     flows = cl.user_session.get("flows") or {}
-    flows[trace_id] = {"question": question, "answer": answer, "trace": trace}
+    flows[trace_id] = {"question": question, "answer": answer}
     cl.user_session.set("flows", flows)
-    return [cl.Action(name=FLOW_ACTION, payload={"trace_id": trace_id}, label=FLOW_TITLE, icon="workflow",
-                      tooltip="Xem từng node đã nhận và trả về gì")]  # fmt: skip
+    return [_flow_button(trace_id)]
+
+
+async def _restore_flows(thread: dict) -> None:
+    """A reopened conversation: every answer with a trace gets its button back."""
+    if not _flow_enabled():
+        return
+    answers = answers_of_thread(thread)
+    cl.user_session.set("flows", answers)
+    for trace_id, answer in answers.items():
+        await _flow_button(trace_id).send(for_id=answer["message_id"])
 
 
 @cl.action_callback(FLOW_ACTION)
@@ -168,7 +191,7 @@ async def reply(message: cl.Message) -> None:
                 elif event == "answer":
                     step.output = details_markdown(data["trace"])
                     trace_id = data["trace"]["trace_id"]
-                    actions = _remember_flow(trace_id, message.content, data["message"]["content"], data["trace"])
+                    actions = _remember_flow(trace_id, message.content, data["message"]["content"])
                     await cl.Message(id=data["message"]["id"], content=data["message"]["content"],
                                      metadata={"trace_id": trace_id}, actions=actions).send()  # fmt: skip
                     if actions:
@@ -177,7 +200,7 @@ async def reply(message: cl.Message) -> None:
                     trace_id = data.get("trace_id")
                     trace = f" Mã trace: `{trace_id}`" if trace_id else ""
                     step.output = f"Lỗi: {data.get('detail')}"
-                    actions = _remember_flow(trace_id, message.content, None, None)
+                    actions = _remember_flow(trace_id, message.content, None)
                     await cl.Message(content=f"Lỗi khi tạo câu trả lời.{trace}", actions=actions).send()
                     if actions:
                         await _show_flow(token, trace_id)

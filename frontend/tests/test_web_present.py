@@ -1,6 +1,7 @@
 from web_fakes import CONVERSATION, SPANS, TRACE
 
 from co5151_web.present import (
+    answers_of_thread,
     chat_settings_body,
     details_markdown,
     flow_props,
@@ -65,3 +66,9 @@ def test_flow_props_flag_failures():
         ("REVISE · Sai số tín chỉ.", "warn"),
         ("RuntimeError: db down", "error"),
     ]
+
+
+def test_answers_of_a_reopened_thread_are_keyed_by_trace():
+    answers = answers_of_thread(thread_dict(CONVERSATION, "sv002"))
+    assert answers == {"t1": {"question": "Điều kiện tốt nghiệp?", "answer": "Theo Điều 22...", "message_id": "m2"}}
+    assert answers_of_thread({"steps": []}) == {}

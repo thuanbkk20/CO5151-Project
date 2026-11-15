@@ -168,3 +168,17 @@ def flow_props(question: str, answer: str | None, spans: list[dict[str, Any]], t
         "total_tokens": (trace.get("input_tokens") or 0) + (trace.get("output_tokens") or 0) if trace else None,
         "llm": trace.get("llm"),
     }
+
+
+def answers_of_thread(thread: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Trace id -> the question, the answer and the answer's message id, oldest first, for every answer of a
+    reopened thread that has a trace (the ones whose agent flow can be shown)."""
+    answers: dict[str, dict[str, Any]] = {}
+    question = ""
+    for step in thread.get("steps") or []:
+        if step.get("type") == "user_message":
+            question = step.get("output") or ""
+        trace_id = (step.get("metadata") or {}).get("trace_id")
+        if step.get("type") == "assistant_message" and trace_id:
+            answers[trace_id] = {"question": question, "answer": step.get("output"), "message_id": step["id"]}
+    return answers
