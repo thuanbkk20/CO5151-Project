@@ -1,5 +1,8 @@
 # Luồng agent trên UI (agent flow)
 
+> **Đổi hướng 15/11:** phần frontend (sidebar Chainlit, commit 5–6, 8–10) đã revert ở `74eb425`; luồng agent
+> xem trong console vận hành ([eval-console.md](eval-console.md)). Phần backend (commit 1–4) giữ nguyên.
+
 Cập nhật: 2026-11-15. Theo dõi tiến độ: [../ui-and-eval-console.md](../ui-and-eval-console.md).
 
 ## Mục tiêu
