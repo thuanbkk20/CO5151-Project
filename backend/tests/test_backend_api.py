@@ -51,6 +51,13 @@ def test_conversation_lifecycle(client):
     assert answer["message"]["content"] == "Bạn đủ điều kiện." and answer["trace"]["verifier_rounds"] == 1
     assert answer["trace"]["tool_calls"] == ["get_my_academic_summary", "search_regulations"]
 
+    spans = client.get(f"/traces/{answer['trace']['trace_id']}/spans", headers=auth).json()["spans"]
+    assert [s["node"] for s in spans] == ["planner", "student_record", "planner", "regulation", "planner", "writer",
+                                          "verifier"]  # fmt: skip
+    assert spans[-1]["output"]["status"] == "pass" and spans[-2]["output"]["text"] == "Bạn đủ điều kiện."
+    other = login(client, "sv002")
+    assert client.get(f"/traces/{answer['trace']['trace_id']}/spans", headers=other).status_code == 404
+
     detail = client.get(f"/conversations/{CONV}", headers=auth).json()
     assert [m["role"] for m in detail["messages"]] == ["user", "assistant"] and detail["title"] == GRADUATION
     answer_id = detail["messages"][1]["id"]

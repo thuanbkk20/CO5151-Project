@@ -1,7 +1,7 @@
 """Request and response bodies of the API, and their mapping from the domain objects."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -9,7 +9,7 @@ from ..application.usecases.ask import Answer
 from ..application.usecases.auth import Session
 from ..domain.conversation import ChatSettings, Conversation, ConversationPage, Message
 from ..domain.principal import Principal
-from ..domain.trace import Trace
+from ..domain.trace import Span, Trace
 
 
 class _In(BaseModel):
@@ -144,6 +144,29 @@ class TraceOut(BaseModel):
                    steps=t.steps, tool_calls=t.tool_calls, citations=t.citations, verifier_rounds=t.verifier_rounds,
                    input_tokens=t.usage.input_tokens, output_tokens=t.usage.output_tokens, latency_ms=t.latency_ms,
                    llm=t.llm, llm_error=t.llm_error, error=t.error)  # fmt: skip
+
+
+class SpanOut(BaseModel):
+    node: str = Field(description="planner | student_record | regulation | writer | verifier")
+    name: str
+    input: dict[str, Any]
+    output: dict[str, Any]
+    start_ms: int = Field(description="from the start of the answer")
+    duration_ms: int
+    input_tokens: int
+    output_tokens: int
+    error: str | None
+
+    @classmethod
+    def of(cls, s: Span) -> "SpanOut":
+        return cls(node=s.node, name=s.name, input=s.input, output=s.output, start_ms=s.start_ms,
+                   duration_ms=s.duration_ms, input_tokens=s.usage.input_tokens, output_tokens=s.usage.output_tokens,
+                   error=s.error)  # fmt: skip
+
+
+class SpansOut(BaseModel):
+    trace_id: str
+    spans: list[SpanOut]
 
 
 class AnswerOut(BaseModel):

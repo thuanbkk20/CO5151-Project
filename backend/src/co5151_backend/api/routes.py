@@ -152,3 +152,10 @@ async def delete_feedback(message_id: str, c: Deps, caller: Caller) -> Response:
 @router.get("/traces/{trace_id}", tags=["chat"])
 async def get_trace(trace_id: str, c: Deps, caller: Caller) -> s.TraceOut:
     return s.TraceOut.of(await c.conversations.trace(caller, trace_id))
+
+
+@router.get("/traces/{trace_id}/spans", tags=["chat"])
+async def get_spans(trace_id: str, c: Deps, caller: Caller) -> s.SpansOut:
+    """What each node of the answer (planner, MCP tools, writer, Verifier) received and returned, in order."""
+    spans = await c.conversations.spans(caller, trace_id)
+    return s.SpansOut(trace_id=trace_id, spans=[s.SpanOut.of(span) for span in spans])
