@@ -6,9 +6,10 @@ Services only see these: the backend's HTTP API or the SQLite file can change wi
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from co5151_eval.runner import Record
 from co5151_eval.tasks import Task
 
-from .models import QuestionSet, QuestionSetSummary
+from .models import QuestionSet, QuestionSetSummary, Run, RunResult
 
 
 class BackendError(Exception):
@@ -57,3 +58,22 @@ class AnswerAgent(Protocol):
 
     def answer(self, question: str, *, user: str | None) -> AgentAnswer:
         """`user`: a demo account, or None for a guest. Never raises: failures come back in `error`."""
+
+
+class RunStore(Protocol):
+    def create_run(self, set_name: str, total: int) -> int: ...
+
+    def add_result(self, run_id: int, task_id: str, question: str, trace_id: str | None, record: Record) -> None: ...
+
+    def finish_run(self, run_id: int, status: str, error: str | None = None) -> None: ...
+
+    def interrupt_running(self) -> None:
+        """Runs left `running` by a console that stopped: mark them `interrupted`."""
+
+    def list_runs(self) -> list[Run]:
+        """Newest first."""
+
+    def get_run(self, run_id: int) -> Run | None: ...
+
+    def results(self, run_id: int) -> list[RunResult]:
+        """In the order the tasks ran."""
