@@ -7,6 +7,7 @@ from co5151_contracts import ErrorCode
 
 from ....domain.evidence import Action, Regulation
 from ...ports import RegulationGateway, StudentRecordGateway
+from ...tracing import DISCARD, SpanRecorder
 
 STUDENT_TOOLS = {Action.SUMMARY: "get_my_academic_summary", Action.WARNINGS: "get_my_academic_decisions"}
 REGULATION_TOOL = "search_regulations"
@@ -35,11 +36,11 @@ class StudentTools:
     def __init__(self, gateway: StudentRecordGateway):
         self._gateway = gateway
 
-    async def read(self, action: Action, token: str) -> StudentFacts:
+    async def read(self, action: Action, token: str, *, spans: SpanRecorder = DISCARD) -> StudentFacts:
         tool = STUDENT_TOOLS[action]
-        res = await self._gateway.call(tool, token)
+        res = await self._call(tool, token, spans)
         if not res.ok and res.error.code.retryable:
-            res = await self._gateway.call(tool, token)  # once
+            res = await self._call(tool, token, spans)  # once
         if not res.ok:
             code = res.error.code
             return StudentFacts(error=SAFE_ERROR_MESSAGES.get(code, SAFE_ERROR_MESSAGES[ErrorCode.INTERNAL]),
@@ -68,6 +69,12 @@ class StudentTools:
             }
         )
 
+    async def _call(self, tool: str, token: str, spans: SpanRecorder):
+        with spans.span("student_record", tool, {"tool": tool, "args": {}, "token": "(ẩn)"}) as span:
+            res = await self._gateway.call(tool, token)
+            span.output = res.model_dump(mode="json", exclude_none=True)
+        return res
+
 
 class RegulationSearch:
     def __init__(self, gateway: RegulationGateway, *, top_k: int = 3, hops: int = 1, max_chars: int = 1500):
@@ -76,8 +83,11 @@ class RegulationSearch:
         self._hops = hops
         self._max_chars = max_chars
 
-    async def search(self, query: str) -> list[Regulation]:
-        res = await self._gateway.call(REGULATION_TOOL, {"query": query, "top_k": self._top_k, "hops": self._hops})
+    async def search(self, query: str, *, spans: SpanRecorder = DISCARD) -> list[Regulation]:
+        args = {"query": query, "top_k": self._top_k, "hops": self._hops}
+        with spans.span("regulation", REGULATION_TOOL, {"tool": REGULATION_TOOL, "args": args}) as span:
+            res = await self._gateway.call(REGULATION_TOOL, args)
+            span.output = res.model_dump(mode="json", exclude_none=True)
         if not res.ok:
             return []
         return [self._regulation(r) for r in res.data.get("results", [])]

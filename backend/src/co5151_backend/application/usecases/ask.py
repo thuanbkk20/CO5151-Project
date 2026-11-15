@@ -34,6 +34,7 @@ from ..ports import (
     StudentTokenIssuer,
     TraceRepository,
 )
+from ..tracing import SpanRecorder
 
 logger = logging.getLogger(__name__)
 
@@ -102,15 +103,16 @@ class AskQuestion:
             await self._chats.update(conversation_id, principal.user_id, title=title_from(question))
 
         trace_id, start = new_trace_id(), time.perf_counter()
+        spans = SpanRecorder(secrets=[prompts.CANARY])
         model = self._models.create(conversation.settings.provider, conversation.settings.model)
         llm = f"{model.provider}/{model.model}" if model else None
         try:
-            turn = await self._answer(question, history, model, self._student_token(principal), emit)
+            turn = await self._answer(question, history, model, self._student_token(principal), emit, spans)
         except Exception as e:
             logger.exception("trace=%s failed", trace_id)
             failed = Trace(trace_id=trace_id, conversation_id=conversation_id, user_message_id=asked.id,
                            latency_ms=_ms(start), llm=llm, error=f"{type(e).__name__}: {e}")  # fmt: skip
-            await self._traces.save(failed)
+            await self._traces.save(failed, spans.spans)
             raise AnswerFailed(trace_id) from e
 
         answer = Message(str(uuid.uuid4()), conversation_id, MessageRole.ASSISTANT, turn.text, utcnow(), trace_id)
@@ -131,17 +133,23 @@ class AskQuestion:
             llm_error="; ".join(turn.llm_errors) or None,
             created_at=answer.created_at,
         )
-        await self._traces.save(trace)
+        await self._traces.save(trace, spans.spans)
         logger.info("trace=%s outcome=%s tools=%s verifier_rounds=%s tokens=%s ms=%s", trace_id,
                     trace.outcome.value if trace.outcome else "llm", ",".join(trace.tool_calls) or "-",
                     trace.verifier_rounds, trace.usage.total, trace.latency_ms)  # fmt: skip
         return Answer(answer, trace)
 
     async def _answer(
-        self, question: str, history: list[ChatTurn], model: ChatModel | None, token: str | None, emit: EventSink
+        self,
+        question: str,
+        history: list[ChatTurn],
+        model: ChatModel | None,
+        token: str | None,
+        emit: EventSink,
+        spans: SpanRecorder,
     ) -> "_Turn":
         gathered = await self._advisor.gather(question, token=token, planner=Planner(self._router_for(model)),
-                                              emit=emit)  # fmt: skip
+                                              emit=emit, spans=spans)  # fmt: skip
         turn = _Turn(gathered.steps, gathered.tool_calls, gathered.citations, gathered.usage, list(gathered.llm_errors))
         if gathered.final_text is not None:  # refusal or clarification of the planner: nothing to verify
             turn.text, turn.outcome = gathered.final_text, gathered.final_outcome
@@ -149,7 +157,7 @@ class AskQuestion:
 
         evidence = gathered.evidence
         await emit(events.step("write"))
-        draft = await self._advisor.write(question, evidence, model=model, history=history, token=token)
+        draft = await self._advisor.write(question, evidence, model=model, history=history, token=token, spans=spans)
         turn.add_draft(draft)
         verifier = self._verifier_for(model)
         if verifier is None:
@@ -157,7 +165,13 @@ class AskQuestion:
 
         turn.verifier_rounds = 0
         while True:
-            verdict = await verifier.verify(_verification_request(question, turn.text, evidence))
+            request = _verification_request(question, turn.text, evidence)
+            with spans.span(
+                "verifier", f"round {turn.verifier_rounds + 1}", _verifier_input(verifier, request)
+            ) as span:
+                verdict = await verifier.verify(request)
+                span.output = verdict.model_dump(mode="json", include={"status", "issues"})
+                span.usage = Usage(verdict.input_tokens, verdict.output_tokens)
             turn.verifier_rounds += 1
             turn.usage += Usage(verdict.input_tokens, verdict.output_tokens)
             turn.steps.append(f"VERIFY_{verdict.status.name}")
@@ -168,7 +182,7 @@ class AskQuestion:
             if verdict.status is VerdictStatus.REVISE and turn.verifier_rounds < MAX_VERIFIER_ROUNDS:
                 await emit(events.step("write", revision=True))
                 rewrite = await self._advisor.write(question, evidence, model=model, history=history, token=token,
-                                                    revise=(turn.text, verdict))  # fmt: skip
+                                                    revise=(turn.text, verdict), spans=spans)  # fmt: skip
             if rewrite is None:
                 turn.text, turn.outcome = prompts.refusal(verdict), Outcome.REFUSE
                 return turn
@@ -199,6 +213,16 @@ def _verification_request(question: str, draft: str, evidence: Evidence) -> Veri
     return VerificationRequest(
         question=question, draft=draft, student_facts=evidence.student_facts(), regulations=list(excerpts.values())
     )
+
+
+def _verifier_input(verifier: ComplianceVerifier, request: VerificationRequest) -> dict:
+    describe = getattr(verifier, "describe", None)
+    return {
+        "checks": describe() if callable(describe) else None,
+        "draft": request.draft,
+        "student_facts": request.student_facts,
+        "regulations": [r.id for r in request.regulations],
+    }
 
 
 def _ms(start: float) -> int:
