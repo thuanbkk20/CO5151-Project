@@ -18,6 +18,7 @@ uv run co5151-api            # :8100, tài liệu API: http://127.0.0.1:8100/doc
 | `POST /conversations/{id}/messages/stream` | Như trên qua SSE: `step`* rồi `answer` hoặc `error` |
 | `PUT/DELETE /messages/{id}/feedback` | Đánh giá câu trả lời |
 | `GET /traces/{id}` | Trace của một câu trả lời (tool, trích dẫn, Verifier, token, thời gian) |
+| `GET /admin/sessions`, `GET /admin/traces`, `GET /admin/traces/{id}` | Cho console vận hành, token `BACKEND_ADMIN_TOKEN`: mọi hội thoại, trace (kèm câu hỏi, câu trả lời, spans) |
 | `GET /traces/{id}/spans` | Từng node của câu trả lời (planner, MCP, writer, Verifier): input, output, thời gian, token |
 
 Cấu hình: các nhóm "Backend API" và "LLM" trong [.env.example](../.env.example). Test không gọi LLM thật và không

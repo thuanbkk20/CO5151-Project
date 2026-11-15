@@ -4,11 +4,12 @@ Cập nhật: 2026-11-15. Theo dõi tiến độ: [../ui-and-eval-console.md](..
 
 ## Mục tiêu
 
-Một web app riêng cho nhóm (không phải cho sinh viên), sidebar trái có 4 trang:
+Một web app riêng cho nhóm (không phải cho sinh viên), sidebar trái có các trang:
 
 | Trang | Làm gì |
 |---|---|
-| Traces | Danh sách câu trả lời gần đây; lọc theo session id (id hội thoại); mở một trace xem luồng node (input/output) |
+| Sessions | Danh sách hội thoại; một session = các lượt hỏi–đáp theo thứ tự, bấm lượt nào mở trace lượt đó |
+| Traces | Danh sách câu trả lời gần đây; lọc theo session id (id hội thoại); bấm một trace → panel phải xem luồng node (input/output) |
 | Đánh giá | Chạy một bộ câu hỏi qua backend, bảng điểm từng câu và tổng, link sang trace của từng câu |
 | Bộ câu hỏi | Tạo, sửa, xóa bộ câu hỏi; nhập bộ mặc định 24 câu của eval |
 | Prompt | Sửa prompt của từng agent theo phiên bản; backend lấy prompt từ đây mỗi lần gọi LLM |
@@ -67,11 +68,11 @@ App chat Chainlit bỏ sidebar luồng agent, chỉ hiện `Trace ID` và `Conve
 | 13 | `feat(console): evaluation runs` | chạy nền, chấm điểm, lưu kết quả + test | xong `7308caa` |
 | 14 | `feat(console): evaluation pages` | bắt đầu chạy (cảnh báo chi phí), danh sách lần chạy, bảng kết quả | xong `8fa838e` |
 | | **P5b. Góp ý của Kiên (15/11)** | | |
-| 18 | `fix(console): the sidebar stays put while the page scrolls` | sidebar đứng yên, chỉ phần nội dung cuộn | chưa |
-| 19 | `feat(console): a trace opens in a side panel` | bấm trace → panel phải ~2/3 màn hình (HTML của trace lấy bằng `fetch`), bấm ra ngoài hoặc Esc để đóng; trang `/traces/{id}` vẫn mở trực tiếp được | chưa |
-| 20 | `feat(backend): GET /admin/sessions` | danh sách hội thoại: chủ, tiêu đề, số lượt, lần cuối; port `TraceLog.sessions` + test | chưa |
-| 21 | `feat(console): sessions page` | danh sách session; một session = các lượt hỏi–đáp theo thứ tự thời gian, bấm lượt nào mở panel trace lượt đó | chưa |
-| 22 | `docs: console side panel and sessions` | README console, plan | chưa |
+| 18 | `fix(console): the sidebar stays put while the page scrolls` | sidebar đứng yên, chỉ phần nội dung cuộn | xong `41330c6` |
+| 19 | `feat(console): a trace opens in a side panel` | bấm trace → panel phải ~2/3 màn hình (HTML của trace lấy bằng `fetch`), bấm ra ngoài hoặc Esc để đóng; trang `/traces/{id}` vẫn mở trực tiếp được | xong `e8a801e` |
+| 20 | `feat(backend): GET /admin/sessions` | danh sách hội thoại: chủ, tiêu đề, số lượt, lần cuối; port `TraceLog.sessions` + test | xong `4ad395f` |
+| 21 | `feat(console): sessions page` | danh sách session; một session = các lượt hỏi–đáp theo thứ tự thời gian, bấm lượt nào mở panel trace lượt đó | xong `346ee65` |
+| 22 | `docs: console side panel and sessions` | README console, plan | xong |
 | | **P6. Prompt** (viết plan chi tiết trước khi làm) | | |
 | 15 | `feat(console): prompt versions` | lưu, sửa, kích hoạt phiên bản + API cho backend | chưa |
 | 16 | `feat(backend): prompts from the console` | port `PromptSource`, adapter HTTP, cache, fallback, ghi phiên bản vào trace | chưa |

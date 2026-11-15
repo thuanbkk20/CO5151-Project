@@ -10,6 +10,9 @@ HTML render phía server. Thiết kế và tiến độ: [docs/design/eval-conso
 uv run co5151-console          # http://127.0.0.1:8200
 ```
 
+Trang: Sessions (các lượt của một hội thoại), Traces (bấm một trace → panel bên phải, `static/panel.js`), Đánh giá, Bộ câu
+hỏi. Cần backend bật API admin.
+
 Chưa có đăng nhập: console chỉ nghe ở `127.0.0.1`. Chạy đánh giá tốn lời gọi LLM thật (trang xác nhận ghi số tối đa);
 trace của từng câu xem ở trang Traces.
 
@@ -19,8 +22,8 @@ trace của từng câu xem ở trang Traces.
 |---|---|
 | `src/co5151_console/config.py` | `Settings` đọc từ biến môi trường |
 | `src/co5151_console/ports.py`, `models.py` | Port (Protocol) và dữ liệu mà service dùng |
-| `src/co5151_console/services/` | Use case: `traces`, `question_sets`, `evaluation` (không import FastAPI, httpx, sqlite3) |
+| `src/co5151_console/services/` | Use case: `sessions`, `traces`, `question_sets`, `evaluation` (không import FastAPI, httpx, sqlite3) |
 | `src/co5151_console/adapters/` | `backend_http` (API admin), `backend_agent` (hỏi như người dùng), `sqlite_store` |
 | `src/co5151_console/container.py` | Chỗ duy nhất chọn adapter cho từng port |
-| `src/co5151_console/web/` | Mỗi trang một router (`traces`, `question_sets`, `evaluation`), `templates/` (Jinja2), `static/style.css` |
+| `src/co5151_console/web/` | Mỗi trang một router (`sessions`, `traces`, `question_sets`, `evaluation`), `templates/` (Jinja2), `static/style.css` |
 | `src/co5151_console/cli.py` | Lệnh `co5151-console`: nạp `.env`, chạy uvicorn |
