@@ -9,7 +9,7 @@ from ..application.usecases.ask import Answer
 from ..application.usecases.auth import Session
 from ..domain.conversation import ChatSettings, Conversation, ConversationPage, Message
 from ..domain.principal import Principal
-from ..domain.trace import Span, Trace, TraceRecord
+from ..domain.trace import SessionRecord, Span, Trace, TraceRecord
 
 
 class _In(BaseModel):
@@ -187,6 +187,26 @@ class TraceRecordOut(BaseModel):
 
 class TraceListOut(BaseModel):
     items: list[TraceRecordOut]
+
+
+class AdminSessionOut(BaseModel):
+    """A conversation (session) for the operator console."""
+
+    conversation_id: str
+    owner_id: str
+    title: str | None
+    turns: int = Field(description="answers (traces) in the conversation")
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def of(cls, r: SessionRecord) -> "AdminSessionOut":
+        return cls(conversation_id=r.conversation_id, owner_id=r.owner_id, title=r.title, turns=r.turns,
+                   created_at=r.created_at, updated_at=r.updated_at)  # fmt: skip
+
+
+class AdminSessionListOut(BaseModel):
+    items: list[AdminSessionOut]
 
 
 class AnswerOut(BaseModel):

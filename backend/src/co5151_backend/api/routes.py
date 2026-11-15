@@ -183,3 +183,10 @@ async def admin_traces(c: Deps, conversation_id: str | None = None, limit: int =
 async def admin_trace(trace_id: str, c: Deps) -> s.TraceRecordOut:
     """One trace with the question, the answer and what each node received and returned."""
     return s.TraceRecordOut.of(await c.operator_traces.detail(trace_id))
+
+
+@router.get("/admin/sessions", tags=["admin"], dependencies=[Operator])
+async def admin_sessions(c: Deps, limit: int = 50) -> s.AdminSessionListOut:
+    """Every user's conversations, most recently active first; their turns are `/admin/traces?conversation_id=`."""
+    sessions = await c.operator_traces.sessions(limit=limit)
+    return s.AdminSessionListOut(items=[s.AdminSessionOut.of(r) for r in sessions])

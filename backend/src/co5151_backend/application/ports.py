@@ -13,7 +13,7 @@ from co5151_contracts import ToolResult
 from ..domain.conversation import ChatSettings, Conversation, ConversationPage, Feedback, Message
 from ..domain.evidence import Action
 from ..domain.principal import Account, Principal
-from ..domain.trace import Span, Trace, TraceRecord
+from ..domain.trace import SessionRecord, Span, Trace, TraceRecord
 from .events import AnswerEvent
 
 # Persistence ---------------------------------------------------------------------------------------------------
@@ -67,6 +67,9 @@ class TraceLog(Protocol):
 
     async def find(self, trace_id: str) -> TraceRecord | None:
         """With its spans."""
+
+    async def sessions(self, *, limit: int = 50) -> list[SessionRecord]:
+        """Every user's conversations, most recently active first, with their number of traces."""
 
 
 # Identity ------------------------------------------------------------------------------------------------------

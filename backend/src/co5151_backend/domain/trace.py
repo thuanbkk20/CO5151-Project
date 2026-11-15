@@ -80,3 +80,15 @@ class TraceRecord:
     question: str | None = None
     answer: str | None = None
     spans: list[Span] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class SessionRecord:
+    """A conversation as the operator console lists it: whose, its title, how many answers (traces) it has."""
+
+    conversation_id: str
+    owner_id: str
+    title: str | None
+    turns: int
+    created_at: datetime
+    updated_at: datetime

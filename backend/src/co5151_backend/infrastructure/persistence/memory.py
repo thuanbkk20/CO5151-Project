@@ -5,7 +5,7 @@ from dataclasses import replace
 
 from ...domain.conversation import ChatSettings, Conversation, ConversationPage, Feedback, Message, MessageRole, utcnow
 from ...domain.errors import NotFound
-from ...domain.trace import Span, Trace, TraceRecord
+from ...domain.trace import SessionRecord, Span, Trace, TraceRecord
 
 
 class InMemoryChatRepository:
@@ -103,6 +103,14 @@ class InMemoryChatRepository:
         traces.sort(key=lambda t: (t.created_at is not None, t.created_at), reverse=True)
         return [self._record(t) for t in traces[:limit]]
 
+    async def sessions(self, limit: int) -> list[SessionRecord]:
+        newest = sorted(self._conversations.values(), key=lambda c: (c.updated_at, c.id), reverse=True)[:limit]
+        sessions = []
+        for c in newest:
+            turns = sum(t.conversation_id == c.id for t in self._traces.values())
+            sessions.append(SessionRecord(c.id, c.owner_id, c.title, turns, c.created_at, c.updated_at))
+        return sessions
+
     async def find_trace(self, trace_id: str) -> TraceRecord | None:
         trace = self._traces.get(trace_id)
         return self._record(trace, list(self._spans.get(trace_id, []))) if trace else None
@@ -131,3 +139,6 @@ class InMemoryTraceRepository:
 
     async def find(self, trace_id: str) -> TraceRecord | None:
         return await self._chats.find_trace(trace_id)
+
+    async def sessions(self, *, limit: int = 50) -> list[SessionRecord]:
+        return await self._chats.sessions(limit)

@@ -12,7 +12,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sqlalchemy import and_, delete, event, or_, select, update
+from sqlalchemy import and_, delete, event, func, or_, select, update
 from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
@@ -29,7 +29,7 @@ from ...domain.conversation import (
     utcnow,
 )
 from ...domain.errors import NotFound
-from ...domain.trace import Outcome, Span, Trace, TraceRecord, Usage
+from ...domain.trace import Outcome, SessionRecord, Span, Trace, TraceRecord, Usage
 from .tables import Base, ConversationRow, MessageRow, SpanRow, TraceRow
 
 SUPPORTED_BACKENDS = ("sqlite", "postgresql")
@@ -286,6 +286,19 @@ class SqlChatRepository:
             rows = (await s.execute(statement)).all()
         return [TraceRecord(_trace(row), owner, question, answer) for row, owner, question, answer in rows]
 
+    async def sessions(self, limit: int) -> list[SessionRecord]:
+        turns = func.count(TraceRow.trace_id)
+        statement = (
+            select(ConversationRow, turns)
+            .outerjoin(TraceRow, TraceRow.conversation_id == ConversationRow.id)
+            .group_by(ConversationRow.id)
+            .order_by(ConversationRow.updated_at.desc(), ConversationRow.id.desc())
+            .limit(limit)
+        )
+        async with self._session() as s:
+            rows = (await s.execute(statement)).all()
+        return [SessionRecord(c.id, c.owner_id, c.title, n, _utc(c.created_at), _utc(c.updated_at)) for c, n in rows]
+
     async def find_trace(self, trace_id: str) -> TraceRecord | None:
         async with self._session() as s:
             found = (await s.execute(self._records().where(TraceRow.trace_id == trace_id))).first()
@@ -318,6 +331,9 @@ class SqlTraceRepository:
 
     async def find(self, trace_id: str) -> TraceRecord | None:
         return await self._chats.find_trace(trace_id)
+
+    async def sessions(self, *, limit: int = 50) -> list[SessionRecord]:
+        return await self._chats.sessions(limit)
 
 
 def _title(title: str | None) -> str | None:

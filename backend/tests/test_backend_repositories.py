@@ -149,6 +149,11 @@ async def test_trace_log_reads_every_owner_newest_first_with_question_and_answer
     failed = await traces.find("2" * 32)
     assert (failed.owner_id, failed.question, failed.trace.error) == ("sv002", None, "boom")
     assert await traces.find("x" * 32) is None and len(await traces.recent(limit=1)) == 1
+    await chats.create(conversation("c3", seconds=-60))  # older, no answer yet
+    sessions = await traces.sessions()
+    assert [(r.conversation_id, r.owner_id, r.turns) for r in sessions][-1] == ("c3", "sv001", 0)
+    assert {r.conversation_id: r.turns for r in sessions} == {"c1": 1, "c2": 1, "c3": 0}
+    assert len(await traces.sessions(limit=1)) == 1
 
 
 async def test_concurrent_creates_of_one_conversation_both_succeed(tmp_path):

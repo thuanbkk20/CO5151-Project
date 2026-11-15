@@ -129,6 +129,9 @@ def test_admin_api_reads_every_users_traces_with_the_admin_token_only():
         assert detail["answer"] == "Bạn đủ điều kiện." and detail["spans"][0]["node"] == "planner"
         assert client.get("/admin/traces/" + "x" * 32, headers=admin).status_code == 404
         assert client.get("/admin/traces", params={"limit": 0}, headers=admin).status_code == 422
+        [session] = client.get("/admin/sessions", headers=admin).json()["items"]
+        assert (session["conversation_id"], session["owner_id"], session["turns"]) == (CONV, "sv001", 1)
+        assert client.get("/admin/sessions", headers=auth).status_code == 401
 
 
 def test_admin_api_does_not_exist_without_a_token(client):
