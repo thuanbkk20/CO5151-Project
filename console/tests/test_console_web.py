@@ -13,9 +13,10 @@ def test_settings_from_env():
     assert Settings.from_env({}).admin_token is None
 
 
-def test_home_has_the_sidebar_and_the_configuration(tmp_path):
+def test_home_has_the_sidebar_and_one_card_per_feature(tmp_path):
     client = TestClient(create_app(build_container(Settings(database=tmp_path / "c.db"))))
     page = client.get("/").text
-    assert 'class="sidebar"' in page and "Tổng quan" in page and "chưa đặt" in page
+    assert 'class="sidebar"' in page and "Tổng quan" in page
+    assert page.count('class="card"') == 4 and 'class="card" href="/sessions"' in page and "chưa đặt" not in page
     assert client.get("/static/style.css").status_code == 200
     assert client.get("/healthz").json() == {"status": "ok"}

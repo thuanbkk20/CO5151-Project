@@ -11,14 +11,18 @@ from ..container import Container
 from . import evaluation, question_sets, sessions, traces
 
 HERE = Path(__file__).parent
-# The sidebar: (path, label). A page is added here when it is built.
-NAV: list[tuple[str, str]] = [
-    ("/", "Tổng quan"),
-    ("/sessions", "Sessions"),
-    ("/traces", "Traces"),
-    ("/eval", "Đánh giá"),
-    ("/question-sets", "Bộ câu hỏi"),
+# The features: (path, name, what it does). Both the sidebar and the cards of the home page list them.
+FEATURES: list[tuple[str, str, str]] = [
+    ("/sessions", "Sessions", "Các hội thoại; mở một session để xem các lượt hỏi–đáp theo thứ tự và trace từng lượt."),
+    (
+        "/traces",
+        "Traces",
+        "Câu trả lời gần đây; mở một trace để xem từng node (Planner, MCP, Advisor, Verifier) đã nhận gì, trả về gì.",
+    ),
+    ("/eval", "Đánh giá", "Chạy một bộ câu hỏi qua backend, chấm điểm từng câu và tổng, link sang trace."),
+    ("/question-sets", "Bộ câu hỏi", "Tạo, sửa bộ câu hỏi đánh giá; nhập bộ mặc định 24 câu."),
 ]
+NAV: list[tuple[str, str]] = [("/", "Tổng quan")] + [(path, name) for path, name, _ in FEATURES]
 
 
 def create_app(container: Container) -> FastAPI:
@@ -35,7 +39,7 @@ def create_app(container: Container) -> FastAPI:
 
     @app.get("/", response_class=HTMLResponse)
     def home(request: Request):
-        return templates.TemplateResponse(request, "home.html", {"settings": container.settings})
+        return templates.TemplateResponse(request, "home.html", {"features": FEATURES})
 
     @app.get("/healthz")
     def healthz() -> dict[str, str]:

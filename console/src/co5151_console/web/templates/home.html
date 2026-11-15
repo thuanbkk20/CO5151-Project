@@ -2,10 +2,12 @@
 {% block title %}Tổng quan{% endblock %}
 {% block content %}
 <h1>Tổng quan</h1>
-<p>Console cho nhóm: xem trace, chạy đánh giá, sửa bộ câu hỏi và prompt. Chọn mục ở thanh bên trái.</p>
-<table class="kv">
-  <tr><th>Backend</th><td><code>{{ settings.backend_url }}</code></td></tr>
-  <tr><th>Token admin</th><td>{{ "đã đặt" if settings.admin_token else "chưa đặt (BACKEND_ADMIN_TOKEN trong .env)" }}</td></tr>
-  <tr><th>Dữ liệu console</th><td><code>{{ settings.database }}</code></td></tr>
-</table>
+<div class="cards">
+  {% for path, name, description in features %}
+  <a class="card" href="{{ path }}">
+    <strong>{{ name }}</strong>
+    <span class="muted">{{ description }}</span>
+  </a>
+  {% endfor %}
+</div>
 {% endblock %}

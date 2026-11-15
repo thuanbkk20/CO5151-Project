@@ -65,3 +65,8 @@ ol.turns li { padding: 10px 0 14px; border-bottom: 1px solid var(--line); }
 .bubble.user { background: var(--panel); margin-right: 15%; }
 .bubble.bot { margin-left: 15%; }
 .turn-meta { margin-left: 15%; font-size: 12px; color: var(--muted); }
+/* Home: one card per feature. */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; max-width: 1000px; }
+.card { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid var(--line);
+        border-radius: 8px; background: var(--panel); color: var(--fg); text-decoration: none; }
+.card:hover { border-color: var(--accent); }
