@@ -25,6 +25,7 @@ Mật khẩu của mọi tài khoản sinh viên: `demo`.
 
 - Hội thoại mới có sẵn câu gợi ý theo tài khoản; câu **Thử bảo mật** cho thấy trợ lý từ chối yêu cầu vượt quy chế.
 - Trợ lý chỉ đọc được hồ sơ của tài khoản đang đăng nhập; hỏi hồ sơ người khác sẽ bị từ chối.
-- Mục **Chi tiết xử lý** dưới câu hỏi: các bước đã làm, điều khoản trích dẫn, Verifier, thời gian.
+- Mục **Đã xử lý câu hỏi** dưới câu hỏi: các bước trợ lý đã làm; mở ra để xem chi tiết kỹ thuật (tool, trích
+  dẫn, Verifier, token, thời gian, trace id).
 - Nút cài đặt cạnh ô nhập: chọn nhà cung cấp LLM và model (chỉ hiện nhà cung cấp backend có key).
 - 👍/👎 dưới câu trả lời để góp ý; các hội thoại cũ nằm ở thanh bên trái.
