@@ -34,6 +34,11 @@ STREAM = (
 )
 
 
+PROVISION = {"id": "QD2933-2021-ART11", "title": "Điều 11.Phân ngành, phân chuyên ngành",
+             "source": "HCMUT_QD2933_2021.pdf", "pages": [12, 13], "text": "Điều 11.Phân ngành\n11.1 Phân ngành",
+             "verified": False, "note": "Original source version; not a consolidated or approved rule."}  # fmt: skip
+
+
 class FakeBackend:
     def __init__(self):
         self.requests: list[tuple[str, str, dict | None]] = []
@@ -65,6 +70,10 @@ class FakeBackend:
             return httpx.Response(200, json=CONVERSATION)
         if path.startswith("/messages/"):
             return httpx.Response(204)
+        if path.startswith("/provisions/"):
+            if request.url.raw_path.decode().removeprefix("/provisions/") != PROVISION["id"]:
+                return httpx.Response(404, json={"detail": "not found"})
+            return httpx.Response(200, json=PROVISION)
         return httpx.Response(500)
 
     def client(self) -> BackendClient:
