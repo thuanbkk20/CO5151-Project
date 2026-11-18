@@ -23,7 +23,7 @@
                 "email": {
                     "label": "Tên đăng nhập",
                     "required": "Cần nhập tên đăng nhập",
-                    "placeholder": "sv001 … sv008, cvht01 hoặc khach"
+                    "placeholder": "sv001 … sv008, hoặc khach"
                 },
                 "password": {
                     "label": "Mật khẩu",
