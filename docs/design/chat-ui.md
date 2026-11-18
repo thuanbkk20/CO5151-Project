@@ -69,7 +69,7 @@ Advisor, Verifier hay luồng dữ liệu.
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
 | 1 | `docs(design): chat UI redesign plan` | file này, link trong `docs/README.md` | xong |
-| 2 | `feat(web): Vietnamese interface` | `vi-VN.json`, `language = "vi-VN"` | chưa |
+| 2 | `feat(web): Vietnamese interface` | `vi-VN.json`, `language = "vi-VN"` + test | xong |
 | 3 | `feat(web): light theme, logo and favicon` | `public/theme.json`, logo SVG, `config.toml` | chưa |
 | 4 | `feat(web): welcome and starters by account` | khung chào, câu gợi ý theo vai trò, nhóm "Thử bảo mật", `chainlit.md` + test | chưa |
 | 5 | `feat(web): plain progress labels` | nhãn tiến trình, "Chi tiết kỹ thuật" thu gọn + test | chưa |
