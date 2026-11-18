@@ -1,6 +1,6 @@
 # Console vận hành: trace, đánh giá, bộ câu hỏi, prompt
 
-Cập nhật: 2026-11-15. Theo dõi tiến độ: [../ui-and-eval-console.md](../ui-and-eval-console.md).
+Cập nhật: 2026-11-18. Theo dõi tiến độ: [../ui-and-eval-console.md](../ui-and-eval-console.md).
 
 ## Mục tiêu
 
@@ -39,6 +39,13 @@ App chat Chainlit bỏ sidebar luồng agent, chỉ hiện `Trace ID` và `Conve
   `khach`), tạo hội thoại, hỏi, nhận câu trả lời + trace; chấm bằng `co5151_eval.scoring`. Trace của lần chạy nằm
   trong DB backend nên xem được ở trang Traces. Chạy nền, trang kết quả tự làm mới. Trước khi chạy hiện cảnh báo số
   câu và số lời gọi LLM tối đa (tốn tiền key).
+- **Đăng nhập** (P5c): một tài khoản vận hành, tên `CONSOLE_USERNAME` (mặc định `admin`), mật khẩu
+  `CONSOLE_PASSWORD`, cả hai trong `.env`, không nằm trong code. `CONSOLE_PASSWORD` trống thì không ai đăng nhập
+  được (đóng chứ không mở). Đăng nhập đúng → cookie phiên `HttpOnly`, `SameSite=Lax`, hạn 12 giờ, ký HMAC-SHA256
+  bằng secret ngẫu nhiên sinh lúc khởi động (khởi động lại = đăng nhập lại; không thêm biến môi trường, không thêm
+  thư viện). Middleware chặn mọi trang trừ `/login`, `/static/`, `/healthz`: trang thường chuyển về
+  `/login?next=...`; nội dung panel (`?panel=1`) trả 401 kèm link đăng nhập lại. `next` chỉ nhận đường dẫn nội bộ.
+  So mật khẩu bằng `hmac.compare_digest`. Sidebar có tên tài khoản và nút "Đăng xuất" (POST).
 - **Prompt** (đợt sau): console lưu các phiên bản, có API `GET /api/prompts/{name}` cho backend. Backend thêm port
   `PromptSource` + adapter HTTP có cache và fallback về prompt trong code; ghi phiên bản prompt vào trace. Canary vẫn
   do code chèn, không nằm trong prompt sửa được.
@@ -75,6 +82,10 @@ App chat Chainlit bỏ sidebar luồng agent, chỉ hiện `Trace ID` và `Conve
 | 22 | `docs: console side panel and sessions` | README console, plan | xong |
 | 23 | `feat(console): a session opens in the side panel too` | bấm session → panel; trong panel bấm "Xem trace" thì panel chuyển sang trace, nút "← Quay lại" về session | xong |
 | 24 | `feat(console): home lists the features as cards` | trang Tổng quan chỉ còn các thẻ tính năng (bỏ bảng cấu hình) | xong |
+| | **P5c. Đăng nhập console** (Kiên, 18/11) | | |
+| 25 | `docs(design): console sign-in` | plan dưới đây | xong |
+| 26 | `feat(console): sign in with the operator account` | trang `/login`, cookie phiên, chặn mọi trang khi chưa đăng nhập, nút đăng xuất, `.env.example` + test | chưa |
+| 27 | `docs: console sign-in` | README gốc, README console, architecture | chưa |
 | | **P6. Prompt** (viết plan chi tiết trước khi làm) | | |
 | 15 | `feat(console): prompt versions` | lưu, sửa, kích hoạt phiên bản + API cho backend | chưa |
 | 16 | `feat(backend): prompts from the console` | port `PromptSource`, adapter HTTP, cache, fallback, ghi phiên bản vào trace | chưa |
@@ -82,8 +93,8 @@ App chat Chainlit bỏ sidebar luồng agent, chỉ hiện `Trace ID` và `Conve
 
 ## Chưa quyết
 
-- Đăng nhập vào console: tạm thời chỉ bind `127.0.0.1`, không có login. Deploy thật thì cần login hoặc reverse
-  proxy có xác thực.
+- Đăng nhập vào console: đã có một tài khoản vận hành (P5c), chưa có HTTPS, chưa giới hạn số lần đăng nhập sai.
+  Vẫn mặc định chỉ nghe ở `127.0.0.1`; deploy thật thì đặt sau reverse proxy có HTTPS.
 - Cách đọc kết cục khi LLM viết câu trả lời (`trace.outcome` rỗng): console theo đúng `co5151_eval.backend_agent`
   (coi là `answer`) để số liệu khớp CLI; nhưng docstring của `Trace` nói kết cục khi đó phải đọc từ câu chữ
   (`scoring.classify`). Cần Kiên quyết định rồi sửa cả hai chỗ cùng lúc.
