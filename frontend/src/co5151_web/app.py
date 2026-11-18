@@ -9,11 +9,12 @@ from chainlit.input_widget import Select, TextInput
 from co5151_web.client import BackendClient, BackendError, SessionExpired
 from co5151_web.history import TOKEN_KEY, BackendDataLayer
 from co5151_web.present import (
+    STEP_NAME,
     chat_settings_body,
-    details_markdown,
     pick_provider,
     progress_line,
     starters_for,
+    step_markdown,
     welcome_markdown,
 )
 
@@ -123,20 +124,20 @@ async def reply(message: cl.Message) -> None:
     conversation_id = cl.context.session.thread_id
     try:
         await _ensure_conversation(token, conversation_id)
-        async with cl.Step(name="Chi tiết xử lý", type="tool") as step:
+        async with cl.Step(name=STEP_NAME, type="tool") as step:
             lines: list[str] = []
             async for event, data in CLIENT.ask(token, conversation_id, message.content):
                 if event == "step":
-                    lines.append(f"- {progress_line(data)}")
-                    step.output = "\n".join(lines)
+                    lines.append(progress_line(data))
+                    step.output = step_markdown(lines)
                     await step.update()
                 elif event == "answer":
-                    step.output = details_markdown(data["trace"])
+                    step.output = step_markdown(lines, data["trace"])
                     await cl.Message(id=data["message"]["id"], content=data["message"]["content"],
                                      metadata={"trace_id": data["trace"]["trace_id"]}).send()  # fmt: skip
                 elif event == "error":
                     trace = f" Mã trace: `{data['trace_id']}`" if data.get("trace_id") else ""
-                    step.output = f"Lỗi: {data.get('detail')}"
+                    step.output = step_markdown([*lines, f"Lỗi: {data.get('detail')}"])
                     await cl.Message(content=f"Lỗi khi tạo câu trả lời.{trace}").send()
     except SessionExpired:
         await _notice(SIGN_IN_AGAIN)

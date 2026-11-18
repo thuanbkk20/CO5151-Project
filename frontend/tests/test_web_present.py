@@ -8,15 +8,29 @@ from co5151_web.present import (
     pick_provider,
     progress_line,
     starters_for,
+    step_markdown,
     thread_dict,
     welcome_markdown,
 )
 
 
-def test_progress_lines():
-    assert progress_line({"name": "plan", "action": "SUMMARY"}) == "Lập kế hoạch: SUMMARY"
-    assert progress_line({"name": "write", "revision": True}) == "Soạn câu trả lời (viết lại)"
+def test_progress_lines_are_plain_words():
+    assert progress_line({"name": "plan", "action": "SUMMARY"}) == "Hiểu câu hỏi: cần đọc hồ sơ học vụ"
+    assert progress_line({"name": "tool", "tool": "search_regulations"}) == "Tra quy chế đào tạo"
+    assert progress_line({"name": "write"}) == "Soạn câu trả lời"
+    assert progress_line({"name": "write", "revision": True}) == "Viết lại theo góp ý của Verifier"
+    assert progress_line({"name": "verify", "round": 1, "status": "revise"}) == "Verifier kiểm tra lượt 1: cần sửa"
+    # values the frontend does not know yet are shown as they come
+    assert progress_line({"name": "plan", "action": "MOI"}) == "Hiểu câu hỏi: MOI"
+    assert progress_line({"name": "tool", "tool": "get_x"}) == "Gọi tool `get_x`"
     assert progress_line({"name": "khac"}) == "khac"
+
+
+def test_step_lists_the_steps_then_the_technical_details():
+    running = step_markdown(["Tra quy chế đào tạo"])
+    assert running == "- Tra quy chế đào tạo" and "Chi tiết kỹ thuật" not in running
+    done = step_markdown(["Tra quy chế đào tạo"], TRACE)
+    assert done.startswith("- Tra quy chế đào tạo\n\n**Chi tiết kỹ thuật**") and "`t1`" in done
 
 
 def test_details_show_the_trace():

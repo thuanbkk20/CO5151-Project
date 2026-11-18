@@ -50,18 +50,46 @@ def welcome_markdown(role: str | None, display_name: str | None) -> str:
     return "\n\n".join([*lines, DRAFT_NOTE])
 
 
-PROGRESS = {
-    "plan": "Lập kế hoạch: {action}",
-    "tool": "Gọi tool `{tool}`",
-    "write": "Soạn câu trả lời",
-    "verify": "Verifier kiểm lượt {round}: {status}",
+# The step of an answer. Chainlit shows it as "Đang <name>" while running and "Đã <name>" after (vi-VN.json).
+STEP_NAME = "xử lý câu hỏi"
+# Plain words for the backend's step events (application/events.py); unknown values are shown as they come.
+PLAN = {
+    "SUMMARY": "cần đọc hồ sơ học vụ",
+    "WARNINGS": "cần xem các quyết định học vụ (cảnh báo, tạm dừng…)",
+    "REGULATIONS": "cần tra quy chế",
+    "CLARIFY": "cần hỏi lại cho rõ",
+    "REFUSE": "ngoài phạm vi, sẽ từ chối",
+    "RESPOND": "trả lời trực tiếp",
 }
+TOOLS = {
+    "get_my_academic_summary": "Đọc hồ sơ học vụ (tín chỉ, điểm trung bình)",
+    "get_my_academic_decisions": "Đọc các quyết định học vụ",
+    "search_regulations": "Tra quy chế đào tạo",
+}
+VERDICTS = {"pass": "đạt", "revise": "cần sửa", "refuse": "không đủ căn cứ, từ chối"}
 
 
 def progress_line(step: dict[str, Any]) -> str:
-    template = PROGRESS.get(step.get("name", ""), "{name}")
-    line = template.format_map({"action": "", "tool": "", "round": "", "status": "", **step})
-    return line + (" (viết lại)" if step.get("revision") else "")
+    name = step.get("name", "")
+    if name == "plan":
+        action = step.get("action", "")
+        return f"Hiểu câu hỏi: {PLAN.get(action, action)}"
+    if name == "tool":
+        return TOOLS.get(step.get("tool", ""), f"Gọi tool `{step.get('tool', '')}`")
+    if name == "write":
+        return "Viết lại theo góp ý của Verifier" if step.get("revision") else "Soạn câu trả lời"
+    if name == "verify":
+        status = step.get("status", "")
+        return f"Verifier kiểm tra lượt {step.get('round', '')}: {VERDICTS.get(status, status)}"
+    return name
+
+
+def step_markdown(lines: list[str], trace: dict[str, Any] | None = None) -> str:
+    """The steps so far as a list; once the answer is there, its technical details under them."""
+    text = "\n".join(f"- {line}" for line in lines)
+    if trace is not None:
+        text += "\n\n**Chi tiết kỹ thuật**\n\n" + details_markdown(trace)
+    return text
 
 
 def _verifier_label(rounds: int | None) -> str:
