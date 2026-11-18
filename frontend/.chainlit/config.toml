@@ -121,7 +121,8 @@ name = "Cố vấn học vụ G3"
 # Every browser gets the Vietnamese interface (.chainlit/translations/vi-VN.json), whatever its language.
 language = "vi-VN"
 
-# default_theme = "dark"
+# Light by default (a returning browser keeps the theme it picked); colours in public/theme.json
+default_theme = "light"
 
 # Force a specific language for all users (e.g., "en-US", "he-IL", "fr-FR")
 # If not set, the browser's language will be used
@@ -141,7 +142,7 @@ language = "vi-VN"
 confirm_new_chat = true
 
 # Description of the assistant. This is used for HTML tags.
-# description = ""
+description = "Trợ lý tư vấn quy chế đào tạo và hồ sơ học vụ (nhóm G3, CO5151)"
 
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "full"
@@ -164,7 +165,8 @@ alert_style = "classic"
 # custom_js_attributes = "async type = \"module\""
 
 # Custom login page image, relative to public directory or external URL
-# login_page_image = "/public/custom-background.jpg"
+# The right half of the sign-in page: what the assistant does and the demo accounts
+login_page_image = "/public/login.svg"
 
 # Custom login page image filter (Tailwind internal filters, no dark/light variants)
 # login_page_image_filter = "brightness-50 grayscale"

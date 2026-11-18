@@ -26,3 +26,14 @@ def test_every_chainlit_string_has_a_vietnamese_translation():
     english = json.loads((Path(chainlit.__file__).parent / "translations" / "en-US.json").read_text(encoding="utf-8"))
     vietnamese = json.loads((FRONTEND / ".chainlit" / "translations" / "vi-VN.json").read_text(encoding="utf-8"))
     assert _keys(vietnamese) == _keys(english)  # a Chainlit upgrade that adds strings makes this red
+
+
+def test_light_theme_logo_and_favicon():
+    assert config.ui.default_theme == "light" and config.ui.description
+    public = FRONTEND / "public"
+    theme = json.loads((public / "theme.json").read_text(encoding="utf-8"))
+    assert {"light", "dark"} <= theme["variables"].keys()
+    assert all(name.startswith("--") for v in theme["variables"].values() for name in v)  # CSS variables of the UI
+    assert config.ui.login_page_image == "/public/login.svg"
+    for name in ("logo_light.svg", "logo_dark.svg", "favicon.svg", "login.svg"):  # favicon = assistant avatar too
+        assert (public / name).read_text(encoding="utf-8").startswith("<svg")
