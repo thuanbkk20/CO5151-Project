@@ -1,6 +1,8 @@
 """Chainlit handlers: sign-in, LLM settings, chat. Every action is one call to the backend API."""
 
+import asyncio
 import logging
+from typing import Any
 
 import chainlit as cl
 import httpx
@@ -13,6 +15,8 @@ from co5151_web.present import (
     chat_settings_body,
     pick_provider,
     progress_line,
+    provision_markdown,
+    source_label,
     starters_for,
     step_markdown,
     welcome_markdown,
@@ -115,6 +119,50 @@ async def _ensure_conversation(token: str, conversation_id: str) -> None:
     cl.user_session.set("started", True)
 
 
+SOURCE = "source"  # the action of a cited provision's button
+
+
+async def _provision(token: str, provision_id: str) -> dict[str, Any] | None:
+    """A cited provision, kept for the session so the button does not ask again; None when it cannot be read."""
+    cache: dict[str, Any] = cl.user_session.get("provisions") or {}
+    if provision_id not in cache:
+        try:
+            cache[provision_id] = await CLIENT.provision(token, provision_id)
+        except (BackendError, httpx.HTTPError):
+            logger.warning("provision %s could not be read", provision_id, exc_info=True)
+            return None
+        cl.user_session.set("provisions", cache)
+    return cache[provision_id]
+
+
+async def _source_actions(token: str, citations: list[str]) -> list[cl.Action]:
+    """One button per provision the answer cites; the label needs the provision, read once per citation."""
+    citations = list(dict.fromkeys(citations))
+    provisions = await asyncio.gather(*(_provision(token, pid) for pid in citations))
+    return [
+        cl.Action(name=SOURCE, payload={"id": pid}, label=source_label(p) if p else pid, icon="book-open",
+                  tooltip="Xem nguyên văn điều khoản")
+        for pid, p in zip(citations, provisions, strict=True)
+    ]  # fmt: skip
+
+
+@cl.action_callback(SOURCE)
+async def show_source(action: cl.Action) -> None:
+    """The cited provision's source text in the side panel."""
+    token = _token()
+    if token is None:
+        await _notice(SIGN_IN_AGAIN)
+        return
+    provision_id = str(action.payload.get("id", ""))
+    provision = await _provision(token, provision_id)
+    if provision is None:
+        title, body = provision_id, "Không tải được điều khoản này (backend hoặc Regulation MCP không trả lời)."
+    else:
+        title, body = provision["title"], provision_markdown(provision)
+    await cl.ElementSidebar.set_elements([cl.Text(name=provision_id, content=body)], key=provision_id)
+    await cl.ElementSidebar.set_title(title)
+
+
 @cl.on_message
 async def reply(message: cl.Message) -> None:
     token = _token()
@@ -133,7 +181,8 @@ async def reply(message: cl.Message) -> None:
                     await step.update()
                 elif event == "answer":
                     step.output = step_markdown(lines, data["trace"])
-                    await cl.Message(id=data["message"]["id"], content=data["message"]["content"],
+                    sources = await _source_actions(token, data["trace"].get("citations") or [])
+                    await cl.Message(id=data["message"]["id"], content=data["message"]["content"], actions=sources,
                                      metadata={"trace_id": data["trace"]["trace_id"]}).send()  # fmt: skip
                 elif event == "error":
                     trace = f" Mã trace: `{data['trace_id']}`" if data.get("trace_id") else ""

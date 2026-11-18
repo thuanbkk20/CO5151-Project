@@ -1,4 +1,4 @@
-from web_fakes import CONVERSATION, TRACE
+from web_fakes import CONVERSATION, PROVISION, TRACE
 
 from co5151_web.present import (
     DRAFT_NOTE,
@@ -6,7 +6,10 @@ from co5151_web.present import (
     chat_settings_body,
     details_markdown,
     pick_provider,
+    plain_markdown,
     progress_line,
+    provision_markdown,
+    source_label,
     starters_for,
     step_markdown,
     thread_dict,
@@ -74,3 +77,24 @@ def test_welcome_by_role_says_the_data_is_a_draft():
     assert "tài khoản khách" in welcome_markdown("guest", "Khách") and "`sv001`" in welcome_markdown(None, None)
     assert "chưa có trong chat" in welcome_markdown("advisor", "TS. Mai Văn Hùng")
     assert all(DRAFT_NOTE in welcome_markdown(r, "x") for r in ("student", "guest", "advisor"))
+
+
+def test_source_label_is_short():
+    assert source_label(PROVISION) == "Điều 11 · QĐ 2933/2021 · tr. 12–13"
+    assert source_label({"id": "x", "title": "Khoản 5.5", "source": "", "pages": [7]}) == "Khoản 5.5 · tr. 7"
+    long = {"id": "x", "title": "Sổ tay sinh viên " * 5, "source": "So_tay_2025.pdf", "pages": []}
+    assert source_label(long) == "Sổ tay sinh viên Sổ tay sinh viên Sổ tay…" + " · So_tay_2025"
+    assert source_label({"id": "QD-X", "title": "", "pages": []}) == "QD-X"
+
+
+def test_provision_panel_says_where_it_comes_from_and_that_it_is_a_draft():
+    text = provision_markdown(PROVISION)
+    assert "`HCMUT_QD2933_2021.pdf`" in text and "**Trang PDF:** 12–13" in text and "`QD2933-2021-ART11`" in text
+    assert "Bản nháp, chưa được duyệt" in text and "Điều 11.Phân ngành\n11.1 Phân ngành" in text
+    assert "Bản nháp" not in provision_markdown({**PROVISION, "verified": True})
+
+
+def test_source_text_is_shown_as_is():
+    assert plain_markdown("- a *b*\n| c |\n# d\n2. e") == "\\- a \\*b\\*\n\\| c \\|\n\\# d\n2\\. e"
+    assert plain_markdown("<script>") == "\\<script\\>"
+    assert plain_markdown("\n    PHỤ LỤC 4\n\n\n\n  1. Quy định\n") == "PHỤ LỤC 4\n1\\. Quy định"

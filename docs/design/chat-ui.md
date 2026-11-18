@@ -75,8 +75,8 @@ Advisor, Verifier hay luồng dữ liệu.
 | 3 | `feat(web): light theme, logo and favicon` | `public/theme.json`, logo SVG, ảnh trang đăng nhập (tài khoản demo), `config.toml` | xong `23fd544` |
 | 4 | `feat(web): welcome and starters by account` | một chat profile mỗi tài khoản (lời chào + câu gợi ý theo vai trò, lấy từ `tasks.json`), "Thử bảo mật", `chainlit.md` + test | xong `95c7176` |
 | 5 | `feat(web): plain progress labels` | step "Đang/Đã xử lý câu hỏi", nhãn tiến trình, "Chi tiết kỹ thuật" bên dưới + test | xong `7843ef3` |
-| 6 | `feat(backend): GET /provisions/{id}` | use case `ReadProvision` qua `RegulationGateway`, 404/422/503, schema, test với MCP server thật (fixture có sẵn) | xong |
-| 7 | `feat(web): sources of an answer in the side panel` | nút nguồn, panel điều khoản, client + test | chưa |
+| 6 | `feat(backend): GET /provisions/{id}` | use case `ReadProvision` qua `RegulationGateway`, 404/422/503, schema, test với MCP server thật (fixture có sẵn) | xong `2eb3713` |
+| 7 | `feat(web): sources of an answer in the side panel` | nút nguồn (đọc điều khoản một lần mỗi trích dẫn, giữ trong phiên), panel `ElementSidebar`, client + test | xong |
 | 8 | `feat(web): verification line under each answer` | nhãn Verifier/mẫu/bản nháp + test | chưa |
 | 9 | `docs: chat UI` | README frontend, README gốc, ảnh chụp mới | chưa |
 
@@ -85,6 +85,8 @@ có key thì Advisor trả lời bằng mẫu).
 
 ## Chưa quyết
 
+- Mở lại hội thoại cũ thì chưa có nút nguồn: trích dẫn nằm trong trace, không lưu cùng tin nhắn; muốn có thì phải
+  đọc trace của từng câu trả lời khi mở lại (thêm một lời gọi backend mỗi câu).
 - Lời chào hiện "Xin chào sv001": backend trả `display_name` là tên đăng nhập, không phải họ tên trong hồ sơ.
 - Tài khoản cố vấn (`cvht01`) chưa hỏi được về sinh viên mình phụ trách: cần thêm tool phía Advisor (ngoài phạm vi
   nhánh này).

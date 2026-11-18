@@ -1,6 +1,7 @@
-"""How backend data is shown in Chainlit: the welcome of an account, the processing details of an answer, and
-threads for the sidebar."""
+"""How backend data is shown in Chainlit: the welcome of an account, the processing details of an answer, the
+provisions it cites, and threads for the sidebar."""
 
+import re
 from typing import Any
 
 # Questions offered on an empty conversation: (label, question), taken from eval/.../tasks.json so their expected
@@ -114,6 +115,57 @@ def details_markdown(trace: dict[str, Any]) -> str:
     if trace.get("llm_error"):
         rows.append(("Lỗi LLM", trace["llm_error"]))
     return "\n".join(f"- **{label}:** {value}" for label, value in rows)
+
+
+UNIT = re.compile(r"^((?:Điều|Khoản|Điểm|Mục|Chương|Phụ lục)\s+[\dIVXLC]+(?:\.\d+)*)", re.IGNORECASE)
+DECISION = re.compile(r"QD[_-]?(\d+)[_-](\d{4})", re.IGNORECASE)
+
+
+def _pages(pages: list[int]) -> str:
+    return "" if not pages else str(pages[0]) if pages[0] == pages[-1] else f"{pages[0]}–{pages[-1]}"
+
+
+def source_label(provision: dict[str, Any]) -> str:
+    """Short label of a cited provision for its button: `Điều 11 · QĐ 2933/2021 · tr. 12–13`."""
+    title = " ".join(provision.get("title", "").split())
+    unit = UNIT.match(title)
+    parts = [unit.group(1) if unit else (title[:40] + "…" if len(title) > 40 else title) or provision["id"]]
+    source = provision.get("source", "")
+    decision = DECISION.search(source)
+    if decision:
+        parts.append(f"QĐ {decision.group(1)}/{decision.group(2)}")
+    elif source:
+        parts.append(source.rsplit(".", 1)[0][:30])
+    if pages := _pages(provision.get("pages") or []):
+        parts.append(f"tr. {pages}")
+    return " · ".join(parts)
+
+
+MARKDOWN_SPECIAL = re.compile(r"([\\`*_\[\]<>#|~])")
+BULLET = re.compile(r"^(\s*)([-+])(\s)")  # "- x" → "\- x"
+NUMBERED = re.compile(r"^(\s*\d+)([.)])(\s)")  # "2. x" → "2\. x" (CommonMark escapes the punctuation)
+
+
+def plain_markdown(text: str) -> str:
+    """Source text (OCR, line breaks matter) shown as is: markdown characters escaped, one line per line (Chainlit
+    renders paragraphs with `white-space: pre-wrap`, so a plain newline breaks the line). No indentation (4 spaces
+    would make a code block) and no empty lines (OCR puts one between most lines)."""
+    lines = (MARKDOWN_SPECIAL.sub(r"\\\1", line.strip()) for line in text.splitlines())
+    return "\n".join(NUMBERED.sub(r"\1\\\2\3", BULLET.sub(r"\1\\\2\3", line)) for line in lines if line)
+
+
+def provision_markdown(provision: dict[str, Any]) -> str:
+    """The side panel of a cited provision: where it comes from, its review state, then its source text."""
+    where = [f"**Văn bản:** `{provision.get('source') or 'không rõ'}`"]
+    if pages := _pages(provision.get("pages") or []):
+        where.append(f"**Trang PDF:** {pages}")
+    where.append(f"**Mã:** `{provision['id']}`")
+    parts = [" · ".join(where)]
+    if not provision.get("verified"):
+        note = provision.get("note")
+        parts.append("> **Bản nháp, chưa được duyệt.**" + (f" {plain_markdown(note)}" if note else ""))
+    parts.append(plain_markdown(provision.get("text") or "(không có nội dung)"))
+    return "\n\n".join(parts)
 
 
 def thread_dict(conversation: dict[str, Any], identifier: str) -> dict[str, Any]:
