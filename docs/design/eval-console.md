@@ -83,9 +83,9 @@ App chat Chainlit bỏ sidebar luồng agent, chỉ hiện `Trace ID` và `Conve
 | 23 | `feat(console): a session opens in the side panel too` | bấm session → panel; trong panel bấm "Xem trace" thì panel chuyển sang trace, nút "← Quay lại" về session | xong |
 | 24 | `feat(console): home lists the features as cards` | trang Tổng quan chỉ còn các thẻ tính năng (bỏ bảng cấu hình) | xong |
 | | **P5c. Đăng nhập console** (Kiên, 18/11) | | |
-| 25 | `docs(design): console sign-in` | plan dưới đây | xong |
-| 26 | `feat(console): sign in with the operator account` | trang `/login`, cookie phiên, chặn mọi trang khi chưa đăng nhập, nút đăng xuất, `.env.example` + test | chưa |
-| 27 | `docs: console sign-in` | README gốc, README console, architecture | chưa |
+| 25 | `docs(design): console sign-in` | plan dưới đây | xong `b23844f` |
+| 26 | `feat(console): sign in with the operator account` | trang `/login`, cookie phiên, chặn mọi trang khi chưa đăng nhập, nút đăng xuất, `.env.example` + test | xong `de1d2c4` |
+| 27 | `docs: console sign-in` | README gốc, README console, architecture | xong |
 | | **P6. Prompt** (viết plan chi tiết trước khi làm) | | |
 | 15 | `feat(console): prompt versions` | lưu, sửa, kích hoạt phiên bản + API cho backend | chưa |
 | 16 | `feat(backend): prompts from the console` | port `PromptSource`, adapter HTTP, cache, fallback, ghi phiên bản vào trace | chưa |

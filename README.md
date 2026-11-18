@@ -53,7 +53,8 @@ tool, trích dẫn, Verifier, token, thời gian, trace id, conversation id (tra
 
 Console vận hành cho nhóm (http://127.0.0.1:8200, process `console` trong Procfile): xem trace theo session id,
 chạy đánh giá qua backend, sửa bộ câu hỏi ([console/README.md](console/README.md)). Cần đặt `BACKEND_ADMIN_TOKEN`
-trong `.env` (cùng một giá trị cho backend và console).
+trong `.env` (cùng một giá trị cho backend và console) và `CONSOLE_PASSWORD` (đăng nhập bằng
+`CONSOLE_USERNAME`, mặc định `admin`).
 
 Biến làm đổi cách chạy:
 

@@ -1,6 +1,6 @@
 # UI hiển thị agent và trang đánh giá (Kiên)
 
-Theo dõi ý tưởng, quyết định và từng bước. Cập nhật: 2026-11-15.
+Theo dõi ý tưởng, quyết định và từng bước. Cập nhật: 2026-11-18.
 
 ## 1. Ý tưởng
 
@@ -59,3 +59,4 @@ Thiết kế và kế hoạch commit: [design/agent-flow.md](design/agent-flow.m
 - 2026-11-15: đợt 2: panel mở sẵn, chọn câu trả lời bất kỳ kể cả hội thoại cũ (commit 8–11).
 - 2026-11-15: đổi hướng: luồng agent chuyển sang console riêng; plan [design/eval-console.md](design/eval-console.md).
 - 2026-11-15: console xong P0–P5 (traces, bộ câu hỏi, đánh giá); còn P6 prompt.
+- 2026-11-18: console có đăng nhập (P5c): tài khoản `CONSOLE_USERNAME`/`CONSOLE_PASSWORD` trong `.env`.
