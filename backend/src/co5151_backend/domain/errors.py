@@ -21,6 +21,10 @@ class InvalidRequest(DomainError):
     pass
 
 
+class Unavailable(DomainError):
+    """A service the request needs (an MCP server) did not answer, or answered with something unusable."""
+
+
 class LLMError(DomainError):
     """An LLM call failed (network, quota, refused parameter) or its reply could not be used."""
 

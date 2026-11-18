@@ -157,6 +157,12 @@ async def delete_feedback(message_id: str, c: Deps, caller: Caller) -> Response:
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+@router.get("/provisions/{provision_id}", tags=["chat"])
+async def get_provision(provision_id: str, c: Deps, _caller: Caller) -> s.ProvisionOut:
+    """A provision cited by an answer (`trace.citations`), from the Regulation MCP."""
+    return s.ProvisionOut.of(await c.read_provision.execute(provision_id))
+
+
 @router.get("/traces/{trace_id}", tags=["chat"])
 async def get_trace(trace_id: str, c: Deps, caller: Caller) -> s.TraceOut:
     return s.TraceOut.of(await c.conversations.trace(caller, trace_id))

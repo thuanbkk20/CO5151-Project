@@ -25,6 +25,21 @@ class Regulation(BaseModel):
     ctdt: str | None = None
 
 
+class Provision(BaseModel):
+    """One provision as a reader sees it, by the id a citation gives: its source text, the document and pages it
+    comes from, and whether it has been reviewed (the corpus is a draft)."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: str
+    title: str
+    source: str  # file name of the document, e.g. HCMUT_QD2933_2021.pdf
+    pages: list[int] = Field(default_factory=list)
+    text: str
+    verified: bool = False
+    note: str | None = None  # the corpus's warning about this provision
+
+
 SUMMARY_FACTS = (
     "ctdt",
     "program_credits",

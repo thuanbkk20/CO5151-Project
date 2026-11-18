@@ -74,8 +74,8 @@ Advisor, Verifier hay luồng dữ liệu.
 | 2 | `feat(web): Vietnamese interface` | `vi-VN.json`, `language = "vi-VN"` + test | xong `d3da21b` |
 | 3 | `feat(web): light theme, logo and favicon` | `public/theme.json`, logo SVG, ảnh trang đăng nhập (tài khoản demo), `config.toml` | xong `23fd544` |
 | 4 | `feat(web): welcome and starters by account` | một chat profile mỗi tài khoản (lời chào + câu gợi ý theo vai trò, lấy từ `tasks.json`), "Thử bảo mật", `chainlit.md` + test | xong `95c7176` |
-| 5 | `feat(web): plain progress labels` | step "Đang/Đã xử lý câu hỏi", nhãn tiến trình, "Chi tiết kỹ thuật" bên dưới + test | xong |
-| 6 | `feat(backend): GET /provisions/{id}` | qua `RegulationGateway`, schema, test với MCP server thật (fixture có sẵn) | chưa |
+| 5 | `feat(web): plain progress labels` | step "Đang/Đã xử lý câu hỏi", nhãn tiến trình, "Chi tiết kỹ thuật" bên dưới + test | xong `7843ef3` |
+| 6 | `feat(backend): GET /provisions/{id}` | use case `ReadProvision` qua `RegulationGateway`, 404/422/503, schema, test với MCP server thật (fixture có sẵn) | xong |
 | 7 | `feat(web): sources of an answer in the side panel` | nút nguồn, panel điều khoản, client + test | chưa |
 | 8 | `feat(web): verification line under each answer` | nhãn Verifier/mẫu/bản nháp + test | chưa |
 | 9 | `docs: chat UI` | README frontend, README gốc, ảnh chụp mới | chưa |
