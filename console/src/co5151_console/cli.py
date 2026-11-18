@@ -22,6 +22,8 @@ def main(argv: list[str] | None = None) -> int:
     from .web.app import create_app
 
     settings = Settings.from_env()
+    if settings.password is None:
+        print("co5151-console: CONSOLE_PASSWORD chưa đặt trong .env, chưa ai đăng nhập được", file=sys.stderr)
     uvicorn.run(create_app(build_container(settings)), host=a.host or settings.host, port=a.port or settings.port)
     return 0
 

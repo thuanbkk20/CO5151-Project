@@ -10,12 +10,14 @@ DEFAULT_DATABASE = Path(__file__).resolve().parents[2] / ".data" / "console.db"
 
 @dataclass(frozen=True)
 class Settings:
-    host: str = "127.0.0.1"  # no sign-in yet: keep it on this machine
+    host: str = "127.0.0.1"  # plain HTTP: keep it on this machine, or behind an HTTPS reverse proxy
     port: int = 8200
     backend_url: str = "http://127.0.0.1:8100"
     admin_token: str | None = None  # BACKEND_ADMIN_TOKEN, shared with the backend
     database: Path = DEFAULT_DATABASE  # question sets, evaluation runs, prompts
     eval_password: str = "demo"  # password of the demo accounts an evaluation run signs in with
+    username: str = "admin"  # the operator account that signs in to the console
+    password: str | None = None  # CONSOLE_PASSWORD; None = nobody can sign in
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> "Settings":
@@ -28,4 +30,6 @@ class Settings:
             admin_token=env.get("BACKEND_ADMIN_TOKEN", "").strip() or None,
             database=Path(database) if database else DEFAULT_DATABASE,
             eval_password=env.get("CONSOLE_EVAL_PASSWORD", cls.eval_password),
+            username=env.get("CONSOLE_USERNAME", "").strip() or cls.username,
+            password=env.get("CONSOLE_PASSWORD", "").strip() or None,
         )

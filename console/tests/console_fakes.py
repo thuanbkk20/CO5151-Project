@@ -1,11 +1,13 @@
 """A fake backend (admin API and the user API) on httpx.MockTransport, answering like the real one. No network,
-no LLM."""
+no LLM. Also `signed_in`: a test client of the console, signed in as the operator."""
 
 import json
 
 import httpx
+from fastapi.testclient import TestClient
 
 TOKEN = "admin-token"
+PASSWORD = "mat-khau-thu"  # CONSOLE_PASSWORD of the tests: Settings(password=PASSWORD)
 SESSION = "6f1c1f0e-0000-4000-8000-000000000001"
 SPANS = [
     {"node": "planner", "name": "rules", "input": {"question": "Điều kiện tốt nghiệp?"},
@@ -76,3 +78,11 @@ class FakeBackend:
 
     def transport(self) -> httpx.MockTransport:
         return httpx.MockTransport(self.handle)
+
+
+def signed_in(app) -> TestClient:
+    """A client of the console `app` (its Settings with password=PASSWORD) after signing in as `admin`."""
+    client = TestClient(app)
+    signed = client.post("/login", data={"username": "admin", "password": PASSWORD}, follow_redirects=False)
+    assert signed.status_code == 303, signed.text
+    return client

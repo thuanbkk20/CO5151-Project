@@ -1,4 +1,4 @@
-from console_fakes import TOKEN, FakeBackend
+from console_fakes import PASSWORD, TOKEN, FakeBackend, signed_in
 from fastapi.testclient import TestClient
 
 from co5151_console.adapters.backend_agent import HttpAnswerAgent
@@ -12,8 +12,9 @@ def client(tmp_path, background=lambda work: work()) -> TestClient:
     backend = FakeBackend(answers={"Học phí?": "Không có trong quy chế."})
     admin = HttpBackendAdmin("http://backend", TOKEN, transport=backend.transport())
     agent = HttpAnswerAgent("http://backend", "demo", transport=backend.transport())
-    container = build_container(Settings(database=tmp_path / "c.db"), admin=admin, agent=agent, background=background)
-    return TestClient(create_app(container))
+    settings = Settings(database=tmp_path / "c.db", password=PASSWORD)
+    container = build_container(settings, admin=admin, agent=agent, background=background)
+    return signed_in(create_app(container))
 
 
 def make_set(c: TestClient) -> str:

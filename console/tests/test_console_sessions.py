@@ -1,5 +1,4 @@
-from console_fakes import ITEM, SESSION, TOKEN, FakeBackend
-from fastapi.testclient import TestClient
+from console_fakes import ITEM, PASSWORD, SESSION, TOKEN, FakeBackend, signed_in
 
 from co5151_console.adapters.backend_http import HttpBackendAdmin
 from co5151_console.config import Settings
@@ -28,7 +27,7 @@ def test_sessions_and_the_turns_of_one_in_order():
 
 
 def test_sessions_pages(tmp_path):
-    c = TestClient(create_app(build_container(Settings(database=tmp_path / "c.db"), admin=admin())))
+    c = signed_in(create_app(build_container(Settings(database=tmp_path / "c.db", password=PASSWORD), admin=admin())))
     page = c.get("/sessions").text
     assert f'href="/sessions/{SESSION}"' in page and "Điều kiện tốt nghiệp?" in page
     session = c.get(f"/sessions/{SESSION}").text
@@ -38,6 +37,7 @@ def test_sessions_pages(tmp_path):
     assert "Theo Điều 22..." in panel and 'class="sidebar"' not in panel and "← Sessions" not in panel
     assert f'href="/sessions/{SESSION}" data-panel' in page and 'id="panel-back"' in page
     assert f'href="/sessions/{SESSION}"' in c.get("/traces").text  # the Session column leads here
-    down = TestClient(create_app(build_container(Settings(database=tmp_path / "d.db"), admin=admin(token="sai"))))
+    settings = Settings(database=tmp_path / "d.db", password=PASSWORD)
+    down = signed_in(create_app(build_container(settings, admin=admin(token="sai"))))
     assert "từ chối token admin" in down.get("/sessions").text
     assert down.get(f"/sessions/{SESSION}").status_code == 502

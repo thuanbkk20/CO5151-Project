@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from ..container import Container
-from . import evaluation, question_sets, sessions, traces
+from . import auth, evaluation, question_sets, sessions, traces
 
 HERE = Path(__file__).parent
 # The features: (path, name, what it does). Both the sidebar and the cards of the home page list them.
@@ -32,6 +32,7 @@ def create_app(container: Container) -> FastAPI:
     templates = Jinja2Templates(directory=HERE / "templates")
     templates.env.globals["nav"] = NAV
     app.state.templates = templates
+    auth.install(app, auth.Sessions(container.settings.username, container.settings.password))
     app.include_router(traces.router)
     app.include_router(sessions.router)
     app.include_router(question_sets.router)

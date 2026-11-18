@@ -70,3 +70,9 @@ ol.turns li { padding: 10px 0 14px; border-bottom: 1px solid var(--line); }
 .card { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid var(--line);
         border-radius: 8px; background: var(--panel); color: var(--fg); text-decoration: none; }
 .card:hover { border-color: var(--accent); }
+/* Sign-in: the account at the bottom of the sidebar; the sign-in page is one centred form. */
+.sidebar .signout { display: flex; align-items: center; justify-content: space-between; gap: 6px;
+                    margin-top: 16px; padding: 12px 8px 0; border-top: 1px solid var(--line); }
+body.login-page { align-items: center; justify-content: center; overflow: auto; }
+form.login { width: min(340px, 100% - 32px); padding: 24px; border: 1px solid var(--line); border-radius: 8px;
+             background: var(--panel); }

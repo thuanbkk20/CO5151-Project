@@ -13,6 +13,12 @@
     {% for path, label in nav %}
       <a href="{{ path }}" class="{{ 'active' if request.url.path == path or (path != '/' and request.url.path.startswith(path)) }}">{{ label }}</a>
     {% endfor %}
+    {% if request.state.user %}
+      <form class="signout" method="post" action="/logout">
+        <span class="muted">{{ request.state.user }}</span>
+        <button type="submit">Đăng xuất</button>
+      </form>
+    {% endif %}
   </nav>
   <main>
     {% block content %}{% endblock %}

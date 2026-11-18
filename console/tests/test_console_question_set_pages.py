@@ -1,4 +1,4 @@
-from console_fakes import FakeBackend
+from console_fakes import PASSWORD, FakeBackend, signed_in
 from fastapi.testclient import TestClient
 
 from co5151_console.adapters.backend_http import HttpBackendAdmin
@@ -9,7 +9,7 @@ from co5151_console.web.app import create_app
 
 def client(tmp_path) -> TestClient:
     admin = HttpBackendAdmin("http://backend", None, transport=FakeBackend().transport())
-    return TestClient(create_app(build_container(Settings(database=tmp_path / "c.db"), admin=admin)))
+    return signed_in(create_app(build_container(Settings(database=tmp_path / "c.db", password=PASSWORD), admin=admin)))
 
 
 def test_create_a_set_add_edit_and_delete_a_task(tmp_path):

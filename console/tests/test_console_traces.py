@@ -1,4 +1,4 @@
-from console_fakes import ITEM, SESSION, SPANS, TOKEN, FakeBackend
+from console_fakes import ITEM, PASSWORD, SESSION, SPANS, TOKEN, FakeBackend, signed_in
 from fastapi.testclient import TestClient
 
 from co5151_console.adapters.backend_http import HttpBackendAdmin
@@ -14,7 +14,7 @@ def browser(backend: FakeBackend | None = None) -> TraceBrowser:
 
 def client(tmp_path, backend: FakeBackend | None = None, token: str | None = TOKEN) -> TestClient:
     admin = HttpBackendAdmin("http://backend", token, transport=(backend or FakeBackend()).transport())
-    return TestClient(create_app(build_container(Settings(database=tmp_path / "c.db"), admin=admin)))
+    return signed_in(create_app(build_container(Settings(database=tmp_path / "c.db", password=PASSWORD), admin=admin)))
 
 
 def test_rows_say_who_asked_what_and_how_it_ended():
