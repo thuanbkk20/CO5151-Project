@@ -182,7 +182,9 @@ login_page_image = "/public/login.svg"
 logo_file_url = ""
 
 # Load assistant avatar image directly from URL.
-default_avatar_file_url = ""
+# Every assistant message, new or reopened. Without it Chainlit asks /avatars/<author>, and the author
+# "Cố vấn học vụ G3" is refused (400: Chainlit only accepts [a-zA-Z0-9_ .-]), so its own default image shows.
+default_avatar_file_url = "/public/favicon.svg"
 
 # Avatar size in pixels (default: 20).
 # avatar_size = 20
