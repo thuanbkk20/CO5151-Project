@@ -8,7 +8,7 @@ from co5151_backend.application.usecases.conversations import Conversations
 from co5151_backend.domain.errors import LLMError
 from co5151_backend.infrastructure.identity import DemoAccountDirectory, JwtAccessTokens, SignedStudentTokens
 from co5151_backend.infrastructure.persistence.memory import InMemoryChatRepository, InMemoryTraceRepository
-from co5151_contracts import IssueCode, Verdict, VerdictStatus, VerificationIssue, ok
+from co5151_contracts import ErrorCode, IssueCode, Verdict, VerdictStatus, VerificationIssue, err, ok
 from co5151_contracts.student import AcademicDecisions, AcademicSummary
 
 GRADUATION = "Với bảng điểm hiện tại em có đủ điều kiện làm luận văn tốt nghiệp kỳ tới không?"
@@ -45,7 +45,19 @@ class Student:
 
 
 class Regulations:
+    """Regulation MCP: `search_regulations` finds REGULATION; `get_provision` knows only its provision."""
+
+    def __init__(self, fail: ErrorCode | None = None):
+        self.fail = fail
+
     async def call(self, tool, args):
+        if self.fail:
+            return err(self.fail, "lỗi")
+        if tool == "get_provision":
+            if args["provision_id"] != REGULATION["evidence"]["provision_id"]:
+                return err(ErrorCode.NOT_FOUND, "Không tìm thấy điều khoản.")
+            citation = {"file_name": "HCMUT_QD2933_2021.pdf", "pdf_pages": [7, 8]}
+            return ok({"results": [{**REGULATION, "verified": False, "citation": citation}]})
         return ok({"results": [REGULATION]})
 
 

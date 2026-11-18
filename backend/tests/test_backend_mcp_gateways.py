@@ -2,6 +2,8 @@
 
 import pytest
 
+from co5151_backend.application.usecases.provisions import ReadProvision
+from co5151_backend.domain.errors import NotFound
 from co5151_backend.infrastructure.mcp.gateways import McpRegulationGateway, McpStudentRecordGateway
 from co5151_contracts import ErrorCode
 from co5151_contracts.student import AcademicSummary
@@ -38,3 +40,12 @@ async def test_regulation_search_over_http(regulation_mcp_url):
 async def test_unreachable_server_is_an_internal_error():
     res = await McpRegulationGateway("http://127.0.0.1:9/mcp").call("search_regulations", {"query": "x"})
     assert res.error.code is ErrorCode.INTERNAL
+
+
+async def test_read_provision_from_the_real_regulation_server(regulation_mcp_url):
+    read = ReadProvision(McpRegulationGateway(regulation_mcp_url))
+    p = await read.execute("QD2933-2021-ART11")
+    assert p.title.startswith("Điều 11") and p.source.endswith(".pdf") and p.pages and not p.verified
+    assert "Phân ngành" in p.text or "Phan ngành" in p.text  # OCR text as the corpus has it
+    with pytest.raises(NotFound):
+        await read.execute("QD-KHONG-CO")

@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from co5151_backend.api.app import create_app
 from co5151_backend.container import Adapters, build_container
 from co5151_backend.infrastructure.config import Settings
+from co5151_contracts import ErrorCode
 
 SETTINGS = Settings(token_secret=b"api-test-secret-at-least-32-bytes", student_token_secret=b"s", database_url=None,
                     planner_mode="rule", verifier_mode="rules")  # fmt: skip
@@ -136,3 +137,20 @@ def test_admin_api_reads_every_users_traces_with_the_admin_token_only():
 
 def test_admin_api_does_not_exist_without_a_token(client):
     assert client.get("/admin/traces", headers={"Authorization": "Bearer anything"}).status_code == 404
+
+
+def test_any_signed_in_caller_reads_a_cited_provision(client):
+    assert client.get("/provisions/QD2933-2021-CL5.5").status_code == 401
+    for user in ("sv001", "khach"):
+        body = client.get("/provisions/QD2933-2021-CL5.5", headers=login(client, user)).json()
+        assert body == {"id": "QD2933-2021-CL5.5", "title": "Khoản 5.5", "source": "HCMUT_QD2933_2021.pdf",
+                        "pages": [7, 8], "text": "5.5 Đăng ký các học phần tốt nghiệp", "verified": False,
+                        "note": None}  # fmt: skip
+    assert client.get("/provisions/KHONG-CO", headers=login(client)).status_code == 404
+
+
+def test_provision_when_the_regulation_server_is_down():
+    adapters = Adapters(student=Student(), regulations=Regulations(fail=ErrorCode.INTERNAL), models=Models(None))
+    with TestClient(create_app(build_container(SETTINGS, adapters))) as c:
+        res = c.get("/provisions/QD2933-2021-CL5.5", headers=login(c))
+    assert res.status_code == 503 and res.json() == {"detail": "regulation service unavailable"}

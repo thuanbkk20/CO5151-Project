@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from ..application.usecases.ask import Answer
 from ..application.usecases.auth import Session
 from ..domain.conversation import ChatSettings, Conversation, ConversationPage, Message
+from ..domain.evidence import Provision
 from ..domain.principal import Principal
 from ..domain.trace import SessionRecord, Span, Trace, TraceRecord
 
@@ -118,6 +119,22 @@ class ConversationPageOut(BaseModel):
 
 class MessageIn(_In):
     content: str = Field(min_length=1, max_length=4000)
+
+
+class ProvisionOut(BaseModel):
+    """A provision a citation points to: source text, document, PDF pages, review state."""
+
+    id: str
+    title: str
+    source: str
+    pages: list[int]
+    text: str
+    verified: bool
+    note: str | None
+
+    @classmethod
+    def of(cls, p: Provision) -> "ProvisionOut":
+        return cls(**p.model_dump())
 
 
 class TraceOut(BaseModel):

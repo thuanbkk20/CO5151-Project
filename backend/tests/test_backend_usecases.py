@@ -1,14 +1,23 @@
 import pytest
-from backend_fakes import GRADUATION, PASS, REFUSE, REVISE, UNVERIFIED, App, ScriptedVerifier, Student
+from backend_fakes import GRADUATION, PASS, REFUSE, REVISE, UNVERIFIED, App, Regulations, ScriptedVerifier, Student
 
 from co5151_backend.application.agents.advisor import prompts
 from co5151_backend.application.usecases.ask import MAX_VERIFIER_ROUNDS
 from co5151_backend.application.usecases.auth import AuthenticateOperator
 from co5151_backend.application.usecases.operator import OperatorTraces
+from co5151_backend.application.usecases.provisions import ReadProvision, provision_of
 from co5151_backend.domain.conversation import ChatSettings, Feedback, MessageRole
-from co5151_backend.domain.errors import AnswerFailed, InvalidCredentials, InvalidRequest, NotFound, Unauthenticated
+from co5151_backend.domain.errors import (
+    AnswerFailed,
+    InvalidCredentials,
+    InvalidRequest,
+    NotFound,
+    Unauthenticated,
+    Unavailable,
+)
 from co5151_backend.domain.principal import Role
 from co5151_backend.domain.trace import Outcome
+from co5151_contracts import ErrorCode
 
 pytestmark = pytest.mark.anyio
 
@@ -225,3 +234,28 @@ async def test_conversation_settings_feedback_and_ids_are_checked():
     await app.conversations.delete(principal, conv.id)
     with pytest.raises(NotFound):
         await app.conversations.delete(principal, conv.id)
+
+
+async def test_read_provision_by_its_citation_id():
+    read = ReadProvision(Regulations())
+    p = await read.execute(" QD2933-2021-CL5.5 ")
+    assert (p.id, p.title, p.source, p.pages, p.verified) == ("QD2933-2021-CL5.5", "Khoản 5.5", "HCMUT_QD2933_2021.pdf",
+                                                              [7, 8], False)  # fmt: skip
+    assert p.text == "5.5 Đăng ký các học phần tốt nghiệp"
+    with pytest.raises(NotFound):
+        await read.execute("QD-KHONG-CO")
+    with pytest.raises(InvalidRequest):
+        await read.execute("  ")
+    with pytest.raises(InvalidRequest):
+        await read.execute("x" * 161)
+    with pytest.raises(Unavailable):
+        await ReadProvision(Regulations(fail=ErrorCode.INTERNAL)).execute("QD2933-2021-CL5.5")
+
+
+def test_provision_text_from_fragments_or_source_text():
+    data = {"results": [{"id": "r", "evidence": {"source_text": "  Điều 1 ...  ", "warning": "bản nháp"}}]}
+    p = provision_of(data)
+    assert (p.id, p.title, p.source, p.pages, p.text, p.note) == ("r", "r", "", [], "Điều 1 ...", "bản nháp")
+    fragments = [{"text": "trang 1 "}, {"text": ""}, {"text": "trang 2"}]
+    two = {"results": [{"id": "r", "evidence": {"fragments": fragments}}]}
+    assert provision_of(two).text == "trang 1\ntrang 2"
