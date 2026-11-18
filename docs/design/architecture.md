@@ -10,7 +10,8 @@ frontend/  (Chainlit)  --HTTP/SSE-->  backend/ (FastAPI)  --MCP Streamable HTTP-
                                           +--> LLM (OpenAI-compatible), database (SQLAlchemy)
 ```
 
-- **frontend** chỉ hiển thị: đăng nhập, chat, sidebar lịch sử. Không biết Advisor, MCP, LLM hay database.
+- **frontend** chỉ hiển thị: đăng nhập, chat, sidebar lịch sử, nguyên văn điều khoản được trích dẫn (qua
+  `GET /provisions/{id}` của backend). Không biết Advisor, MCP, LLM hay database. Chi tiết: [chat-ui.md](chat-ui.md).
 - **backend** là nơi duy nhất ráp mọi thứ (`container.py`). Hai MCP server vẫn là hệ thống riêng.
 - **eval** gọi use case của backend trong cùng process (`co5151_eval.backend_agent`), không qua HTTP.
 - **console** (cho nhóm, không cho sinh viên; đăng nhập bằng tài khoản vận hành trong `.env`) đọc trace qua API admin của backend (`/admin/*`, token
