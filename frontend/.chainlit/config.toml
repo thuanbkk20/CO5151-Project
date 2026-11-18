@@ -118,6 +118,9 @@ reaction_on_message_received = false
 # Name of the assistant.
 name = "Cố vấn học vụ G3"
 
+# Every browser gets the Vietnamese interface (.chainlit/translations/vi-VN.json), whatever its language.
+language = "vi-VN"
+
 # default_theme = "dark"
 
 # Force a specific language for all users (e.g., "en-US", "he-IL", "fr-FR")
