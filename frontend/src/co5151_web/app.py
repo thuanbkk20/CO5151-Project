@@ -19,6 +19,7 @@ from co5151_web.present import (
     source_label,
     starters_for,
     step_markdown,
+    verification_line,
     welcome_markdown,
 )
 
@@ -182,7 +183,9 @@ async def reply(message: cl.Message) -> None:
                 elif event == "answer":
                     step.output = step_markdown(lines, data["trace"])
                     sources = await _source_actions(token, data["trace"].get("citations") or [])
-                    await cl.Message(id=data["message"]["id"], content=data["message"]["content"], actions=sources,
+                    # The line is only shown: the backend keeps the answer as it was written
+                    shown = f"{data['message']['content']}\n\n{verification_line(data['trace'])}"
+                    await cl.Message(id=data["message"]["id"], content=shown, actions=sources,
                                      metadata={"trace_id": data["trace"]["trace_id"]}).send()  # fmt: skip
                 elif event == "error":
                     trace = f" Mã trace: `{data['trace_id']}`" if data.get("trace_id") else ""

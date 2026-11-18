@@ -76,8 +76,8 @@ Advisor, Verifier hay luồng dữ liệu.
 | 4 | `feat(web): welcome and starters by account` | một chat profile mỗi tài khoản (lời chào + câu gợi ý theo vai trò, lấy từ `tasks.json`), "Thử bảo mật", `chainlit.md` + test | xong `95c7176` |
 | 5 | `feat(web): plain progress labels` | step "Đang/Đã xử lý câu hỏi", nhãn tiến trình, "Chi tiết kỹ thuật" bên dưới + test | xong `7843ef3` |
 | 6 | `feat(backend): GET /provisions/{id}` | use case `ReadProvision` qua `RegulationGateway`, 404/422/503, schema, test với MCP server thật (fixture có sẵn) | xong `2eb3713` |
-| 7 | `feat(web): sources of an answer in the side panel` | nút nguồn (đọc điều khoản một lần mỗi trích dẫn, giữ trong phiên), panel `ElementSidebar`, client + test | xong |
-| 8 | `feat(web): verification line under each answer` | nhãn Verifier/mẫu/bản nháp + test | chưa |
+| 7 | `feat(web): sources of an answer in the side panel` | nút nguồn (đọc điều khoản một lần mỗi trích dẫn, giữ trong phiên), panel `ElementSidebar`, client + test | xong `dfb0798` |
+| 8 | `feat(web): verification line under each answer` | dòng Verifier / theo mẫu / từ chối theo quy tắc / số trích dẫn, chỉ hiển thị (backend giữ nguyên câu trả lời) + test | xong |
 | 9 | `docs: chat UI` | README frontend, README gốc, ảnh chụp mới | chưa |
 
 Mỗi bước: `ruff`, `pytest`, rồi xem tay trên trình duyệt (không cần gọi LLM: tài khoản `khach` hoặc backend không
