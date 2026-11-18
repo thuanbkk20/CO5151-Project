@@ -34,12 +34,14 @@ Advisor, Verifier hay luồng dữ liệu.
 - `custom_css` nhỏ (`public/style.css`) chỉ cho những gì theme không làm được (khung nguồn trích dẫn, nhãn).
 
 ### 3. Màn hình chào theo tài khoản (H3, H4, H7)
-- Sau khi đăng nhập, khung chào (không lưu vào hội thoại) cho biết: đang là ai (tên, MSSV hoặc "khách"/"cố vấn"),
+- Sau khi đăng nhập, khung chào (không lưu vào hội thoại; là `markdown_description` của chat profile duy nhất, vì
+  tin nhắn chào sẽ làm Chainlit ẩn câu gợi ý) cho biết: đang là ai (tên, MSSV hoặc "khách"/"cố vấn"),
   hỏi được gì với tài khoản này, và dòng lưu ý "Quy chế là bản nháp chưa phê duyệt; dữ liệu sinh viên là mô phỏng".
 - Câu gợi ý theo vai trò:
   - Sinh viên: câu về hồ sơ của mình (tín chỉ, cảnh báo, luận văn, tốt nghiệp).
   - Khách: chỉ câu về quy chế chung.
-  - Cố vấn học tập: câu về sinh viên mình phụ trách.
+  - Cố vấn học tập: như khách. Advisor chưa có tool cho cố vấn (`STUDENT_TOOLS` trong `advisor/tools.py` chỉ
+    có `get_my_*`), nên ảnh trang đăng nhập không quảng cáo `cvht01`.
   - Một nhóm "Thử bảo mật" (xem hồ sơ người khác, prompt injection) để thầy thấy hệ thống từ chối đúng.
 - Trang Readme (`chainlit.md`) viết lại: bảng tài khoản kèm tình huống của từng `sv00x` (lấy từ
   `mcp/student-server/docs/MOCK_DATA.md`), cách đọc nguồn trích dẫn và nhãn Verifier.
@@ -70,8 +72,8 @@ Advisor, Verifier hay luồng dữ liệu.
 |---|---|---|---|
 | 1 | `docs(design): chat UI redesign plan` | file này, link trong `docs/README.md` | xong |
 | 2 | `feat(web): Vietnamese interface` | `vi-VN.json`, `language = "vi-VN"` + test | xong `d3da21b` |
-| 3 | `feat(web): light theme, logo and favicon` | `public/theme.json`, logo SVG, ảnh trang đăng nhập (tài khoản demo), `config.toml` | xong |
-| 4 | `feat(web): welcome and starters by account` | khung chào, câu gợi ý theo vai trò, nhóm "Thử bảo mật", `chainlit.md` + test | chưa |
+| 3 | `feat(web): light theme, logo and favicon` | `public/theme.json`, logo SVG, ảnh trang đăng nhập (tài khoản demo), `config.toml` | xong `23fd544` |
+| 4 | `feat(web): welcome and starters by account` | một chat profile mỗi tài khoản (lời chào + câu gợi ý theo vai trò, lấy từ `tasks.json`), "Thử bảo mật", `chainlit.md` + test | xong |
 | 5 | `feat(web): plain progress labels` | nhãn tiến trình, "Chi tiết kỹ thuật" thu gọn + test | chưa |
 | 6 | `feat(backend): GET /provisions/{id}` | qua `RegulationGateway`, schema, test với MCP server thật (fixture có sẵn) | chưa |
 | 7 | `feat(web): sources of an answer in the side panel` | nút nguồn, panel điều khoản, client + test | chưa |
@@ -82,6 +84,10 @@ Mỗi bước: `ruff`, `pytest`, rồi xem tay trên trình duyệt (không cầ
 có key thì Advisor trả lời bằng mẫu).
 
 ## Chưa quyết
+
+- Lời chào hiện "Xin chào sv001": backend trả `display_name` là tên đăng nhập, không phải họ tên trong hồ sơ.
+- Tài khoản cố vấn (`cvht01`) chưa hỏi được về sinh viên mình phụ trách: cần thêm tool phía Advisor (ngoài phạm vi
+  nhánh này).
 
 - Màu chủ đạo và chữ trên logo: tạm "G3 · Cố vấn học vụ", xanh dương đậm. Kiên chốt.
 - Có giữ ô chọn nhà cung cấp/model LLM trước mặt thầy không, hay chỉ hiện khi bật chế độ demo bằng biến môi trường.

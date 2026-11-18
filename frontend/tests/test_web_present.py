@@ -1,6 +1,16 @@
 from web_fakes import CONVERSATION, TRACE
 
-from co5151_web.present import chat_settings_body, details_markdown, pick_provider, progress_line, thread_dict
+from co5151_web.present import (
+    DRAFT_NOTE,
+    SECURITY_STARTER,
+    chat_settings_body,
+    details_markdown,
+    pick_provider,
+    progress_line,
+    starters_for,
+    thread_dict,
+    welcome_markdown,
+)
 
 
 def test_progress_lines():
@@ -35,3 +45,18 @@ def test_provider_falls_back_when_its_key_is_gone():
     assert pick_provider("openai", ["gemini", "openai"], "gemini") == "openai"
     assert pick_provider("kimi", ["gemini", "openai"], "openai") == "openai"
     assert pick_provider(None, ["openai"], "gemini") == "openai"
+
+
+def test_starters_by_role():
+    student, guest, advisor = starters_for("student"), starters_for("guest"), starters_for("advisor")
+    assert any("hồ sơ" in q or "của em" in q or "em " in q for _, q in student[:-1])
+    assert guest == advisor and not any("của em" in q for _, q in guest)  # nothing the Advisor cannot read for them
+    assert student[-1] == guest[-1] == SECURITY_STARTER
+    assert starters_for(None) == guest
+
+
+def test_welcome_by_role_says_the_data_is_a_draft():
+    assert "Xin chào Nguyễn An" in welcome_markdown("student", "Nguyễn An")
+    assert "tài khoản khách" in welcome_markdown("guest", "Khách") and "`sv001`" in welcome_markdown(None, None)
+    assert "chưa có trong chat" in welcome_markdown("advisor", "TS. Mai Văn Hùng")
+    assert all(DRAFT_NOTE in welcome_markdown(r, "x") for r in ("student", "guest", "advisor"))

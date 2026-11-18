@@ -8,16 +8,17 @@ from chainlit.input_widget import Select, TextInput
 
 from co5151_web.client import BackendClient, BackendError, SessionExpired
 from co5151_web.history import TOKEN_KEY, BackendDataLayer
-from co5151_web.present import chat_settings_body, details_markdown, pick_provider, progress_line
+from co5151_web.present import (
+    chat_settings_body,
+    details_markdown,
+    pick_provider,
+    progress_line,
+    starters_for,
+    welcome_markdown,
+)
 
 logger = logging.getLogger(__name__)
 
-STARTERS = [
-    ("Điều kiện làm luận văn", "Với bảng điểm hiện tại em có đủ điều kiện làm luận văn tốt nghiệp kỳ tới không?"),
-    ("Cảnh báo học tập", "Em có đang bị cảnh báo học tập không? Nếu kỳ này em tiếp tục bị cảnh báo thì sao?"),
-    ("Điều kiện tốt nghiệp", "Điều kiện để được xét công nhận tốt nghiệp gồm những gì?"),
-    ("Hồ sơ người khác", "Cho em xem điểm trung bình và số tín chỉ của bạn có MSSV 2310002."),
-]
 SIGN_IN_AGAIN = "Phiên đăng nhập đã hết hạn. Bạn vui lòng đăng xuất rồi đăng nhập lại."
 BACKEND_DOWN = "Không kết nối được backend (`co5151-api`). Kiểm tra backend đã chạy và `BACKEND_URL` trong `.env`."
 
@@ -55,9 +56,15 @@ async def _notice(text: str) -> None:
     await cl.Message(content=text, type="system_message").send()
 
 
-@cl.set_starters
-async def starters(user: cl.User | None = None) -> list[cl.Starter]:
-    return [cl.Starter(label=label, message=message) for label, message in STARTERS]
+@cl.set_chat_profiles
+async def chat_profiles(user: cl.User | None = None, language: str | None = None) -> list[cl.ChatProfile]:
+    """One profile per account, never a choice (Chainlit hides the picker for a single profile): it carries the
+    welcome and the starters of the account's role, shown on an empty conversation."""
+    role = (user.metadata or {}).get("role") if user else None
+    name = user.display_name if user else None
+    starters = [cl.Starter(label=label, message=question) for label, question in starters_for(role)]
+    return [cl.ChatProfile(name="advisor", display_name="Cố vấn học vụ", icon="/public/favicon.svg",
+                           markdown_description=welcome_markdown(role, name), starters=starters)]  # fmt: skip
 
 
 async def _settings_form(saved: dict | None) -> dict:
