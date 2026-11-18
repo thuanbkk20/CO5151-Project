@@ -13,6 +13,7 @@ from co5151_web.present import (
     starters_for,
     step_markdown,
     thread_dict,
+    verification_line,
     welcome_markdown,
 )
 
@@ -98,3 +99,15 @@ def test_source_text_is_shown_as_is():
     assert plain_markdown("- a *b*\n| c |\n# d\n2. e") == "\\- a \\*b\\*\n\\| c \\|\n\\# d\n2\\. e"
     assert plain_markdown("<script>") == "\\<script\\>"
     assert plain_markdown("\n    PHỤ LỤC 4\n\n\n\n  1. Quy định\n") == "PHỤ LỤC 4\n1\\. Quy định"
+
+
+def test_verification_line_under_an_answer():
+    assert verification_line(TRACE).startswith("_✓ Verifier đã kiểm") and verification_line(TRACE).endswith("_")
+    assert "1 điều khoản trích dẫn" in verification_line(TRACE)
+    assert "viết lại 2 lần" in verification_line({**TRACE, "verifier_rounds": 3})
+    template = verification_line({**TRACE, "llm": None, "citations": []})
+    assert "trả lời theo mẫu, không qua LLM" in template and "trích dẫn" not in template
+    assert verification_line({**TRACE, "verifier_rounds": None}).startswith("_Không qua Verifier")
+    refused = verification_line({**TRACE, "verifier_rounds": None, "outcome": "refuse", "llm": None})
+    assert refused.startswith("_Từ chối theo quy tắc") and "Verifier" not in refused
+    assert "LLM lỗi một phần" in verification_line({**TRACE, "llm_error": "hết quota"})

@@ -99,6 +99,25 @@ def _verifier_label(rounds: int | None) -> str:
     return f"{rounds} lượt kiểm" + (", có viết lại" if rounds > 1 else "")
 
 
+RULED = {"refuse": "Từ chối theo quy tắc, không soạn câu trả lời", "clarify": "Hỏi lại theo quy tắc"}
+
+
+def verification_line(trace: dict[str, Any]) -> str:
+    """One short line under an answer: was it checked, by what, on how many cited provisions."""
+    rounds = trace.get("verifier_rounds")
+    if rounds is None:  # not drafted: refused or asked back by rule, or the Verifier is off
+        parts = [RULED.get(trace.get("outcome") or "", "Không qua Verifier")]
+    else:
+        parts = ["✓ Verifier đã kiểm" + (f", viết lại {rounds - 1} lần" if rounds > 1 else "")]
+    if not trace.get("llm"):
+        parts.append("trả lời theo mẫu, không qua LLM")
+    elif trace.get("llm_error"):
+        parts.append("LLM lỗi một phần")
+    if citations := len(set(trace.get("citations") or [])):
+        parts.append(f"{citations} điều khoản trích dẫn (bấm để xem)")
+    return "_" + " · ".join(parts) + "_"
+
+
 def details_markdown(trace: dict[str, Any]) -> str:
     rows = [
         ("Kết cục", trace.get("outcome") or "do LLM viết"),
