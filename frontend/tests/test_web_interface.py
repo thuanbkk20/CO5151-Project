@@ -35,5 +35,7 @@ def test_light_theme_logo_and_favicon():
     assert {"light", "dark"} <= theme["variables"].keys()
     assert all(name.startswith("--") for v in theme["variables"].values() for name in v)  # CSS variables of the UI
     assert config.ui.login_page_image == "/public/login.svg"
+    # the UI's name has Vietnamese letters, which /avatars/<name> refuses: the avatar must not depend on it
+    assert config.ui.default_avatar_file_url == "/public/favicon.svg"
     for name in ("logo_light.svg", "logo_dark.svg", "favicon.svg", "login.svg"):  # favicon = assistant avatar too
         assert (public / name).read_text(encoding="utf-8").startswith("<svg")
