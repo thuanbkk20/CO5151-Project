@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1000" viewBox="0 0 900 1000">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d4f91"/>
+      <stop offset="1" stop-color="#0f2547"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1000" fill="url(#bg)"/>
+  <circle cx="820" cy="120" r="260" fill="#fff" opacity=".04"/>
+  <circle cx="60" cy="930" r="220" fill="#fff" opacity=".04"/>
+  <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" fill="#fff">
+    <g transform="translate(150 230) scale(1.6)">
+      <path d="M32 13 58 25.5 32 38 6 25.5Z" fill="#fff"/>
+      <path d="M16 31v10c0 4.5 7.5 8.5 16 8.5S48 45.5 48 41V31l-16 7.7Z" fill="#fff" opacity=".85"/>
+      <path d="M54 27.5v12" stroke="#f2b705" stroke-width="3.2" stroke-linecap="round"/>
+    </g>
+    <text x="150" y="400" font-size="52" font-weight="700">Cố vấn học vụ</text>
+    <g font-size="25" opacity=".9">
+      <text x="150" y="456">Hỏi quy chế đào tạo và hồ sơ học vụ của bạn.</text>
+      <text x="150" y="494">Mỗi câu trả lời kèm điều khoản trích dẫn và</text>
+      <text x="150" y="532">được Verifier kiểm tra lại trước khi gửi.</text>
+    </g>
+    <rect x="150" y="590" width="600" height="226" rx="18" fill="#fff" opacity=".1"/>
+    <text x="180" y="638" font-size="22" font-weight="700" fill="#f2b705">TÀI KHOẢN DEMO</text>
+    <g font-size="23">
+      <text x="180" y="684"><tspan font-weight="700">sv001 … sv008</tspan> · mật khẩu <tspan font-weight="700">demo</tspan></text>
+      <text x="180" y="720" opacity=".85">mỗi tài khoản là một tình huống học vụ khác nhau</text>
+      <text x="180" y="756"><tspan font-weight="700">cvht01</tspan> · mật khẩu <tspan font-weight="700">demo</tspan> · cố vấn của 4 sinh viên</text>
+      <text x="180" y="792"><tspan font-weight="700">khach</tspan> · mật khẩu bất kỳ, chỉ hỏi quy chế chung</text>
+    </g>
+    <text x="150" y="880" font-size="19" opacity=".6">Quy chế là bản nháp chưa phê duyệt · dữ liệu sinh viên là mô phỏng</text>
+  </g>
+</svg>
