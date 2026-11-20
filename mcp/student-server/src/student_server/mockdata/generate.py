@@ -22,7 +22,7 @@ import random
 import sys
 from pathlib import Path
 
-from student_server.auth.passwords import hash_password
+from co5151_contracts.security import hash_password
 
 HERE = Path(__file__).resolve().parent
 SEED = 2026

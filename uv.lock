@@ -12,13 +12,11 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "co5151-advisor",
-    "co5151-chat-store",
+    "co5151-backend",
     "co5151-contracts",
     "co5151-eval",
     "co5151-regulation-server",
     "co5151-student-server",
-    "co5151-verifier",
     "co5151-web",
 ]
 
@@ -764,37 +762,21 @@ wheels = [
 ]
 
 [[package]]
-name = "co5151-advisor"
+name = "co5151-backend"
 version = "0.1.0"
-source = { editable = "services/advisor" }
-dependencies = [
-    { name = "co5151-contracts" },
-    { name = "co5151-eval" },
-    { name = "co5151-regulation-server" },
-    { name = "co5151-student-server" },
-    { name = "co5151-verifier" },
-    { name = "openai" },
-    { name = "pydantic" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "co5151-contracts", editable = "packages/contracts" },
-    { name = "co5151-eval", editable = "eval" },
-    { name = "co5151-regulation-server", editable = "mcp/regulation-server" },
-    { name = "co5151-student-server", editable = "mcp/student-server" },
-    { name = "co5151-verifier", editable = "services/verifier" },
-    { name = "openai", specifier = ">=1.0" },
-    { name = "pydantic", specifier = ">=2" },
-]
-
-[[package]]
-name = "co5151-chat-store"
-version = "0.1.0"
-source = { editable = "packages/chat-store" }
+source = { editable = "backend" }
 dependencies = [
     { name = "aiosqlite" },
+    { name = "co5151-contracts" },
+    { name = "co5151-student-server" },
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "mcp" },
+    { name = "openai" },
+    { name = "pydantic" },
+    { name = "pyjwt" },
     { name = "sqlalchemy", extra = ["asyncio"] },
+    { name = "uvicorn" },
 ]
 
 [package.optional-dependencies]
@@ -806,7 +788,16 @@ postgres = [
 requires-dist = [
     { name = "aiosqlite", specifier = ">=0.20" },
     { name = "asyncpg", marker = "extra == 'postgres'", specifier = ">=0.29" },
+    { name = "co5151-contracts", editable = "packages/contracts" },
+    { name = "co5151-student-server", editable = "mcp/student-server" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "mcp", specifier = ">=1.30,<3" },
+    { name = "openai", specifier = ">=1.0" },
+    { name = "pydantic", specifier = ">=2" },
+    { name = "pyjwt", specifier = ">=2.8" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.30,<2.1" },
+    { name = "uvicorn", specifier = ">=0.30" },
 ]
 provides-extras = ["postgres"]
 
@@ -826,13 +817,17 @@ name = "co5151-eval"
 version = "0.1.0"
 source = { editable = "eval" }
 dependencies = [
+    { name = "co5151-backend" },
     { name = "co5151-contracts" },
+    { name = "co5151-regulation-server" },
     { name = "co5151-student-server" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "co5151-backend", editable = "backend" },
     { name = "co5151-contracts", editable = "packages/contracts" },
+    { name = "co5151-regulation-server", editable = "mcp/regulation-server" },
     { name = "co5151-student-server", editable = "mcp/student-server" },
 ]
 
@@ -867,35 +862,20 @@ requires-dist = [
 ]
 
 [[package]]
-name = "co5151-verifier"
-version = "0.1.0"
-source = { editable = "services/verifier" }
-dependencies = [
-    { name = "co5151-contracts" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "co5151-contracts", editable = "packages/contracts" }]
-
-[[package]]
 name = "co5151-web"
 version = "0.1.0"
-source = { editable = "apps/web" }
+source = { editable = "frontend" }
 dependencies = [
     { name = "chainlit" },
-    { name = "co5151-advisor" },
-    { name = "co5151-chat-store" },
     { name = "co5151-contracts" },
-    { name = "co5151-student-server" },
+    { name = "httpx" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "chainlit", specifier = ">=2.12,<3" },
-    { name = "co5151-advisor", editable = "services/advisor" },
-    { name = "co5151-chat-store", editable = "packages/chat-store" },
     { name = "co5151-contracts", editable = "packages/contracts" },
-    { name = "co5151-student-server", editable = "mcp/student-server" },
+    { name = "httpx", specifier = ">=0.27" },
 ]
 
 [[package]]

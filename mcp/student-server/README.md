@@ -121,7 +121,7 @@ src/student_server/
   mockdata/      generate.py (seed 2026) + *.json theo schema API
   db.py          nạp payload vào SQLite (query_only, có lock)
   academic.py    anti-corruption layer: payload thô → model contracts
-  auth/          tokens.py (HMAC) · passwords.py (PBKDF2) · accounts.py (login demo)
+  auth/          accounts.py (login demo); token HMAC + PBKDF2 nằm ở co5151_contracts.security
   authz.py       quyết định target của mỗi lần gọi
   audit.py       access log có pseudonym
   service.py     pipeline: authenticate → validate → authorize → read → audit

@@ -32,13 +32,27 @@ Cả app dùng **một** file `.env` ở gốc repo và **một** cơ chế đ�
    bằng key thật.
 5. Biến làm thay đổi cách chạy app thì ghi thêm vào mục "Chạy ứng dụng" của README.
 
+## Backend (clean architecture)
+
+Tầng và quyết định: [docs/design/architecture.md](docs/design/architecture.md). Khi sửa `backend/`:
+
+- Phụ thuộc chỉ hướng vào trong: `domain` ← `application` (ports, agents, usecases) ← `infrastructure`, `api`.
+  `domain` và `application` không import FastAPI, SQLAlchemy, MCP SDK, openai hay httpx.
+- I/O mới (database, MCP, LLM, dịch vụ ngoài) = một Protocol trong `application/ports.py` + một adapter trong
+  `infrastructure/`. Chỉ `container.py` chọn adapter; eval và test truyền adapter riêng qua `Adapters`.
+- Agent (Advisor, Verifier) chỉ dùng port; use case điều phối agent, lưu dữ liệu và trace. Không gọi agent từ `api/`.
+- Mọi lời gọi LLM đi qua port `ChatModel` với `max_output_tokens`; LLM lỗi thì raise `LLMError`, nơi gọi ghi lỗi
+  vào trace (`llm_error`) rồi fallback, không nuốt lỗi.
+- Test dùng fake trong `backend/tests/backend_fakes.py`; test MCP gateway dựng server thật (fixture trong
+  `backend/tests/conftest.py`).
+
 ## LLM provider mới
 
-Thêm một `Provider` vào `PROVIDERS` trong `services/advisor/src/co5151_advisor/llm.py` (base URL, model mặc định,
-tên biến chứa key, có nhận `seed` không, `reasoning_effort` mặc định), thêm biến key vào `.env.example` và một test
-trong `services/advisor/tests/test_llm_providers.py`. Tham số mà không phải provider nào cũng hỗ trợ (`seed`,
-`reasoning_effort`, ...) chỉ gửi khi profile hoặc biến môi trường bật; provider OpenAI-compatible có thể trả 400
-cho tham số lạ.
+Thêm một `Provider` vào `PROVIDERS` trong `backend/src/co5151_backend/infrastructure/llm.py` (base URL, model mặc
+định, tên biến chứa key, `reasoning_effort` mặc định, có nhận `json_schema` không, tên tham số giới hạn token ra),
+thêm biến key vào `.env.example` và một test trong `backend/tests/test_backend_llm.py`. Tham số mà không phải
+provider nào cũng hỗ trợ (`reasoning_effort`, structured output, ...) chỉ gửi khi profile hoặc biến môi trường bật;
+provider OpenAI-compatible có thể trả 400 cho tham số lạ.
 
 ## Package mới
 
@@ -55,18 +69,19 @@ cho tham số lạ.
 
 - Dữ liệu đi qua model trong `packages/contracts`. Kết quả tool luôn là envelope `ToolResult` (`{ok, data|error}`).
 - Một thành phần dùng thành phần khác qua interface nhỏ `call(tên_tool, tham_số) -> ToolResult`, không import code
-  nội bộ của package khác. Chỗ ráp các service thật với nhau (composition root) là adapter, ví dụ
-  `services/advisor/src/co5151_advisor/eval_adapter.py`.
+  nội bộ của package khác. Chỗ ráp các service thật với nhau (composition root) là `backend/.../container.py`
+  (app, qua MCP HTTP) và `eval/src/co5151_eval/backend_agent.py` (eval, gọi service trong process).
 - Đổi tên, thêm, bỏ tool hoặc model trong `packages/contracts`:
   1. chạy `uv run python -m co5151_contracts.export` để sinh lại `schemas/`;
   2. tìm mọi chỗ gọi tên cũ (`git grep <tên_tool>`), gồm Advisor, eval (`gold.py`, `tasks.json`) và tài liệu;
   3. có ít nhất một test gọi **service thật** chứ không chỉ mock (ví dụ
-     `services/advisor/tests/test_student_tools.py`), để đổi tên tool là test đỏ ngay.
+     `backend/tests/test_backend_mcp_gateways.py`, `eval/tests/test_eval_backend_agent.py`), để đổi tên tool là
+     test đỏ ngay.
 - Đổi mock data của Student Record thì chạy `uv run co5151-eval check-gold` và sửa số liệu trong
   `eval/src/co5151_eval/data/tasks.json`.
 
 ## Khác
 
-- Commit theo Conventional Commits, scope là tên thành phần: `feat(advisor): ...`, `fix(eval): ...`.
+- Commit theo Conventional Commits, scope là tên thành phần: `feat(backend): ...`, `fix(web): ...`, `fix(eval): ...`.
 - Không commit `.env`, key hay secret. Dữ liệu sinh viên là mô phỏng.
 - Trả lời và viết tài liệu bằng tiếng Việt; thuật ngữ kỹ thuật giữ tiếng Anh.

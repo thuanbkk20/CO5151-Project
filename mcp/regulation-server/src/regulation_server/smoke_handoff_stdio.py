@@ -29,10 +29,14 @@ def envelope(result):
 
 
 async def check(base, draft):
-    args = ["-m", "regulation_server.regulation_mcp_v2", "--base", str(base)]
+    args = ["-m", "regulation_server.regulation_mcp_v2", "--stdio", "--base", str(base)]
     if draft:
         args.append("--allow-draft")
-    parameters = StdioServerParameters(command=sys.executable, args=args, env={**os.environ, "PYTHONUTF8": "1"})
+    parameters = StdioServerParameters(
+        command=sys.executable,
+        args=args,
+        env={**os.environ, "PYTHONUTF8": "1", "REGULATION_ALLOW_DRAFT": "true" if draft else "false"},
+    )
     async with stdio_client(parameters) as (read, write):  # noqa: SIM117 - keep client lifecycle explicit
         async with ClientSession(read, write, read_timeout_seconds=READ_TIMEOUT) as session:
             await session.initialize()

@@ -36,9 +36,9 @@ eval/results/
 # environment files
 .env
 
-# Chainlit (apps/web): generated translations and uploaded files
-apps/web/.chainlit/translations/
-apps/web/.files/
+# Chainlit (frontend): generated translations and uploaded files
+frontend/.chainlit/translations/
+frontend/.files/
 
 # Local data of the apps (chat history database)
 .data/
