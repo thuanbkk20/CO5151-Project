@@ -5,7 +5,7 @@ import uuid
 from ...domain.conversation import ChatSettings, Conversation, ConversationPage, Feedback, utcnow
 from ...domain.errors import InvalidRequest, NotFound
 from ...domain.principal import Principal
-from ...domain.trace import Trace
+from ...domain.trace import Span, Trace
 from ..ports import ChatModels, ConversationRepository, TraceRepository
 
 MAX_PAGE = 100
@@ -96,6 +96,13 @@ class Conversations:
 
     async def trace(self, principal: Principal, trace_id: str) -> Trace:
         found = await self._traces.get(trace_id, principal.user_id)
+        if found is None:
+            raise NotFound(trace_id)
+        return found
+
+    async def spans(self, principal: Principal, trace_id: str) -> list[Span]:
+        """What each node of that answer received and returned (the agent-flow view)."""
+        found = await self._traces.spans(trace_id, principal.user_id)
         if found is None:
             raise NotFound(trace_id)
         return found

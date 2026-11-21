@@ -21,8 +21,9 @@ CONVERSATION = {
          "trace_id": "t1", "feedback": {"value": 1, "comment": "tốt"}},
     ],
 }  # fmt: skip
-TRACE = {"trace_id": "t1", "outcome": None, "tool_calls": ["get_my_academic_summary"], "citations": ["QD-Đ22"],
-         "verifier_rounds": 1, "input_tokens": 1200, "output_tokens": 150, "latency_ms": 2500, "llm": "gemini/x",
+TRACE = {"trace_id": "t1", "conversation_id": CONVERSATION["id"], "outcome": None,
+         "tool_calls": ["get_my_academic_summary"], "citations": ["QD-Đ22"], "verifier_rounds": 1,
+         "input_tokens": 1200, "output_tokens": 150, "latency_ms": 2500, "llm": "gemini/x",
          "llm_error": None}  # fmt: skip
 STREAM = (
     'event: step\ndata: {"name": "plan", "action": "SUMMARY"}\n\n'
@@ -31,6 +32,11 @@ STREAM = (
     + json.dumps({"message": CONVERSATION["messages"][1], "trace": TRACE}, ensure_ascii=False)
     + "\n\n"
 )
+
+
+PROVISION = {"id": "QD2933-2021-ART11", "title": "Điều 11.Phân ngành, phân chuyên ngành",
+             "source": "HCMUT_QD2933_2021.pdf", "pages": [12, 13], "text": "Điều 11.Phân ngành\n11.1 Phân ngành",
+             "verified": False, "note": "Original source version; not a consolidated or approved rule."}  # fmt: skip
 
 
 class FakeBackend:
@@ -64,6 +70,10 @@ class FakeBackend:
             return httpx.Response(200, json=CONVERSATION)
         if path.startswith("/messages/"):
             return httpx.Response(204)
+        if path.startswith("/provisions/"):
+            if request.url.raw_path.decode().removeprefix("/provisions/") != PROVISION["id"]:
+                return httpx.Response(404, json={"detail": "not found"})
+            return httpx.Response(200, json=PROVISION)
         return httpx.Response(500)
 
     def client(self) -> BackendClient:

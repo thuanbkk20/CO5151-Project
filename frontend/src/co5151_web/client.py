@@ -4,6 +4,7 @@ import json
 import os
 from collections.abc import AsyncIterator
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -68,6 +69,15 @@ class BackendClient:
     async def conversation(self, token: str, conversation_id: str) -> dict[str, Any] | None:
         try:
             return (await self._request("GET", f"/conversations/{conversation_id}", token)).json()
+        except BackendError as e:
+            if e.status == 404:
+                return None
+            raise
+
+    async def provision(self, token: str, provision_id: str) -> dict[str, Any] | None:
+        """A provision an answer cites (`trace.citations`), or None when the backend has no such id."""
+        try:
+            return (await self._request("GET", f"/provisions/{quote(provision_id, safe='')}", token)).json()
         except BackendError as e:
             if e.status == 404:
                 return None

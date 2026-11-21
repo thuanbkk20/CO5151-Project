@@ -1,5 +1,5 @@
 import pytest
-from web_fakes import CONVERSATION, TOKEN, FakeBackend
+from web_fakes import CONVERSATION, PROVISION, TOKEN, FakeBackend
 
 from co5151_web.client import SessionExpired
 
@@ -37,3 +37,10 @@ async def test_ask_yields_the_server_sent_events_in_order():
     assert [name for name, _ in events] == ["step", "step", "answer"]
     assert events[1][1]["tool"] == "get_my_academic_summary"
     assert events[2][1]["message"]["id"] == "m2"
+
+
+async def test_provision_by_citation_id_or_none():
+    client = FakeBackend().client()
+    assert await client.provision(TOKEN, "QD2933-2021-ART11") == PROVISION
+    assert await client.provision(TOKEN, "khong-co") is None
+    assert await client.provision(TOKEN, "a/b") is None  # the id is one path segment, whatever it holds

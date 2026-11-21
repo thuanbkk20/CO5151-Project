@@ -36,9 +36,13 @@ eval/results/
 # environment files
 .env
 
-# Chainlit (frontend): generated translations and uploaded files
-frontend/.chainlit/translations/
+# Chainlit (frontend): generated translations and uploaded files; /.chainlit/ appears when Chainlit runs from
+# the repo root (the app's own config is frontend/.chainlit/config.toml)
+frontend/.chainlit/translations/*
+!frontend/.chainlit/translations/vi-VN.json
 frontend/.files/
+/.chainlit/
+/.files/
 
 # Local data of the apps (chat history database)
 .data/

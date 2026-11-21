@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ "Sửa " ~ editing if editing else "Thêm câu" }}{% endblock %}
+{% block content %}
+<p><a href="/question-sets/{{ qs.id }}">← {{ qs.name }}</a></p>
+<h1>{{ "Sửa câu " ~ editing if editing else "Thêm câu" }}</h1>
+{% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+<form method="post" action="/question-sets/{{ qs.id }}/tasks" class="stack">
+  <input type="hidden" name="editing" value="{{ editing or '' }}">
+  <label>ID <span class="muted">(chữ in hoa + 2 số, vd. B07)</span>
+    <input name="id" value="{{ form.id if form }}" required></label>
+  <label>Nhóm
+    <select name="group">{% for g in groups %}<option {{ "selected" if form and form.group == g }}>{{ g }}</option>{% endfor %}</select></label>
+  <label>Câu hỏi <textarea name="question" rows="3" required>{{ form.question if form }}</textarea></label>
+  <label>Người hỏi <span class="muted">(tài khoản demo sv001…sv008; trống = khách)</span>
+    <input name="user" value="{{ form.user if form }}"></label>
+  <label>Kết cục mong đợi
+    <select name="expected">{% for o in outcomes %}<option {{ "selected" if form and form.expected == o }}>{{ o }}</option>{% endfor %}</select></label>
+  <div>Chấp nhận thêm
+    {% for o in outcomes %}<label class="check"><input type="checkbox" name="also_accept" value="{{ o }}" {{ "checked" if form and o in form.also_accept }}> {{ o }}</label>{% endfor %}</div>
+  <label>Trích dẫn cần có <span class="muted">(mỗi dòng một mã)</span>
+    <textarea name="citations" rows="2">{{ form.citations if form }}</textarea></label>
+  <label>Mẫu cấm <span class="muted">(regex, mỗi dòng một mẫu)</span>
+    <textarea name="forbidden" rows="2">{{ form.forbidden if form }}</textarea></label>
+  <label>Facts <span class="muted">(JSON: [{"field": "...", "value": ..., "mention": ["..."]}])</span>
+    <textarea name="facts" rows="4">{{ form.facts if form }}</textarea></label>
+  <label>Câu trả lời tham khảo <textarea name="reference_answer" rows="3">{{ form.reference_answer if form }}</textarea></label>
+  <label>Ghi chú <textarea name="notes" rows="2">{{ form.notes if form }}</textarea></label>
+  <div><button class="primary" type="submit">Lưu</button></div>
+</form>
+{% endblock %}

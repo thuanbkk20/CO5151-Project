@@ -1,9 +1,10 @@
 """Sign-in and token checks."""
 
+import hmac
 import secrets
 from dataclasses import dataclass
 
-from ...domain.errors import InvalidCredentials
+from ...domain.errors import InvalidCredentials, NotFound, Unauthenticated
 from ...domain.principal import Principal, Role
 from ..ports import AccessTokens, AccountDirectory
 
@@ -42,3 +43,17 @@ class Authenticate:
     def execute(self, token: str) -> Principal:
         """Raises Unauthenticated."""
         return self._tokens.verify(token)
+
+
+class AuthenticateOperator:
+    """The operator console signs its requests with one shared admin token. Without a configured token the admin
+    API does not exist (NotFound), so a deployment that does not set it exposes nothing."""
+
+    def __init__(self, admin_token: str | None):
+        self._admin_token = admin_token
+
+    def execute(self, token: str | None) -> None:
+        if not self._admin_token:
+            raise NotFound("admin API is disabled")
+        if not token or not hmac.compare_digest(token.encode(), self._admin_token.encode()):
+            raise Unauthenticated("invalid admin token")

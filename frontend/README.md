@@ -17,11 +17,15 @@ Tài khoản: `sv001` … `sv008` mật khẩu `demo` (sinh viên mô phỏng), 
 
 | File | Vai trò |
 |---|---|
-| `src/co5151_web/client.py` | `BackendClient`: gọi API backend (đăng nhập, hội thoại, đánh giá, stream SSE câu trả lời) |
+| `src/co5151_web/client.py` | `BackendClient`: gọi API backend (đăng nhập, hội thoại, đánh giá, stream SSE câu trả lời, điều khoản trích dẫn) |
 | `src/co5151_web/history.py` | Data layer của Chainlit chuyển tiếp sang backend: sidebar, mở lại, đổi tên, xóa, đánh giá |
-| `src/co5151_web/present.py` | Chuyển dữ liệu backend sang dạng hiển thị: tiến trình, chi tiết xử lý, thread của Chainlit |
-| `src/co5151_web/app.py` | Handler Chainlit: đăng nhập, cài đặt LLM, chat (hiện từng bước khi backend stream) |
+| `src/co5151_web/present.py` | Chuyển dữ liệu backend sang dạng hiển thị: lời chào và câu gợi ý theo vai trò, nhãn tiến trình, dòng kiểm chứng, nút và panel điều khoản, thread của Chainlit |
+| `src/co5151_web/app.py` | Handler Chainlit: đăng nhập, chat profile (lời chào + câu gợi ý), cài đặt LLM, chat (hiện từng bước khi backend stream), nút nguồn → panel bên phải |
 | `src/co5151_web/cli.py` | Lệnh `co5151-web`: nạp `.env`, kiểm tra secret, chạy Chainlit với `frontend` làm thư mục gốc |
+| `.chainlit/config.toml` | Cấu hình Chainlit: `language = "vi-VN"`, giao diện sáng, ảnh trang đăng nhập, tắt tải file |
+| `.chainlit/translations/vi-VN.json` | Chữ của Chainlit bằng tiếng Việt (file dịch khác Chainlit tự sinh, không commit); test báo đỏ khi Chainlit thêm chữ mới chưa dịch |
+| `public/` | `theme.json` (màu), logo sáng/tối, `favicon.svg` (cũng là avatar trợ lý), `login.svg` (nửa phải trang đăng nhập: tài khoản demo) |
+| `chainlit.md` | Trang "Hướng dẫn": tài khoản demo và tình huống của từng tài khoản, cách dùng |
 
 ## Bảo mật
 

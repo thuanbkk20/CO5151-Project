@@ -13,7 +13,7 @@ from co5151_contracts import ToolResult
 from ..domain.conversation import ChatSettings, Conversation, ConversationPage, Feedback, Message
 from ..domain.evidence import Action
 from ..domain.principal import Account, Principal
-from ..domain.trace import Trace
+from ..domain.trace import SessionRecord, Span, Trace, TraceRecord
 from .events import AnswerEvent
 
 # Persistence ---------------------------------------------------------------------------------------------------
@@ -50,9 +50,26 @@ class ConversationRepository(Protocol):
 
 
 class TraceRepository(Protocol):
-    async def save(self, trace: Trace) -> None: ...
+    async def save(self, trace: Trace, spans: Sequence[Span] = ()) -> None:
+        """The trace and its spans, together; saving a trace again replaces its spans."""
 
     async def get(self, trace_id: str, owner_id: str) -> Trace | None: ...
+
+    async def spans(self, trace_id: str, owner_id: str) -> list[Span] | None:
+        """In the order they started; None when `owner_id` has no such trace."""
+
+
+class TraceLog(Protocol):
+    """Every user's traces, for the operator console only (the admin API). Never used to answer a user."""
+
+    async def recent(self, *, conversation_id: str | None = None, limit: int = 50) -> list[TraceRecord]:
+        """Newest first, without spans; only the traces of `conversation_id` when it is given."""
+
+    async def find(self, trace_id: str) -> TraceRecord | None:
+        """With its spans."""
+
+    async def sessions(self, *, limit: int = 50) -> list[SessionRecord]:
+        """Every user's conversations, most recently active first, with their number of traces."""
 
 
 # Identity ------------------------------------------------------------------------------------------------------

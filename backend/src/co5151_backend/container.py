@@ -22,8 +22,10 @@ from .application.ports import (
     TraceRepository,
 )
 from .application.usecases.ask import AskQuestion
-from .application.usecases.auth import Authenticate, SignIn
+from .application.usecases.auth import Authenticate, AuthenticateOperator, SignIn
 from .application.usecases.conversations import Conversations
+from .application.usecases.operator import OperatorTraces
+from .application.usecases.provisions import ReadProvision
 from .infrastructure.config import Settings
 from .infrastructure.identity import DemoAccountDirectory, JwtAccessTokens, SignedStudentTokens
 from .infrastructure.laya import LayaActionRouter
@@ -53,8 +55,11 @@ class Container:
     settings: Settings
     sign_in: SignIn
     authenticate: Authenticate
+    authenticate_operator: AuthenticateOperator
     conversations: Conversations
     ask: AskQuestion
+    operator_traces: OperatorTraces
+    read_provision: ReadProvision
     chats: ConversationRepository
     models: ChatModels
     _sql: SqlChatRepository | None = field(default=None, repr=False)
@@ -125,14 +130,13 @@ def build_container(settings: Settings, adapters: Adapters | None = None) -> Con
     models = a.models or ProviderChatModels()
     accounts = a.accounts or DemoAccountDirectory(settings.accounts_file)
     access_tokens = JwtAccessTokens(settings.token_secret, settings.token_ttl)
-    advisor = Advisor(
-        a.student or McpStudentRecordGateway(settings.student_mcp_url),
-        a.regulations or McpRegulationGateway(settings.regulation_mcp_url),
-    )
+    regulations = a.regulations or McpRegulationGateway(settings.regulation_mcp_url)
+    advisor = Advisor(a.student or McpStudentRecordGateway(settings.student_mcp_url), regulations)
     return Container(
         settings=settings,
         sign_in=SignIn(accounts, access_tokens),
         authenticate=Authenticate(access_tokens),
+        authenticate_operator=AuthenticateOperator(settings.admin_token),
         conversations=Conversations(chats, traces, models),
         ask=AskQuestion(
             chats=chats,
@@ -145,6 +149,8 @@ def build_container(settings: Settings, adapters: Adapters | None = None) -> Con
             verifier_for=verifier_factory(settings, models),
             history_messages=settings.history_messages,
         ),
+        operator_traces=OperatorTraces(traces),
+        read_provision=ReadProvision(regulations),
         chats=chats,
         models=models,
         _sql=sql,

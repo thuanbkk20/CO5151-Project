@@ -1,15 +1,16 @@
 """Request and response bodies of the API, and their mapping from the domain objects."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..application.usecases.ask import Answer
 from ..application.usecases.auth import Session
 from ..domain.conversation import ChatSettings, Conversation, ConversationPage, Message
+from ..domain.evidence import Provision
 from ..domain.principal import Principal
-from ..domain.trace import Trace
+from ..domain.trace import SessionRecord, Span, Trace, TraceRecord
 
 
 class _In(BaseModel):
@@ -120,6 +121,22 @@ class MessageIn(_In):
     content: str = Field(min_length=1, max_length=4000)
 
 
+class ProvisionOut(BaseModel):
+    """A provision a citation points to: source text, document, PDF pages, review state."""
+
+    id: str
+    title: str
+    source: str
+    pages: list[int]
+    text: str
+    verified: bool
+    note: str | None
+
+    @classmethod
+    def of(cls, p: Provision) -> "ProvisionOut":
+        return cls(**p.model_dump())
+
+
 class TraceOut(BaseModel):
     trace_id: str
     conversation_id: str
@@ -144,6 +161,69 @@ class TraceOut(BaseModel):
                    steps=t.steps, tool_calls=t.tool_calls, citations=t.citations, verifier_rounds=t.verifier_rounds,
                    input_tokens=t.usage.input_tokens, output_tokens=t.usage.output_tokens, latency_ms=t.latency_ms,
                    llm=t.llm, llm_error=t.llm_error, error=t.error)  # fmt: skip
+
+
+class SpanOut(BaseModel):
+    node: str = Field(description="planner | student_record | regulation | writer | verifier")
+    name: str
+    input: dict[str, Any]
+    output: dict[str, Any]
+    start_ms: int = Field(description="from the start of the answer")
+    duration_ms: int
+    input_tokens: int
+    output_tokens: int
+    error: str | None
+
+    @classmethod
+    def of(cls, s: Span) -> "SpanOut":
+        return cls(node=s.node, name=s.name, input=s.input, output=s.output, start_ms=s.start_ms,
+                   duration_ms=s.duration_ms, input_tokens=s.usage.input_tokens, output_tokens=s.usage.output_tokens,
+                   error=s.error)  # fmt: skip
+
+
+class SpansOut(BaseModel):
+    trace_id: str
+    spans: list[SpanOut]
+
+
+class TraceRecordOut(BaseModel):
+    """A trace for the operator console: whose conversation, the question, the answer, and (detail only) spans."""
+
+    trace: TraceOut
+    owner_id: str
+    question: str | None
+    answer: str | None
+    created_at: datetime | None
+    spans: list[SpanOut]
+
+    @classmethod
+    def of(cls, r: TraceRecord) -> "TraceRecordOut":
+        return cls(trace=TraceOut.of(r.trace), owner_id=r.owner_id, question=r.question, answer=r.answer,
+                   created_at=r.trace.created_at, spans=[SpanOut.of(s) for s in r.spans])  # fmt: skip
+
+
+class TraceListOut(BaseModel):
+    items: list[TraceRecordOut]
+
+
+class AdminSessionOut(BaseModel):
+    """A conversation (session) for the operator console."""
+
+    conversation_id: str
+    owner_id: str
+    title: str | None
+    turns: int = Field(description="answers (traces) in the conversation")
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def of(cls, r: SessionRecord) -> "AdminSessionOut":
+        return cls(conversation_id=r.conversation_id, owner_id=r.owner_id, title=r.title, turns=r.turns,
+                   created_at=r.created_at, updated_at=r.updated_at)  # fmt: skip
+
+
+class AdminSessionListOut(BaseModel):
+    items: list[AdminSessionOut]
 
 
 class AnswerOut(BaseModel):

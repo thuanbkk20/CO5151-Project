@@ -1,0 +1,260 @@
+{
+    "common": {
+        "actions": {
+            "cancel": "Hủy",
+            "confirm": "Xác nhận",
+            "continue": "Tiếp tục",
+            "goBack": "Quay lại",
+            "reset": "Đặt lại",
+            "submit": "Gửi"
+        },
+        "status": {
+            "loading": "Đang tải...",
+            "error": {
+                "default": "Đã có lỗi xảy ra",
+                "serverConnection": "Không kết nối được máy chủ"
+            }
+        }
+    },
+    "auth": {
+        "login": {
+            "title": "Đăng nhập Cố vấn học vụ G3",
+            "form": {
+                "email": {
+                    "label": "Tên đăng nhập",
+                    "required": "Cần nhập tên đăng nhập",
+                    "placeholder": "sv001 … sv008, hoặc khach"
+                },
+                "password": {
+                    "label": "Mật khẩu",
+                    "required": "Cần nhập mật khẩu"
+                },
+                "actions": {
+                    "signin": "Đăng nhập"
+                },
+                "alternativeText": {
+                    "or": "HOẶC"
+                }
+            },
+            "errors": {
+                "default": "Không đăng nhập được",
+                "signin": "Hãy thử đăng nhập bằng tài khoản khác",
+                "oauthSignin": "Đăng nhập thất bại. Hãy thử lại hoặc dùng cách đăng nhập khác.",
+                "redirectUriMismatch": "Redirect URI không khớp cấu hình ứng dụng OAuth",
+                "oauthCallback": "Hãy thử đăng nhập bằng tài khoản khác",
+                "oauthCreateAccount": "Hãy thử đăng nhập bằng tài khoản khác",
+                "emailCreateAccount": "Hãy thử đăng nhập bằng tài khoản khác",
+                "callback": "Hãy thử đăng nhập bằng tài khoản khác",
+                "oauthAccountNotLinked": "Để xác nhận danh tính, hãy đăng nhập bằng tài khoản đã dùng lúc đầu",
+                "emailSignin": "Không gửi được email",
+                "emailVerify": "Hãy xác nhận email, một email mới vừa được gửi",
+                "credentialsSignin": "Sai tên đăng nhập hoặc mật khẩu (tài khoản demo: sv001 … sv008, mật khẩu demo)",
+                "sessionRequired": "Hãy đăng nhập để vào trang này"
+            }
+        },
+        "provider": {
+            "continue": "Tiếp tục với {{provider}}"
+        }
+    },
+    "chat": {
+        "input": {
+            "placeholder": "Hỏi về quy chế đào tạo hoặc hồ sơ học vụ của bạn...",
+            "actions": {
+                "send": "Gửi câu hỏi",
+                "stop": "Dừng",
+                "attachFiles": "Đính kèm tệp"
+            }
+        },
+        "favorites": {
+            "use": "Dùng câu hỏi đã lưu",
+            "headline": "Câu hỏi đã lưu",
+            "remove": "Bỏ lưu",
+            "empty": {
+                "title": "Chưa lưu câu hỏi nào",
+                "description": "Gửi một câu hỏi rồi đánh dấu sao, hoặc đánh dấu sao câu hỏi trong các hội thoại trước"
+            }
+        },
+        "commands": {
+            "button": "Công cụ",
+            "changeTool": "Đổi công cụ",
+            "availableTools": "Công cụ có sẵn"
+        },
+        "speech": {
+            "start": "Bắt đầu ghi âm",
+            "stop": "Dừng ghi âm",
+            "connecting": "Đang kết nối"
+        },
+        "fileUpload": {
+            "dragDrop": "Kéo và thả tệp vào đây",
+            "browse": "Chọn tệp",
+            "sizeLimit": "Giới hạn:",
+            "errors": {
+                "failed": "Tải lên thất bại",
+                "cancelled": "Đã hủy tải lên"
+            },
+            "actions": {
+                "cancelUpload": "Hủy tải lên",
+                "removeAttachment": "Bỏ tệp đính kèm"
+            }
+        },
+        "messages": {
+            "status": {
+                "using": "Đang",
+                "used": "Đã"
+            },
+            "actions": {
+                "copy": {
+                    "button": "Sao chép",
+                    "success": "Đã sao chép!"
+                }
+            },
+            "feedback": {
+                "positive": "Hữu ích",
+                "negative": "Chưa hữu ích",
+                "edit": "Sửa đánh giá",
+                "dialog": {
+                    "title": "Thêm nhận xét",
+                    "submit": "Gửi đánh giá",
+                    "yourFeedback": "Nhận xét của bạn..."
+                },
+                "status": {
+                    "updating": "Đang cập nhật",
+                    "updated": "Đã cập nhật đánh giá"
+                }
+            }
+        },
+        "history": {
+            "title": "Câu hỏi gần đây",
+            "empty": "Chưa có gì...",
+            "show": "Xem câu hỏi gần đây"
+        },
+        "settings": {
+            "title": "Cài đặt",
+            "customize": "Chọn nhà cung cấp LLM và model cho hội thoại này"
+        },
+        "watermark": "Trợ lý có thể sai. Quy chế là bản nháp chưa phê duyệt, dữ liệu sinh viên là mô phỏng."
+    },
+    "threadHistory": {
+        "sidebar": {
+            "title": "Hội thoại trước",
+            "filters": {
+                "search": "Tìm",
+                "placeholder": "Tìm hội thoại..."
+            },
+            "timeframes": {
+                "today": "Hôm nay",
+                "yesterday": "Hôm qua",
+                "previous7days": "7 ngày trước",
+                "previous30days": "30 ngày trước"
+            },
+            "empty": "Chưa có hội thoại nào",
+            "actions": {
+                "close": "Đóng thanh bên",
+                "open": "Mở thanh bên"
+            }
+        },
+        "thread": {
+            "untitled": "Hội thoại chưa đặt tên",
+            "menu": {
+                "rename": "Đổi tên",
+                "share": "Chia sẻ",
+                "delete": "Xóa"
+            },
+            "actions": {
+                "share": {
+                    "title": "Chia sẻ link hội thoại",
+                    "button": "Chia sẻ",
+                    "status": {
+                        "copied": "Đã sao chép link",
+                        "created": "Đã tạo link chia sẻ!",
+                        "unshared": "Đã tắt chia sẻ hội thoại này"
+                    },
+                    "error": {
+                        "create": "Không tạo được link chia sẻ",
+                        "unshare": "Không tắt được chia sẻ"
+                    }
+                },
+                "delete": {
+                    "title": "Xác nhận xóa",
+                    "description": "Hội thoại và mọi tin nhắn trong đó sẽ bị xóa. Không hoàn tác được.",
+                    "success": "Đã xóa hội thoại",
+                    "inProgress": "Đang xóa hội thoại"
+                },
+                "rename": {
+                    "title": "Đổi tên hội thoại",
+                    "description": "Nhập tên mới cho hội thoại",
+                    "form": {
+                        "name": {
+                            "label": "Tên",
+                            "placeholder": "Nhập tên mới"
+                        }
+                    },
+                    "success": "Đã đổi tên!",
+                    "inProgress": "Đang đổi tên"
+                }
+            }
+        }
+    },
+    "navigation": {
+        "header": {
+            "chat": "Chat",
+            "readme": "Hướng dẫn",
+            "theme": {
+                "light": "Giao diện sáng",
+                "dark": "Giao diện tối",
+                "system": "Theo hệ thống"
+            }
+        },
+        "newChat": {
+            "button": "Hội thoại mới",
+            "dialog": {
+                "title": "Tạo hội thoại mới",
+                "description": "Hội thoại hiện tại sẽ được đóng lại (vẫn xem lại được ở thanh bên). Tiếp tục?",
+                "tooltip": "Hội thoại mới"
+            }
+        },
+        "user": {
+            "menu": {
+                "settings": "Cài đặt",
+                "settingsKey": "S",
+                "apiKeys": "API key",
+                "logout": "Đăng xuất"
+            }
+        }
+    },
+    "apiKeys": {
+        "title": "API key cần có",
+        "description": "Ứng dụng cần các API key sau. Key được lưu trong trình duyệt của bạn.",
+        "success": {
+            "saved": "Đã lưu"
+        }
+    },
+    "alerts": {
+        "info": "Thông tin",
+        "note": "Ghi chú",
+        "tip": "Mẹo",
+        "important": "Quan trọng",
+        "warning": "Cảnh báo",
+        "caution": "Thận trọng",
+        "debug": "Debug",
+        "example": "Ví dụ",
+        "success": "Thành công",
+        "help": "Trợ giúp",
+        "idea": "Ý tưởng",
+        "pending": "Đang chờ",
+        "security": "Bảo mật",
+        "beta": "Beta",
+        "best-practice": "Nên làm"
+    },
+    "components": {
+        "MultiSelectInput": {
+            "placeholder": "Chọn..."
+        },
+        "DatePickerInput": {
+            "placeholder": {
+                "single": "Chọn ngày",
+                "range": "Chọn khoảng ngày"
+            }
+        }
+    }
+}

@@ -1,6 +1,7 @@
 """The HTTP API over the real container, with in-memory and fake adapters (no MCP server, no LLM)."""
 
 import json
+from dataclasses import replace
 
 import pytest
 from backend_fakes import GRADUATION, Model, Models, Regulations, Student
@@ -9,6 +10,7 @@ from fastapi.testclient import TestClient
 from co5151_backend.api.app import create_app
 from co5151_backend.container import Adapters, build_container
 from co5151_backend.infrastructure.config import Settings
+from co5151_contracts import ErrorCode
 
 SETTINGS = Settings(token_secret=b"api-test-secret-at-least-32-bytes", student_token_secret=b"s", database_url=None,
                     planner_mode="rule", verifier_mode="rules")  # fmt: skip
@@ -50,6 +52,13 @@ def test_conversation_lifecycle(client):
     answer = client.post(f"/conversations/{CONV}/messages", json={"content": GRADUATION}, headers=auth).json()
     assert answer["message"]["content"] == "Bạn đủ điều kiện." and answer["trace"]["verifier_rounds"] == 1
     assert answer["trace"]["tool_calls"] == ["get_my_academic_summary", "search_regulations"]
+
+    spans = client.get(f"/traces/{answer['trace']['trace_id']}/spans", headers=auth).json()["spans"]
+    assert [s["node"] for s in spans] == ["planner", "student_record", "planner", "regulation", "planner", "writer",
+                                          "verifier"]  # fmt: skip
+    assert spans[-1]["output"]["status"] == "pass" and spans[-2]["output"]["text"] == "Bạn đủ điều kiện."
+    other = login(client, "sv002")
+    assert client.get(f"/traces/{answer['trace']['trace_id']}/spans", headers=other).status_code == 404
 
     detail = client.get(f"/conversations/{CONV}", headers=auth).json()
     assert [m["role"] for m in detail["messages"]] == ["user", "assistant"] and detail["title"] == GRADUATION
@@ -102,3 +111,46 @@ def test_stream_reports_a_failure_with_its_trace_id():
         assert error["detail"] == "answer failed" and len(error["trace_id"]) == 32
         res = client.post(f"/conversations/{CONV}/messages", json={"content": GRADUATION}, headers=auth)
         assert res.status_code == 500 and len(res.json()["trace_id"]) == 32
+
+
+def test_admin_api_reads_every_users_traces_with_the_admin_token_only():
+    settings = replace(SETTINGS, admin_token="admin-token")
+    adapters = Adapters(student=Student(), regulations=Regulations(), models=Models(Model(*["Bạn đủ điều kiện."] * 5)))
+    with TestClient(create_app(build_container(settings, adapters))) as client:
+        auth = login(client)
+        client.post("/conversations", json={"id": CONV}, headers=auth)
+        trace_id = client.post(f"/conversations/{CONV}/messages", json={"content": GRADUATION},
+                               headers=auth).json()["trace"]["trace_id"]  # fmt: skip
+        admin = {"Authorization": "Bearer admin-token"}
+        assert client.get("/admin/traces", headers=auth).status_code == 401  # a user's token is not enough
+        assert client.get("/admin/traces").status_code == 401
+        [item] = client.get("/admin/traces", params={"conversation_id": CONV}, headers=admin).json()["items"]
+        assert (item["owner_id"], item["question"], item["spans"]) == ("sv001", GRADUATION, [])
+        detail = client.get(f"/admin/traces/{trace_id}", headers=admin).json()
+        assert detail["answer"] == "Bạn đủ điều kiện." and detail["spans"][0]["node"] == "planner"
+        assert client.get("/admin/traces/" + "x" * 32, headers=admin).status_code == 404
+        assert client.get("/admin/traces", params={"limit": 0}, headers=admin).status_code == 422
+        [session] = client.get("/admin/sessions", headers=admin).json()["items"]
+        assert (session["conversation_id"], session["owner_id"], session["turns"]) == (CONV, "sv001", 1)
+        assert client.get("/admin/sessions", headers=auth).status_code == 401
+
+
+def test_admin_api_does_not_exist_without_a_token(client):
+    assert client.get("/admin/traces", headers={"Authorization": "Bearer anything"}).status_code == 404
+
+
+def test_any_signed_in_caller_reads_a_cited_provision(client):
+    assert client.get("/provisions/QD2933-2021-CL5.5").status_code == 401
+    for user in ("sv001", "khach"):
+        body = client.get("/provisions/QD2933-2021-CL5.5", headers=login(client, user)).json()
+        assert body == {"id": "QD2933-2021-CL5.5", "title": "Khoản 5.5", "source": "HCMUT_QD2933_2021.pdf",
+                        "pages": [7, 8], "text": "5.5 Đăng ký các học phần tốt nghiệp", "verified": False,
+                        "note": None}  # fmt: skip
+    assert client.get("/provisions/KHONG-CO", headers=login(client)).status_code == 404
+
+
+def test_provision_when_the_regulation_server_is_down():
+    adapters = Adapters(student=Student(), regulations=Regulations(fail=ErrorCode.INTERNAL), models=Models(None))
+    with TestClient(create_app(build_container(SETTINGS, adapters))) as c:
+        res = c.get("/provisions/QD2933-2021-CL5.5", headers=login(c))
+    assert res.status_code == 503 and res.json() == {"detail": "regulation service unavailable"}

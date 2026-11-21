@@ -118,7 +118,11 @@ reaction_on_message_received = false
 # Name of the assistant.
 name = "Cố vấn học vụ G3"
 
-# default_theme = "dark"
+# Every browser gets the Vietnamese interface (.chainlit/translations/vi-VN.json), whatever its language.
+language = "vi-VN"
+
+# Light by default (a returning browser keeps the theme it picked); colours in public/theme.json
+default_theme = "light"
 
 # Force a specific language for all users (e.g., "en-US", "he-IL", "fr-FR")
 # If not set, the browser's language will be used
@@ -138,7 +142,7 @@ name = "Cố vấn học vụ G3"
 confirm_new_chat = true
 
 # Description of the assistant. This is used for HTML tags.
-# description = ""
+description = "Trợ lý tư vấn quy chế đào tạo và hồ sơ học vụ (nhóm G3, CO5151)"
 
 # Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
 cot = "full"
@@ -161,7 +165,8 @@ alert_style = "classic"
 # custom_js_attributes = "async type = \"module\""
 
 # Custom login page image, relative to public directory or external URL
-# login_page_image = "/public/custom-background.jpg"
+# The right half of the sign-in page: what the assistant does and the demo accounts
+login_page_image = "/public/login.svg"
 
 # Custom login page image filter (Tailwind internal filters, no dark/light variants)
 # login_page_image_filter = "brightness-50 grayscale"
@@ -177,7 +182,9 @@ alert_style = "classic"
 logo_file_url = ""
 
 # Load assistant avatar image directly from URL.
-default_avatar_file_url = ""
+# Every assistant message, new or reopened. Without it Chainlit asks /avatars/<author>, and the author
+# "Cố vấn học vụ G3" is refused (400: Chainlit only accepts [a-zA-Z0-9_ .-]), so its own default image shows.
+default_avatar_file_url = "/public/favicon.svg"
 
 # Avatar size in pixels (default: 20).
 # avatar_size = 20

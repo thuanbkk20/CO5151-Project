@@ -10,9 +10,13 @@ frontend/  (Chainlit)  --HTTP/SSE-->  backend/ (FastAPI)  --MCP Streamable HTTP-
                                           +--> LLM (OpenAI-compatible), database (SQLAlchemy)
 ```
 
-- **frontend** chỉ hiển thị: đăng nhập, chat, sidebar lịch sử. Không biết Advisor, MCP, LLM hay database.
+- **frontend** chỉ hiển thị: đăng nhập, chat, sidebar lịch sử, nguyên văn điều khoản được trích dẫn (qua
+  `GET /provisions/{id}` của backend). Không biết Advisor, MCP, LLM hay database. Chi tiết: [chat-ui.md](chat-ui.md).
 - **backend** là nơi duy nhất ráp mọi thứ (`container.py`). Hai MCP server vẫn là hệ thống riêng.
 - **eval** gọi use case của backend trong cùng process (`co5151_eval.backend_agent`), không qua HTTP.
+- **console** (cho nhóm, không cho sinh viên; đăng nhập bằng tài khoản vận hành trong `.env`) đọc trace qua API admin của backend (`/admin/*`, token
+  `BACKEND_ADMIN_TOKEN`) và chạy đánh giá qua API người dùng như app chat. Chi tiết:
+  [eval-console.md](eval-console.md).
 
 ## Tầng trong backend (`backend/src/co5151_backend/`)
 
@@ -45,6 +49,9 @@ Database, MCP và LLM đều là adapter sau một port; đổi adapter không p
    Student Record.
 8. **Database mới**, không migrate dữ liệu chat cũ (dữ liệu demo). Bảng mới không theo format của Chainlit.
 9. **eval dùng gateway trong process** (gọi thẳng service của MCP server) để chạy nhanh; app luôn đi qua MCP.
+10. **Span từng node** (planner, MCP, writer, Verifier) lưu cùng trace trong bảng `trace_spans`, đọc qua
+    `GET /traces/{id}/spans`, không stream: nháp bị Verifier loại chỉ thấy sau khi có câu trả lời cuối. Chi tiết:
+    [agent-flow.md](agent-flow.md).
 
 ## Verifier và chi phí LLM
 
@@ -57,7 +64,7 @@ lần rồi kiểm lại; không đạt hoặc `refuse` → từ chối. Lời g
 ## Còn mở
 
 1. **Dữ liệu điểm trong lịch sử chat** mâu thuẫn với cam kết D1 (threat model A6): giữ, thêm hạn tự xóa, hay chỉ
-   lưu câu hỏi + trace?
+   lưu câu hỏi + trace? Span (`trace_spans`) cũng lưu kết quả Student Record và nháp, nên cùng quyết định này.
 2. **Đổi cấu trúc bảng**: hiện chỉ tạo bảng còn thiếu; khi deploy thật thì thêm Alembic. PostgreSQL chưa chạy với
    server thật.
 3. **Khách**: mỗi lần đăng nhập `khach` là một danh tính mới, đăng xuất là mất lịch sử.
