@@ -7,7 +7,7 @@ import pytest
 
 from co5151_backend.domain.conversation import ChatSettings, Conversation, Feedback, Message, MessageRole, utcnow
 from co5151_backend.domain.errors import NotFound
-from co5151_backend.domain.trace import Outcome, Trace, Usage
+from co5151_backend.domain.trace import Outcome, Span, Trace, Usage
 from co5151_backend.infrastructure.persistence.memory import InMemoryChatRepository, InMemoryTraceRepository
 from co5151_backend.infrastructure.persistence.sql import SqlChatRepository, SqlTraceRepository, UnsupportedDatabase
 
@@ -114,6 +114,46 @@ async def test_trace_round_trip_is_owner_scoped(repos):
     assert got.outcome is Outcome.REFUSE and got.usage.total == 15 and got.llm_error == "LLMError: 429"
     assert got.steps == ["REFUSE"] and got.citations == ["Dieu_24"] and got.verifier_rounds == 2
     assert await traces.get("a" * 32, "sv002") is None
+
+
+async def test_spans_are_saved_with_their_trace_owner_scoped_and_replaced(repos):
+    chats, traces = repos
+    await chats.create(conversation("c1"))
+    later = Span(node="verifier", name="round 1", output={"status": "pass"}, start_ms=20, usage=Usage(30, 2))
+    first = Span(node="planner", name="rules", input={"question": "q"}, start_ms=0, duration_ms=1)
+    await traces.save(Trace(trace_id="s" * 32, conversation_id="c1"), [later, first])
+    assert await traces.spans("s" * 32, "sv001") == [first, later]
+    assert await traces.spans("s" * 32, "sv002") is None and await traces.spans("x" * 32, "sv001") is None
+    await traces.save(Trace(trace_id="s" * 32, conversation_id="c1"), [first])
+    assert await traces.spans("s" * 32, "sv001") == [first]
+    await chats.delete("c1", "sv001")
+    assert await traces.spans("s" * 32, "sv001") is None
+
+
+async def test_trace_log_reads_every_owner_newest_first_with_question_and_answer(repos):
+    chats, traces = repos
+    await chats.create(conversation("c1"))
+    await chats.create(conversation("c2", owner="sv002"))
+    await chats.add_message(message("q1", "c1"))
+    await chats.add_message(message("a1", "c1", MessageRole.ASSISTANT, seconds=1))
+    older = Trace(trace_id="1" * 32, conversation_id="c1", user_message_id="q1", answer_message_id="a1",
+                  created_at=utcnow())  # fmt: skip
+    newer = Trace(trace_id="2" * 32, conversation_id="c2", error="boom", created_at=utcnow() + timedelta(seconds=5))
+    await traces.save(older, [Span(node="planner", name="rules")])
+    await traces.save(newer)
+    assert [r.trace.trace_id for r in await traces.recent()] == ["2" * 32, "1" * 32]
+    [mine] = await traces.recent(conversation_id="c1", limit=10)
+    assert (mine.owner_id, mine.question, mine.answer, mine.spans) == ("sv001", "text q1", "text a1", [])
+    found = await traces.find("1" * 32)
+    assert [s.node for s in found.spans] == ["planner"] and found.trace.user_message_id == "q1"
+    failed = await traces.find("2" * 32)
+    assert (failed.owner_id, failed.question, failed.trace.error) == ("sv002", None, "boom")
+    assert await traces.find("x" * 32) is None and len(await traces.recent(limit=1)) == 1
+    await chats.create(conversation("c3", seconds=-60))  # older, no answer yet
+    sessions = await traces.sessions()
+    assert [(r.conversation_id, r.owner_id, r.turns) for r in sessions][-1] == ("c3", "sv001", 0)
+    assert {r.conversation_id: r.turns for r in sessions} == {"c1": 1, "c2": 1, "c3": 0}
+    assert len(await traces.sessions(limit=1)) == 1
 
 
 async def test_concurrent_creates_of_one_conversation_both_succeed(tmp_path):

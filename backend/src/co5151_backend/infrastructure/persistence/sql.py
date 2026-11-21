@@ -6,16 +6,17 @@ Rules kept from the earlier chat store, each fixing a failure seen in practice:
   creates of the same conversation both succeed.
 """
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sqlalchemy import and_, delete, event, or_, select, update
+from sqlalchemy import and_, delete, event, func, or_, select, update
 from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import aliased
 
 from ...domain.conversation import (
     MAX_TITLE,
@@ -28,8 +29,8 @@ from ...domain.conversation import (
     utcnow,
 )
 from ...domain.errors import NotFound
-from ...domain.trace import Outcome, Trace, Usage
-from .tables import Base, ConversationRow, MessageRow, TraceRow
+from ...domain.trace import Outcome, SessionRecord, Span, Trace, TraceRecord, Usage
+from .tables import Base, ConversationRow, MessageRow, SpanRow, TraceRow
 
 SUPPORTED_BACKENDS = ("sqlite", "postgresql")
 _INSERT = {"sqlite": sqlite.insert, "postgresql": postgresql.insert}
@@ -167,6 +168,8 @@ class SqlChatRepository:
         async with self._session() as s:
             if await s.scalar(select(ConversationRow.id).where(self._owned(conversation_id, owner_id))) is None:
                 return False
+            traces = select(TraceRow.trace_id).where(TraceRow.conversation_id == conversation_id)
+            await s.execute(delete(SpanRow).where(SpanRow.trace_id.in_(traces)))
             for table in (TraceRow, MessageRow):
                 await s.execute(delete(table).where(table.conversation_id == conversation_id))
             await s.execute(delete(ConversationRow).where(ConversationRow.id == conversation_id))
@@ -221,7 +224,7 @@ class SqlChatRepository:
 
     # Traces ------------------------------------------------------------------------------------------------
 
-    async def save(self, trace: Trace) -> None:
+    async def save(self, trace: Trace, spans: Sequence[Span] = ()) -> None:
         values = {
             "trace_id": trace.trace_id,
             "conversation_id": trace.conversation_id,
@@ -244,6 +247,8 @@ class SqlChatRepository:
         replaced = {k: statement.excluded[k] for k in values if k not in ("trace_id", "created_at")}
         async with self._session() as s:
             await s.execute(statement.on_conflict_do_update(index_elements=["trace_id"], set_=replaced))
+            await s.execute(delete(SpanRow).where(SpanRow.trace_id == trace.trace_id))
+            s.add_all(_span_row(trace.trace_id, seq, span) for seq, span in enumerate(spans))
 
     async def get_trace(self, trace_id: str, owner_id: str) -> Trace | None:
         async with self._session() as s:
@@ -254,6 +259,57 @@ class SqlChatRepository:
             )
             return _trace(row) if row else None
 
+    async def get_spans(self, trace_id: str, owner_id: str) -> list[Span] | None:
+        if await self.get_trace(trace_id, owner_id) is None:
+            return None
+        async with self._session() as s:
+            rows = await s.scalars(
+                select(SpanRow).where(SpanRow.trace_id == trace_id).order_by(SpanRow.start_ms, SpanRow.seq)
+            )
+            return [_span(row) for row in rows]
+
+    def _records(self):
+        """Traces with the owner of their conversation, the question and the answer (one query)."""
+        asked, answered = aliased(MessageRow), aliased(MessageRow)
+        return (
+            select(TraceRow, ConversationRow.owner_id, asked.content, answered.content)
+            .join(ConversationRow, ConversationRow.id == TraceRow.conversation_id)
+            .outerjoin(asked, asked.id == TraceRow.user_message_id)
+            .outerjoin(answered, answered.id == TraceRow.answer_message_id)
+        )
+
+    async def recent_traces(self, conversation_id: str | None, limit: int) -> list[TraceRecord]:
+        statement = self._records().order_by(TraceRow.created_at.desc()).limit(limit)
+        if conversation_id is not None:
+            statement = statement.where(TraceRow.conversation_id == conversation_id)
+        async with self._session() as s:
+            rows = (await s.execute(statement)).all()
+        return [TraceRecord(_trace(row), owner, question, answer) for row, owner, question, answer in rows]
+
+    async def sessions(self, limit: int) -> list[SessionRecord]:
+        turns = func.count(TraceRow.trace_id)
+        statement = (
+            select(ConversationRow, turns)
+            .outerjoin(TraceRow, TraceRow.conversation_id == ConversationRow.id)
+            .group_by(ConversationRow.id)
+            .order_by(ConversationRow.updated_at.desc(), ConversationRow.id.desc())
+            .limit(limit)
+        )
+        async with self._session() as s:
+            rows = (await s.execute(statement)).all()
+        return [SessionRecord(c.id, c.owner_id, c.title, n, _utc(c.created_at), _utc(c.updated_at)) for c, n in rows]
+
+    async def find_trace(self, trace_id: str) -> TraceRecord | None:
+        async with self._session() as s:
+            found = (await s.execute(self._records().where(TraceRow.trace_id == trace_id))).first()
+            if found is None:
+                return None
+            spans = await s.scalars(
+                select(SpanRow).where(SpanRow.trace_id == trace_id).order_by(SpanRow.start_ms, SpanRow.seq)
+            )
+            row, owner, question, answer = found
+            return TraceRecord(_trace(row), owner, question, answer, [_span(span) for span in spans])
+
 
 class SqlTraceRepository:
     """The TraceRepository view of the same store (its `get` would clash with the conversations' `get`)."""
@@ -261,11 +317,23 @@ class SqlTraceRepository:
     def __init__(self, chats: SqlChatRepository):
         self._chats = chats
 
-    async def save(self, trace: Trace) -> None:
-        await self._chats.save(trace)
+    async def save(self, trace: Trace, spans: Sequence[Span] = ()) -> None:
+        await self._chats.save(trace, spans)
 
     async def get(self, trace_id: str, owner_id: str) -> Trace | None:
         return await self._chats.get_trace(trace_id, owner_id)
+
+    async def spans(self, trace_id: str, owner_id: str) -> list[Span] | None:
+        return await self._chats.get_spans(trace_id, owner_id)
+
+    async def recent(self, *, conversation_id: str | None = None, limit: int = 50) -> list[TraceRecord]:
+        return await self._chats.recent_traces(conversation_id, limit)
+
+    async def find(self, trace_id: str) -> TraceRecord | None:
+        return await self._chats.find_trace(trace_id)
+
+    async def sessions(self, *, limit: int = 50) -> list[SessionRecord]:
+        return await self._chats.sessions(limit)
 
 
 def _title(title: str | None) -> str | None:
@@ -316,3 +384,16 @@ def _trace(row: TraceRow) -> Trace:
         error=row.error,
         created_at=_utc(row.created_at),
     )
+
+
+def _span_row(trace_id: str, seq: int, span: Span) -> SpanRow:
+    return SpanRow(trace_id=trace_id, seq=seq, node=span.node, name=span.name[:255], input=span.input,
+                   output=span.output, start_ms=span.start_ms, duration_ms=span.duration_ms,
+                   input_tokens=span.usage.input_tokens, output_tokens=span.usage.output_tokens,
+                   error=span.error)  # fmt: skip
+
+
+def _span(row: SpanRow) -> Span:
+    return Span(node=row.node, name=row.name, input=row.input or {}, output=row.output or {},
+                start_ms=row.start_ms, duration_ms=row.duration_ms,
+                usage=Usage(row.input_tokens, row.output_tokens), error=row.error)  # fmt: skip

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Session {{ session_id[:8] }}{% endblock %}
+{% block content %}
+<p><a href="/sessions">← Sessions</a></p>
+{% include "_session_body.html" %}
+{% endblock %}

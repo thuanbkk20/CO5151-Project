@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 
 def new_trace_id() -> str:
@@ -49,3 +50,45 @@ class Trace:
     llm_error: str | None = None  # an LLM call failed and a fallback was used
     error: str | None = None  # the answer could not be produced
     created_at: datetime | None = None
+
+
+@dataclass(frozen=True)
+class Span:
+    """What one node of an answer received and returned (the OpenTelemetry idea of a span, kept flat).
+
+    `input` and `output` are JSON values already cut to size; they never hold a token, a system prompt or the
+    canary. `start_ms` counts from the start of the answer.
+    """
+
+    node: str  # planner | student_record | regulation | writer | verifier
+    name: str
+    input: dict[str, Any] = field(default_factory=dict)
+    output: dict[str, Any] = field(default_factory=dict)
+    start_ms: int = 0
+    duration_ms: int = 0
+    usage: Usage = field(default_factory=Usage)
+    error: str | None = None
+
+
+@dataclass(frozen=True)
+class TraceRecord:
+    """A trace as the operator console sees it: with whose conversation it is, the question and the answer.
+    `spans` is only filled when one trace is looked up."""
+
+    trace: Trace
+    owner_id: str
+    question: str | None = None
+    answer: str | None = None
+    spans: list[Span] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class SessionRecord:
+    """A conversation as the operator console lists it: whose, its title, how many answers (traces) it has."""
+
+    conversation_id: str
+    owner_id: str
+    title: str | None
+    turns: int
+    created_at: datetime
+    updated_at: datetime

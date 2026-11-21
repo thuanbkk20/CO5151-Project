@@ -1,0 +1,30 @@
+[project]
+name = "co5151-console"
+version = "0.1.0"
+description = "Operator console: traces, evaluation runs, question sets and prompts (server-rendered HTML)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "co5151-contracts",
+    # Task model, the default 24-task set and the scoring of an answer
+    "co5151-eval",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+co5151-console = "co5151_console.cli:main"
+
+[tool.uv.sources]
+co5151-contracts = { workspace = true }
+co5151-eval = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/co5151_console"]

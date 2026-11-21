@@ -1,0 +1,20 @@
+{# One session: its own page (session.html) and the side panel (session_panel.html). #}
+<h1>Session <code>{{ session_id }}</code></h1>
+{% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+{% if detail %}
+{% if not detail.turns %}<p class="muted">Session này chưa có lượt nào được trả lời.</p>{% else %}
+<p class="muted">Người dùng {{ detail.owner }} · {{ detail.turns|length }} lượt. Bấm “Xem trace” để mở luồng node của lượt đó.</p>
+<ol class="turns">
+  {% for t in detail.turns %}{% set r = t.row %}
+  <li>
+    <div class="bubble user"><span class="muted">{{ r.created_at }} · {{ r.owner }}</span><br>{{ t.question or "(không có)" }}</div>
+    <div class="bubble bot">{{ t.answer or "(không có câu trả lời)" }}</div>
+    <div class="turn-meta">
+      <span class="{{ r.tone }}">{{ r.result }}</span> · {{ r.tools }} · {{ r.tokens }} token · {{ r.seconds }} s ·
+      <a href="/traces/{{ r.trace_id }}" data-panel>Xem trace</a>
+    </div>
+  </li>
+  {% endfor %}
+</ol>
+{% endif %}
+{% endif %}

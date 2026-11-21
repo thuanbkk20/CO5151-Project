@@ -33,6 +33,8 @@ def details_markdown(trace: dict[str, Any]) -> str:
         ("LLM", trace.get("llm") or "không có (trả lời bằng mẫu)"),
         ("Trace ID", f"`{trace['trace_id']}`"),
     ]
+    if trace.get("conversation_id"):  # the session id to look up in the operator console
+        rows.append(("Conversation ID", f"`{trace['conversation_id']}`"))
     if trace.get("llm_error"):
         rows.append(("Lỗi LLM", trace["llm_error"]))
     return "\n".join(f"- **{label}:** {value}" for label, value in rows)

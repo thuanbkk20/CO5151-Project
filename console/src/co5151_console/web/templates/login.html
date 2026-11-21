@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập · G3</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body class="login-page">
+  <form class="login stack" method="post" action="/login">
+    <h1>G3 Console</h1>
+    {% if not enabled %}
+      <div class="notice error">Chưa đặt <code>CONSOLE_PASSWORD</code> trong <code>.env</code>: chưa ai đăng nhập được.</div>
+    {% endif %}
+    {% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+    <input type="hidden" name="next" value="{{ target }}">
+    <label>Tên đăng nhập <input name="username" value="{{ username }}" autocomplete="username" required autofocus></label>
+    <label>Mật khẩu <input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="primary" type="submit">Đăng nhập</button>
+  </form>
+</body>
+</html>

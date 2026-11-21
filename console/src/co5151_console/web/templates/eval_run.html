@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% set run = report.run %}
+{% block title %}Lần chạy #{{ run.id }}{% endblock %}
+{% block head %}{% if run.status == "running" %}<meta http-equiv="refresh" content="3">{% endif %}{% endblock %}
+{% block content %}
+<p><a href="/eval">← Đánh giá</a></p>
+<h1>Lần chạy #{{ run.id }} · {{ run.set_name }}</h1>
+<p>
+  <span class="{{ {'done': 'ok', 'running': 'warn'}.get(run.status, 'error') }}">{{ run.status }}</span>
+  · {{ run.done }}/{{ run.total }} câu · bắt đầu {{ run.created_at }}{% if run.finished_at %} · xong {{ run.finished_at }}{% endif %}
+  {% if run.status == "running" %}<span class="muted">(trang tự làm mới)</span>{% endif %}
+</p>
+{% if run.error %}<div class="notice error">{{ run.error }}</div>{% endif %}
+
+{% macro value(m, key, rate) %}{% set v = m.get(key) %}{% if v is none %}—{% elif rate %}{{ "%.0f"|format(v * 100) }}%{% else %}{{ v }}{% endif %}{% endmacro %}
+{% if report.overall %}
+<h2>Tổng hợp</h2>
+<table>
+  <tr><th></th>{% for key, label, rate in metrics %}<th>{{ label }}</th>{% endfor %}</tr>
+  <tr><th>Tất cả</th>{% for key, label, rate in metrics %}<td>{{ value(report.overall, key, rate) }}</td>{% endfor %}</tr>
+  {% for group, m in report.by_group.items() %}
+  <tr><th>{{ group }}</th>{% for key, label, rate in metrics %}<td>{{ value(m, key, rate) }}</td>{% endfor %}</tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<h2>Từng câu</h2>
+{% if not report.results %}<p class="muted">Chưa có kết quả.</p>{% else %}
+<table>
+  <tr><th>Câu</th><th>Câu hỏi</th><th>Kết cục</th><th>Facts</th><th>Trích dẫn</th><th>Pass</th><th>Token</th><th>Giây</th><th>Trace</th></tr>
+  {% for r in report.results %}{% set x = r.record %}
+  <tr>
+    <td>{{ r.task_id }}</td>
+    <td>
+      <details><summary>{{ r.question }}</summary>
+        <pre>{{ x.text or "(không có câu trả lời)" }}</pre>
+        {% if x.forbidden_hits %}<div class="error">Mẫu cấm: {{ x.forbidden_hits|join(", ") }}</div>{% endif %}
+      </details>
+      {% if x.error %}<div class="error">{{ x.error }}</div>{% endif %}
+    </td>
+    <td class="{{ 'ok' if x.outcome_ok else 'error' }}">{{ x.outcome }}</td>
+    <td>{{ x.facts_hit }}/{{ x.facts_total }}</td>
+    <td>{{ x.citations_hit }}/{{ x.citations_total }}</td>
+    <td class="{{ {True: 'ok', False: 'error'}.get(x.passed, 'warn') }}">{{ {True: "đạt", False: "trượt"}.get(x.passed, "chấm tay") }}</td>
+    <td>{{ x.tokens }}</td>
+    <td>{{ x.latency_s|round(1) }}</td>
+    <td>{% if r.trace_id %}<a href="/traces/{{ r.trace_id }}" data-panel><code>{{ r.trace_id[:8] }}</code></a>{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

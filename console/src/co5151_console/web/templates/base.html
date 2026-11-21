@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Console{% endblock %} · G3</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="brand">G3 Console</div>
+    {% for path, label in nav %}
+      <a href="{{ path }}" class="{{ 'active' if request.url.path == path or (path != '/' and request.url.path.startswith(path)) }}">{{ label }}</a>
+    {% endfor %}
+    {% if request.state.user %}
+      <form class="signout" method="post" action="/logout">
+        <span class="muted">{{ request.state.user }}</span>
+        <button type="submit">Đăng xuất</button>
+      </form>
+    {% endif %}
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  {# Side panel: links with data-panel open here (static/panel.js); click outside or Esc to close. #}
+  <div id="panel-backdrop" class="panel-backdrop" hidden></div>
+  <aside id="panel" class="panel" hidden>
+    <div class="panel-bar">
+      <span><button id="panel-back" type="button" hidden>← Quay lại</button> <a id="panel-page" href="#">Mở trang riêng</a></span>
+      <button id="panel-close" type="button">Đóng ✕</button>
+    </div>
+    <div id="panel-body"></div>
+  </aside>
+  <script src="{{ url_for('static', path='panel.js') }}"></script>
+</body>
+</html>

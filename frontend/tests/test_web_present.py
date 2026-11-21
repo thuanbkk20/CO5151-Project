@@ -13,6 +13,7 @@ def test_details_show_the_trace():
     text = details_markdown(TRACE)
     assert "get_my_academic_summary" in text and "QD-Đ22" in text and "1350" in text and "`t1`" in text
     assert "Lỗi LLM" not in text
+    assert "**Conversation ID:** `6f1c1f0e-0000-4000-8000-000000000001`" in text
     assert "Lỗi LLM:** hết quota" in details_markdown({**TRACE, "llm_error": "hết quota"})
 
 

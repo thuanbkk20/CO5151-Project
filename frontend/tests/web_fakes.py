@@ -21,8 +21,9 @@ CONVERSATION = {
          "trace_id": "t1", "feedback": {"value": 1, "comment": "tốt"}},
     ],
 }  # fmt: skip
-TRACE = {"trace_id": "t1", "outcome": None, "tool_calls": ["get_my_academic_summary"], "citations": ["QD-Đ22"],
-         "verifier_rounds": 1, "input_tokens": 1200, "output_tokens": 150, "latency_ms": 2500, "llm": "gemini/x",
+TRACE = {"trace_id": "t1", "conversation_id": CONVERSATION["id"], "outcome": None,
+         "tool_calls": ["get_my_academic_summary"], "citations": ["QD-Đ22"], "verifier_rounds": 1,
+         "input_tokens": 1200, "output_tokens": 150, "latency_ms": 2500, "llm": "gemini/x",
          "llm_error": None}  # fmt: skip
 STREAM = (
     'event: step\ndata: {"name": "plan", "action": "SUMMARY"}\n\n'

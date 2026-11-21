@@ -27,3 +27,5 @@ def test_settings_from_env():
                            "REGULATION_MCP_PORT": "9000"})  # fmt: skip
     assert s.database_url is None and s.regulation_mcp_url == "http://127.0.0.1:9000/mcp"
     assert s.student_mcp_url == "http://127.0.0.1:8102/mcp" and s.token_secret == b"a"
+    assert s.admin_token is None
+    assert Settings.from_env({"BACKEND_ADMIN_TOKEN": " t0k "}).admin_token == "t0k"
