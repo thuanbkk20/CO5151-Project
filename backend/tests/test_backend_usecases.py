@@ -3,8 +3,10 @@ from backend_fakes import GRADUATION, PASS, REFUSE, REVISE, UNVERIFIED, App, Scr
 
 from co5151_backend.application.agents.advisor import prompts
 from co5151_backend.application.usecases.ask import MAX_VERIFIER_ROUNDS
+from co5151_backend.application.usecases.auth import AuthenticateOperator
+from co5151_backend.application.usecases.operator import OperatorTraces
 from co5151_backend.domain.conversation import ChatSettings, Feedback, MessageRole
-from co5151_backend.domain.errors import AnswerFailed, InvalidCredentials, InvalidRequest, NotFound
+from co5151_backend.domain.errors import AnswerFailed, InvalidCredentials, InvalidRequest, NotFound, Unauthenticated
 from co5151_backend.domain.principal import Role
 from co5151_backend.domain.trace import Outcome
 
@@ -72,6 +74,33 @@ async def test_revise_rewrites_once_with_the_issues():
     assert "Quy chế không nêu ngưỡng 105 tín chỉ." in app.model.calls[1]["prompt"]
 
 
+async def test_spans_show_what_each_node_received_and_returned():
+    app = App("Nháp có G3-CANARY-7F3A.", "Bản sửa.", verifier=ScriptedVerifier(REVISE, PASS))
+    principal, conv = await started(app)
+    answer = await app.ask.execute(principal, conv.id, GRADUATION)
+    spans = await app.conversations.spans(principal, answer.trace.trace_id)
+    assert [(s.node, s.name) for s in spans] == [
+        ("planner", "rules"), ("student_record", "get_my_academic_summary"), ("planner", "rules"),
+        ("regulation", "search_regulations"), ("planner", "rules"), ("writer", "draft"), ("verifier", "round 1"),
+        ("writer", "rewrite"), ("verifier", "round 2"),
+    ]  # fmt: skip
+    planner, student, _, regulation, _, draft, verify, rewrite, _ = spans
+    assert planner.output == {"action": "SUMMARY", "by": "rule", "error": None}
+    assert student.output["data"]["credits_earned"] == 113 and student.input["token"] == "(ẩn)"
+    assert regulation.input["args"]["query"] == GRADUATION
+    assert regulation.output["data"]["results"][0]["evidence"]["provision_id"] == "QD2933-2021-CL5.5"
+    assert draft.output == {"text": "Nháp có .", "by": "fake/fake-1"} and draft.usage.total == 1100
+    assert verify.output["status"] == "revise" and verify.input["draft"] == "Nháp có ."
+    assert rewrite.input["verifier_issues"][0]["message"] == "Quy chế không nêu ngưỡng 105 tín chỉ."
+    assert all(a.start_ms <= b.start_ms for a, b in zip(spans, spans[1:], strict=False))
+    dumped = repr(spans)
+    assert prompts.CANARY not in dumped and prompts.SYSTEM_PROMPT[:40] not in dumped
+    assert not any(token in dumped for _, token in app.student.calls)
+    other = app.sign_in.execute("sv002", "demo").principal
+    with pytest.raises(NotFound):
+        await app.conversations.spans(other, answer.trace.trace_id)
+
+
 async def test_a_rewrite_that_still_fails_is_refused_without_a_third_llm_call():
     app = App("Nháp", "Vẫn sai", verifier=ScriptedVerifier(REVISE, REVISE))
     principal, conv = await started(app)
@@ -134,6 +163,24 @@ async def test_a_crash_is_reported_with_a_saved_trace():
         await app.ask.execute(principal, conv.id, GRADUATION)
     trace = await app.conversations.trace(principal, failed.value.trace_id)
     assert trace.error == "RuntimeError: db down" and trace.answer_message_id is None
+    *_, failed_span = await app.conversations.spans(principal, failed.value.trace_id)
+    assert (failed_span.node, failed_span.error) == ("student_record", "RuntimeError: db down")
+
+
+async def test_operator_reads_every_users_traces():
+    app = App("Bạn đủ điều kiện.")
+    principal, conv = await started(app)
+    answer = await app.ask.execute(principal, conv.id, GRADUATION)
+    operator = OperatorTraces(app.traces)
+    [record] = await operator.recent(conversation_id=conv.id)
+    assert (record.owner_id, record.question, record.answer) == ("sv001", GRADUATION, "Bạn đủ điều kiện.")
+    detail = await operator.detail(answer.trace.trace_id)
+    assert detail.spans[0].node == "planner" and detail.trace.trace_id == answer.trace.trace_id
+    assert await operator.recent(conversation_id="khac") == []
+    with pytest.raises(NotFound):
+        await operator.detail("x" * 32)
+    with pytest.raises(InvalidRequest):
+        await operator.recent(limit=0)
 
 
 def test_sign_in():
@@ -144,6 +191,16 @@ def test_sign_in():
     first, second = app.sign_in.execute("khach", ""), app.sign_in.execute("KHACH", "x")
     assert first.principal.user_id != second.principal.user_id and first.principal.is_guest
     assert app.authenticate.execute(first.access_token) == first.principal
+
+
+def test_operator_token_is_checked_and_the_admin_api_is_off_without_one():
+    operator = AuthenticateOperator("admin-token")
+    operator.execute("admin-token")
+    for wrong in ("", None, "admin-token2"):
+        with pytest.raises(Unauthenticated):
+            operator.execute(wrong)
+    with pytest.raises(NotFound):
+        AuthenticateOperator(None).execute("anything")
 
 
 async def test_conversation_settings_feedback_and_ids_are_checked():

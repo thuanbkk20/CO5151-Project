@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Đánh giá{% endblock %}
+{% block content %}
+<h1>Đánh giá</h1>
+{% if error %}<div class="notice error">{{ error }}</div>{% endif %}
+{% if sets %}
+<form class="inline" method="get" action="/eval/confirm">
+  <select name="set_id">{% for s in sets %}<option value="{{ s.id }}">{{ s.name }} ({{ s.size }} câu)</option>{% endfor %}</select>
+  <button class="primary" type="submit">Chạy bộ này…</button>
+</form>
+{% else %}
+<p class="muted">Chưa có bộ câu hỏi. <a href="/question-sets">Tạo hoặc nhập bộ mặc định</a> trước.</p>
+{% endif %}
+<h2>Các lần chạy</h2>
+{% if not runs %}<p class="muted">Chưa chạy lần nào.</p>{% else %}
+<table>
+  <tr><th>#</th><th>Bộ câu hỏi</th><th>Trạng thái</th><th>Tiến độ</th><th>Bắt đầu (UTC)</th><th>Xong (UTC)</th></tr>
+  {% for r in runs %}
+  <tr>
+    <td><a href="/eval/runs/{{ r.id }}">#{{ r.id }}</a></td>
+    <td>{{ r.set_name }}</td>
+    <td class="{{ {'done': 'ok', 'running': 'warn'}.get(r.status, 'error') }}">{{ r.status }}</td>
+    <td>{{ r.done }}/{{ r.total }}</td>
+    <td>{{ r.created_at }}</td>
+    <td>{{ r.finished_at or "" }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

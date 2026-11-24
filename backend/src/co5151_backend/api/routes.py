@@ -38,6 +38,14 @@ def principal(c: Deps, credentials: Annotated[HTTPAuthorizationCredentials | Non
 Caller = Annotated[Principal, Depends(principal)]
 
 
+def operator(c: Deps, credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]) -> None:
+    """The operator console's admin token (`BACKEND_ADMIN_TOKEN`); a user's access token is never accepted."""
+    c.authenticate_operator.execute(credentials.credentials if credentials else None)
+
+
+Operator = Depends(operator)
+
+
 @router.post("/auth/login", tags=["auth"])
 def login(body: s.LoginIn, c: Deps) -> s.SessionOut:
     return s.SessionOut.of(c.sign_in.execute(body.username, body.password))
@@ -152,3 +160,33 @@ async def delete_feedback(message_id: str, c: Deps, caller: Caller) -> Response:
 @router.get("/traces/{trace_id}", tags=["chat"])
 async def get_trace(trace_id: str, c: Deps, caller: Caller) -> s.TraceOut:
     return s.TraceOut.of(await c.conversations.trace(caller, trace_id))
+
+
+@router.get("/traces/{trace_id}/spans", tags=["chat"])
+async def get_spans(trace_id: str, c: Deps, caller: Caller) -> s.SpansOut:
+    """What each node of the answer (planner, MCP tools, writer, Verifier) received and returned, in order."""
+    spans = await c.conversations.spans(caller, trace_id)
+    return s.SpansOut(trace_id=trace_id, spans=[s.SpanOut.of(span) for span in spans])
+
+
+# Operator console (admin token) ----------------------------------------------------------------------------------
+
+
+@router.get("/admin/traces", tags=["admin"], dependencies=[Operator])
+async def admin_traces(c: Deps, conversation_id: str | None = None, limit: int = 50) -> s.TraceListOut:
+    """Every user's traces, newest first; only those of `conversation_id` (the session id) when given."""
+    records = await c.operator_traces.recent(conversation_id=conversation_id, limit=limit)
+    return s.TraceListOut(items=[s.TraceRecordOut.of(r) for r in records])
+
+
+@router.get("/admin/traces/{trace_id}", tags=["admin"], dependencies=[Operator])
+async def admin_trace(trace_id: str, c: Deps) -> s.TraceRecordOut:
+    """One trace with the question, the answer and what each node received and returned."""
+    return s.TraceRecordOut.of(await c.operator_traces.detail(trace_id))
+
+
+@router.get("/admin/sessions", tags=["admin"], dependencies=[Operator])
+async def admin_sessions(c: Deps, limit: int = 50) -> s.AdminSessionListOut:
+    """Every user's conversations, most recently active first; their turns are `/admin/traces?conversation_id=`."""
+    sessions = await c.operator_traces.sessions(limit=limit)
+    return s.AdminSessionListOut(items=[s.AdminSessionOut.of(r) for r in sessions])

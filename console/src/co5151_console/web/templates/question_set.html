@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ qs.name }}{% endblock %}
+{% block content %}
+<p><a href="/question-sets">← Bộ câu hỏi</a></p>
+<h1>{{ qs.name }}</h1>
+<form class="inline" method="get" action="/question-sets/{{ qs.id }}/tasks/new">
+  <button class="primary" type="submit">Thêm câu</button>
+</form>
+{% if not qs.tasks %}<p class="muted">Bộ này chưa có câu nào.</p>{% else %}
+<table>
+  <tr><th>ID</th><th>Nhóm</th><th>Người hỏi</th><th>Kết cục mong đợi</th><th>Câu hỏi</th><th></th></tr>
+  {% for t in qs.tasks %}
+  <tr>
+    <td><a href="/question-sets/{{ qs.id }}/tasks/{{ t.id }}">{{ t.id }}</a></td>
+    <td>{{ t.group.value }}</td>
+    <td>{{ t.user or "khách" }}</td>
+    <td>{{ t.expected.value }}{% for o in t.also_accept %} / {{ o.value }}{% endfor %}</td>
+    <td>{{ t.question }}</td>
+    <td>
+      <form method="post" action="/question-sets/{{ qs.id }}/tasks/{{ t.id }}/delete" onsubmit="return confirm('Xóa câu {{ t.id }}?')">
+        <button type="submit">Xóa</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+<h2>Xóa bộ</h2>
+<form method="post" action="/question-sets/{{ qs.id }}/delete" onsubmit="return confirm('Xóa cả bộ câu hỏi này?')">
+  <button type="submit">Xóa bộ này</button>
+</form>
+{% endblock %}

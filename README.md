@@ -47,8 +47,14 @@ uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation
 
 Mở http://localhost:8000, đăng nhập `sv001` … `sv008` (mật khẩu `demo`) hoặc `khach` (chỉ hỏi quy chế). Nút cài
 đặt cạnh ô nhập chọn provider (chỉ bên đã có key) và model. Dưới mỗi câu trả lời có "Chi tiết xử lý": từng bước,
-tool, trích dẫn, Verifier, token, thời gian, trace id. Lịch sử chat theo tài khoản do backend lưu
+tool, trích dẫn, Verifier, token, thời gian, trace id, conversation id (tra luồng node trong console, xem
+[docs/design/eval-console.md](docs/design/eval-console.md)). Lịch sử chat theo tài khoản do backend lưu
 (`CHAT_DATABASE_URL`, mặc định SQLite `backend/.data/chat.db`). API: [backend/README.md](backend/README.md).
+
+Console vận hành cho nhóm (http://127.0.0.1:8200, process `console` trong Procfile): xem trace theo session id,
+chạy đánh giá qua backend, sửa bộ câu hỏi ([console/README.md](console/README.md)). Cần đặt `BACKEND_ADMIN_TOKEN`
+trong `.env` (cùng một giá trị cho backend và console) và `CONSOLE_PASSWORD` (đăng nhập bằng
+`CONSOLE_USERNAME`, mặc định `admin`).
 
 Biến làm đổi cách chạy:
 

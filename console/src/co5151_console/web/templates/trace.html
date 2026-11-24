@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Trace {{ trace_id[:8] }}{% endblock %}
+{% block content %}
+<p><a href="/traces">← Traces</a></p>
+{% include "_trace_body.html" %}
+{% endblock %}
