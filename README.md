@@ -37,7 +37,8 @@ Yêu cầu: Python ≥ 3.10, [uv](https://docs.astral.sh/uv/) ≥ 0.5.
 frontend (Chainlit :8000) --HTTP/SSE--> backend (co5151-api :8100) --MCP HTTP--> student-mcp :8102, regulation-mcp :8103
 ```
 
-Điền trong `.env`: key của provider LLM đang chọn (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`),
+Điền trong `.env`: key của provider LLM đang chọn (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`; Azure
+OpenAI của nhóm: `LLM_PROVIDER=azure`, xem [infra/azure/README.md](infra/azure/README.md#azure-openai)),
 `BACKEND_TOKEN_SECRET`, `STUDENT_MCP_TOKEN_SECRET`, `CHAINLIT_AUTH_SECRET`; các biến khác có mặc định chạy được
 ([.env.example](.env.example)). Chạy cả 4 process bằng [Procfile](Procfile):
 

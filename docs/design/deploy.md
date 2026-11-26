@@ -65,7 +65,7 @@ Terraform root module, không phải package Python (không thêm vào uv worksp
   Console tắt mặc định (bật bằng biến), vì dành cho nhóm vận hành.
 - Mọi service nghe `127.0.0.1` (mặc định của `.env.example`). Chỉ Caddy nghe 80/443.
 - Caddy: tự lấy chứng chỉ HTTPS cho tên miền `cloudapp.azure.com`; chuyển websocket của Chainlit. Không có basic
-  auth (xem "Chưa quyết" 7).
+  auth (xem "Chưa quyết" 8).
 - Đăng nhập: trang đăng nhập của Chainlit, như khi chạy local, nhưng
   - `GUEST_LOGIN=off`: backend từ chối `khach` (local vẫn bật);
   - `DEMO_ACCOUNTS_FILE=/opt/co5151/accounts.json`: cùng tài khoản `sv001` … `sv008`, `cvht01`, mật khẩu chung là
@@ -114,8 +114,10 @@ Mỗi bước: `terraform fmt -check` và `terraform validate` (không cần đ�
    (nặng, khoảng vài trăm MB, chưa đo).
 5. **CI chạy apply** (GitHub Actions + OIDC + remote state trong Storage Account): chưa làm trong nhánh này; README
    chỉ giải thích cách hoạt động. Làm thêm nếu Kiên muốn thực hành.
-6. **Nhánh git trên VM**: mặc định `main`; trước khi được merge thì deploy `feat/deploy` (đã chứa `feat/chat-ui`).
-7. ~~Basic auth trước toàn trang~~ → **bỏ** (26/11). Chrome hỏi lại mật khẩu basic auth liên tục: khi cookie của
+6. **LLM**: Gemini từ chối request từ VM ở Hong Kong; app dùng Azure OpenAI ở `koreacentral`, xem
+   [azure-openai.md](azure-openai.md).
+7. **Nhánh git trên VM**: mặc định `main`; trước khi được merge thì deploy `feat/deploy` (đã chứa `feat/chat-ui`).
+8. ~~Basic auth trước toàn trang~~ → **bỏ** (26/11). Chrome hỏi lại mật khẩu basic auth liên tục: khi cookie của
    Chainlit hết hạn hoặc chưa có, `/user` trả 401 (`{"detail":"Invalid authentication token"}`, không có
    `WWW-Authenticate`), sau đó Chrome gửi request không kèm basic auth, Caddy trả 401 Basic và Chrome hỏi lại (đoán
    từ log Caddy, chưa thấy tài liệu xác nhận). Thay bằng tắt `khach` và mật khẩu riêng. Đổi lại: trang đăng nhập

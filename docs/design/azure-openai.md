@@ -72,13 +72,13 @@ lại: Gemini vẫn chọn được trong nút cài đặt ở local.
 |---|---|---|---|
 | 1 | `docs(design): LLM on Azure OpenAI` | file này, link trong `docs/README.md` | xong `d97780f` |
 | 2 | `feat(infra): Azure OpenAI account and gpt-4.1-mini deployment` | `openai.tf`, biến, output, đăng ký provider. Apply (26/11): 2 resource, endpoint `co5151-g3-openai` | xong `e636dda` |
-| 3 | `feat(backend): azure provider` | `base_url_env`, `PROVIDERS["azure"]`, `.env.example`, test (không gọi LLM thật) | |
+| 3 | `feat(backend): azure provider` | `base_url_env`, `PROVIDERS["azure"]`, `.env.example`, test (không gọi LLM thật) | xong `4e75a17` |
 | 4 | `docs: Azure OpenAI` | README gốc (provider), README infra (lấy key vào `.env`), `deploy.md`. Kiên thử một câu ở local rồi deploy | |
 
 ## Chưa quyết
 
-1. **Gọi từ Hong Kong**: Azure OpenAI có chặn theo vị trí như Gemini không. Đoán là không (gọi tới resource của mình);
-   kiểm bằng một câu hỏi trên bản deploy sau bước 4.
+1. ~~Gọi từ Hong Kong~~ → **được** (26/11): `curl` từ VM tới `chat/completions` của deployment trả HTTP 200. Ở local
+   gọi qua provider `azure` cũng được (24 token vào, 1 token ra).
 2. **Không dùng key** (Entra ID: `az login` ở local, managed identity trên VM) an toàn hơn, nhưng cần thêm thư viện
    `azure-identity`. Chưa làm.
 3. **Eval với `gpt-4.1-mini`**: bộ eval mới chạy với Gemini; chạy lại với Azure tốn token, chỉ chạy khi Kiên bảo.
