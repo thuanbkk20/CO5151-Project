@@ -50,3 +50,11 @@ frontend/.files/
 # Personal Claude Code settings and agents
 .claude/settings.local.json
 .claude/agents/researcher.md
+
+# Terraform (infra/): provider downloads, state (holds resource details), local variable values
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log

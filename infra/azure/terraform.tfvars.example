@@ -1,0 +1,4 @@
+# Copy thành terraform.tfvars (đã gitignore) rồi sửa nếu cần. Biến không ghi ở đây dùng giá trị mặc định
+# trong variables.tf. Không ghi secret vào file này: Terraform lưu giá trị biến vào state ở dạng rõ.
+
+# location = "eastasia"

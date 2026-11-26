@@ -70,7 +70,7 @@ Terraform root module, không phải package Python (không thêm vào uv worksp
 
 | Khoản | Ước tính | Căn cứ |
 |---|---|---|
-| VM B1s / B2ats v2 | $0 | Azure for Students: 750 giờ mỗi cỡ B1s, B2pts v2, B2ats v2 |
+| VM B2ats v2 | $0 | Azure for Students: 750 giờ mỗi cỡ B1s, B2pts v2, B2ats v2 |
 | Public IP Standard | khoảng $3.6/tháng | chưa kiểm chứng, xem trong Cost Management sau khi apply |
 | OS disk | $0 nếu nằm trong mức miễn phí | chưa kiểm chứng |
 | Budget, NSG, VNet | $0 | — |
@@ -82,7 +82,7 @@ Mỗi bước: `terraform fmt -check` và `terraform validate` (không cần đ�
 
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
-| 1 | `docs(design): deployment plan` | file này, link trong `docs/README.md` | |
+| 1 | `docs(design): deployment plan` | file này, link trong `docs/README.md` | xong `19836d0` |
 | 2 | `feat(infra): Terraform skeleton for Azure` | `versions.tf`, provider, biến, resource group, `.gitignore` cho state/tfvars, `README.md` (cài công cụ, init/plan/apply, state). Apply: chỉ tạo resource group | |
 | 3 | `feat(infra): network and firewall` | VNet, subnet, NSG (80/443 mọi nơi, 22 từ `admin_cidr`), public IP có DNS label. Apply | |
 | 4 | `feat(infra): VM with cloud-init` | VM, SSH key, cloud-init: user, swap, `uv`, Caddy, clone repo, systemd unit; output URL và lệnh SSH. Apply, SSH thử | |
@@ -93,11 +93,11 @@ Mỗi bước: `terraform fmt -check` và `terraform validate` (không cần đ�
 
 ## Chưa quyết
 
-1. **Cỡ máy**: B2ats v2 (2 vCPU, nghe nói 1 GB RAM, chưa kiểm chứng) hay B1s (1 vCPU, 1 GB). Đều miễn phí 750 giờ.
-   Có bài trên Microsoft Q&A (2024) nói B2 không có cho một số subscription sinh viên. Kiểm bằng
-   `az vm list-skus` ở bước 2.
-2. **Region**: `southeastasia` (Singapore, gần VN nhất). Có bài nói subscription sinh viên bị policy chặn một số
-   region; kiểm ở bước 2.
+1. ~~Cỡ máy~~ → **B2ats v2** (2 vCPU, 1 GB, x64). `az vm list-skus` (26/11): B1s `NotAvailableForSubscription` ở
+   cả `malaysiawest`, `indonesiacentral`, `eastasia`; B2ats v2 chỉ dùng được ở `eastasia`.
+2. ~~Region~~ → **`eastasia`** (Hong Kong). Policy "Allowed resource deployment regions" của subscription (tenant
+   `hcmut.edu.vn`) chỉ cho `uaenorth`, `koreacentral`, `malaysiawest`, `eastasia`, `indonesiacentral`; không có
+   `southeastasia`.
 3. **Chứng chỉ HTTPS cho `*.cloudapp.azure.com`**: Caddy (Let's Encrypt) cấp được không chưa kiểm chứng. Không được thì
    dùng `<IP>.sslip.io`.
 4. **Cài `az` CLI** (để `az login` cho Terraform): máy không có Homebrew; dự kiến `uv tool install azure-cli`
