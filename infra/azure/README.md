@@ -13,8 +13,7 @@ Dựng máy chạy app trên subscription **Azure for Students**. Thiết kế v
 
 ```bash
 cd infra/azure
-az login                                                     # đăng nhập, chọn subscription "Azure for Students"
-export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+az login             # đăng nhập; Terraform dùng subscription mặc định của az ("Azure for Students")
 terraform init       # lần đầu, hoặc khi đổi provider: tải provider vào .terraform/ (~300 MB)
 terraform plan       # xem sẽ tạo / sửa / xóa gì; chưa đụng vào Azure
 terraform apply      # in lại plan, gõ "yes" mới thực hiện
@@ -24,6 +23,10 @@ terraform destroy    # xóa mọi resource do Terraform tạo
 
 Đổi giá trị biến: `cp terraform.tfvars.example terraform.tfvars` rồi sửa (file này gitignore). Không ghi secret vào
 biến Terraform.
+
+Tài khoản có nhiều subscription thì chỉ định rõ, kẻo Terraform tạo resource vào subscription mặc định đang chọn của
+`az`: `export ARM_SUBSCRIPTION_ID=$(az account show --name "Azure for Students" --query id -o tsv)`. Trên CI
+(không có `az login`) biến này là bắt buộc.
 
 ## Terraform hoạt động thế nào
 

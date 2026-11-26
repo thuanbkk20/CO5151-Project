@@ -9,7 +9,7 @@ terraform {
   }
 }
 
-# Subscription lấy từ biến môi trường ARM_SUBSCRIPTION_ID (xem README), đăng nhập bằng phiên `az login`.
+# Đăng nhập bằng phiên `az login`; subscription là subscription mặc định của az, hoặc ARM_SUBSCRIPTION_ID nếu đặt.
 provider "azurerm" {
   features {}
 }
