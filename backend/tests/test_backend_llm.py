@@ -59,6 +59,19 @@ async def test_request_carries_history_limit_and_schema_only_where_supported():
     assert create.call_args.kwargs["max_completion_tokens"] == 10
 
 
+async def test_azure_needs_its_resource_url_and_calls_the_deployment():
+    assert "azure" not in ProviderChatModels({"AZURE_OPENAI_API_KEY": "a"}).providers()
+    url = "https://x.openai.azure.com/openai/v1/"
+    models = ProviderChatModels({"LLM_PROVIDER": "azure", "AZURE_OPENAI_API_KEY": "a", "AZURE_OPENAI_BASE_URL": url})
+    assert models.providers() == ["azure"] and models.default_provider() == "azure"
+    azure = models.create(None, None)
+    assert (azure.base_url, azure.model) == (url, "gpt-4.1-mini")
+    create = _mocked(azure)
+    await azure.complete("q", system="s", max_output_tokens=10, json_schema=SCHEMA)
+    sent = create.call_args.kwargs
+    assert sent["model"] == "gpt-4.1-mini" and sent["max_completion_tokens"] == 10 and sent["response_format"] == SCHEMA
+
+
 async def test_overrides_apply_to_the_default_provider_only():
     env = {"LLM_PROVIDER": "openai", "LLM_API_KEY": "local", "LLM_BASE_URL": "http://localhost:11434/v1",
            "LLM_MODEL": "my-model", "LLM_REASONING_EFFORT": "low", "GEMINI_API_KEY": "g"}  # fmt: skip

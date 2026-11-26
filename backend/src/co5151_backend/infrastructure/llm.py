@@ -28,6 +28,8 @@ class Provider:
     json_schema: bool = False
     # Name of the output-token limit: OpenAI wants max_completion_tokens, most compatible endpoints max_tokens
     max_tokens_param: str = "max_tokens"
+    # Variable holding the base URL when it depends on the customer's resource (Azure); it then replaces `base_url`
+    base_url_env: str | None = None
 
 
 PROVIDERS: dict[str, Provider] = {
@@ -45,6 +47,15 @@ PROVIDERS: dict[str, Provider] = {
         max_tokens_param="max_completion_tokens",
     ),
     "kimi": Provider(base_url="https://opencode.ai/inference/openai/v1", model="kimi-k3", key_env="OPENCODE_API_KEY"),
+    # Azure OpenAI v1 endpoint (https://<resource>.openai.azure.com/openai/v1/); model = deployment name
+    "azure": Provider(
+        base_url="",
+        model="gpt-4.1-mini",
+        key_env="AZURE_OPENAI_API_KEY",
+        json_schema=True,
+        max_tokens_param="max_completion_tokens",
+        base_url_env="AZURE_OPENAI_BASE_URL",
+    ),
 }
 DEFAULT_PROVIDER = "gemini"
 DEFAULT_TIMEOUT_S = 60.0
@@ -109,7 +120,7 @@ class OpenAICompatibleChatModel:
 
 
 class ProviderChatModels:
-    """The providers that have a key in the environment.
+    """The providers that have a key (and a base URL, for Azure) in the environment.
 
     `LLM_PROVIDER` is the default. `LLM_MODEL`, `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_REASONING_EFFORT` override
     the profile of that default provider only, e.g. to point it at a local OpenAI-compatible server.
@@ -126,12 +137,16 @@ class ProviderChatModels:
             raise ValueError(f"Unknown LLM_PROVIDER {self._default!r}; choose one of {sorted(PROVIDERS)}")
         self._overrides = {k: get(f"LLM_{k.upper()}") for k in ("model", "base_url", "api_key", "reasoning_effort")}
         self._keys = {name: get(p.key_env) for name, p in PROVIDERS.items()}
+        self._base_urls = {name: (get(p.base_url_env) if p.base_url_env else None) or p.base_url
+                           for name, p in PROVIDERS.items()}  # fmt: skip
         if self._overrides["api_key"]:
             self._keys[self._default] = self._overrides["api_key"]
+        if self._overrides["base_url"]:
+            self._base_urls[self._default] = self._overrides["base_url"]
         self._timeout = float(get("LLM_TIMEOUT") or DEFAULT_TIMEOUT_S)
 
     def providers(self) -> list[str]:
-        return [name for name in PROVIDERS if self._keys[name]]
+        return [name for name in PROVIDERS if self._keys[name] and self._base_urls[name]]
 
     def default_provider(self) -> str:
         available = self.providers()
@@ -141,7 +156,7 @@ class ProviderChatModels:
         name = (provider or self.default_provider()).lower()
         if name not in PROVIDERS:
             raise InvalidRequest(f"Unknown LLM provider {name!r}; choose one of {sorted(PROVIDERS)}")
-        if not self._keys[name]:
+        if name not in self.providers():
             return None
         overrides = self._overrides if name == self._default else {}
         return OpenAICompatibleChatModel(
@@ -149,7 +164,7 @@ class ProviderChatModels:
             PROVIDERS[name],
             api_key=self._keys[name],
             model=model or overrides.get("model"),
-            base_url=overrides.get("base_url"),
+            base_url=self._base_urls[name],
             reasoning_effort=overrides.get("reasoning_effort"),
             timeout=self._timeout,
         )

@@ -70,8 +70,8 @@ lại: Gemini vẫn chọn được trong nút cài đặt ở local.
 
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
-| 1 | `docs(design): LLM on Azure OpenAI` | file này, link trong `docs/README.md` | |
-| 2 | `feat(infra): Azure OpenAI account and gpt-4.1-mini deployment` | `openai.tf`, biến, output, đăng ký provider. Kiên `terraform apply` | |
+| 1 | `docs(design): LLM on Azure OpenAI` | file này, link trong `docs/README.md` | xong `d97780f` |
+| 2 | `feat(infra): Azure OpenAI account and gpt-4.1-mini deployment` | `openai.tf`, biến, output, đăng ký provider. Apply (26/11): 2 resource, endpoint `co5151-g3-openai` | xong `e636dda` |
 | 3 | `feat(backend): azure provider` | `base_url_env`, `PROVIDERS["azure"]`, `.env.example`, test (không gọi LLM thật) | |
 | 4 | `docs: Azure OpenAI` | README gốc (provider), README infra (lấy key vào `.env`), `deploy.md`. Kiên thử một câu ở local rồi deploy | |
 
