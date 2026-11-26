@@ -45,10 +45,12 @@ frontend (Chainlit :8000) --HTTP/SSE--> backend (co5151-api :8100) --MCP HTTP-->
 uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation-mcp, co5151-api, co5151-web
 ```
 
-Mở http://localhost:8000, đăng nhập `sv001` … `sv008` (mật khẩu `demo`) hoặc `khach` (chỉ hỏi quy chế). Nút cài
-đặt cạnh ô nhập chọn provider (chỉ bên đã có key) và model. Dưới mỗi câu trả lời có "Chi tiết xử lý": từng bước,
-tool, trích dẫn, Verifier, token, thời gian, trace id, conversation id (tra luồng node trong console, xem
-[docs/design/eval-console.md](docs/design/eval-console.md)). Lịch sử chat theo tài khoản do backend lưu
+Mở http://localhost:8000 (giao diện tiếng Việt), đăng nhập `sv001` … `sv008` (mật khẩu `demo`) hoặc `khach` (chỉ
+hỏi quy chế); trang đăng nhập và mục "Hướng dẫn" ghi tình huống của từng tài khoản. Hội thoại mới có câu gợi ý theo
+tài khoản. Nút cài đặt cạnh ô nhập chọn provider (chỉ bên đã có key) và model. Mỗi câu trả lời có mục "Đã xử lý câu
+hỏi" (các bước; mở ra xem tool, trích dẫn, Verifier, token, thời gian, trace id, conversation id để tra trong
+console, xem [docs/design/eval-console.md](docs/design/eval-console.md)), một dòng kiểm chứng, và nút cho từng điều
+khoản trích dẫn: bấm để xem nguyên văn ở panel bên phải. Thiết kế: [docs/design/chat-ui.md](docs/design/chat-ui.md). Lịch sử chat theo tài khoản do backend lưu
 (`CHAT_DATABASE_URL`, mặc định SQLite `backend/.data/chat.db`). API: [backend/README.md](backend/README.md).
 
 Console vận hành cho nhóm (http://127.0.0.1:8200, process `console` trong Procfile): xem trace theo session id,

@@ -9,6 +9,7 @@ Tài liệu dùng chung cho cả hệ thống. Tài liệu của riêng từng t
 |---|---|
 | [architecture.md](design/architecture.md) | Kiến trúc frontend/backend, các tầng của backend, quyết định chính, Verifier, việc còn mở |
 | [eval-console.md](design/eval-console.md) | Console vận hành (trace, đánh giá, bộ câu hỏi, prompt): thiết kế và kế hoạch commit |
+| [chat-ui.md](design/chat-ui.md) | Thiết kế lại giao diện chat Chainlit: tiếng Việt, câu gợi ý theo tài khoản, nguồn trích dẫn; kế hoạch commit |
 | [agent-flow.md](design/agent-flow.md) | Luồng agent trên UI: span từng node, lưu, API, sidebar; kế hoạch commit |
 | [threat-model.md](design/threat-model.md) | Threat model v1 (D2, mục 6): tài sản, điểm vào, kẻ tấn công, biện pháp và trạng thái từng biện pháp |
 

@@ -6,10 +6,10 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from ..container import Container
-from ..domain.errors import AnswerFailed, InvalidCredentials, InvalidRequest, NotFound, Unauthenticated
+from ..domain.errors import AnswerFailed, InvalidCredentials, InvalidRequest, NotFound, Unauthenticated, Unavailable
 from .routes import router
 
-STATUS = {InvalidCredentials: 401, Unauthenticated: 401, NotFound: 404, InvalidRequest: 422}
+STATUS = {InvalidCredentials: 401, Unauthenticated: 401, NotFound: 404, InvalidRequest: 422, Unavailable: 503}
 DETAIL = {InvalidCredentials: "invalid credentials", Unauthenticated: "not signed in", NotFound: "not found"}
 
 
