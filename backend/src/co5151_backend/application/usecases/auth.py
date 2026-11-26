@@ -19,13 +19,15 @@ class Session:
 
 
 class SignIn:
-    def __init__(self, accounts: AccountDirectory, tokens: AccessTokens):
+    def __init__(self, accounts: AccountDirectory, tokens: AccessTokens, guest_login: bool = True):
         self._accounts = accounts
         self._tokens = tokens
+        self._guest_login = guest_login
 
     def execute(self, username: str, password: str) -> Session:
-        """`khach` signs in without a password as a new guest, so each guest sign-in has its own history."""
-        if username.strip().lower() == GUEST_USERNAME:
+        """`khach` signs in without a password as a new guest, so each guest sign-in has its own history. With guest
+        sign-in off (a public deployment) `khach` is an unknown account like any other."""
+        if self._guest_login and username.strip().lower() == GUEST_USERNAME:
             principal = Principal(f"{GUEST_USERNAME}-{secrets.token_hex(6)}", Role.GUEST, "Khách")
         else:
             account = self._accounts.authenticate(username, password)

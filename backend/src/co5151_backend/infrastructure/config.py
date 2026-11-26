@@ -37,6 +37,7 @@ class Settings:
     verifier_model: str | None = None
     history_messages: int = 10
     admin_token: str | None = None  # the operator console's token; None: no admin API
+    guest_login: bool = True  # `khach` signs in without a password
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> "Settings":
@@ -68,4 +69,5 @@ class Settings:
             verifier_model=env.get("VERIFIER_LLM_MODEL", "").strip() or None,
             history_messages=int(env.get("ADVISOR_HISTORY_MESSAGES", cls.history_messages)),
             admin_token=env.get("BACKEND_ADMIN_TOKEN", "").strip() or None,
+            guest_login=env.get("GUEST_LOGIN", "on").strip().lower() not in OFF_VALUES,
         )

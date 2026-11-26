@@ -46,7 +46,7 @@ uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation
 ```
 
 Mở http://localhost:8000 (giao diện tiếng Việt), đăng nhập `sv001` … `sv008` (mật khẩu `demo`) hoặc `khach` (chỉ
-hỏi quy chế); trang đăng nhập và mục "Hướng dẫn" ghi tình huống của từng tài khoản. Hội thoại mới có câu gợi ý theo
+hỏi quy chế; `GUEST_LOGIN=off` tắt tài khoản này); trang đăng nhập và mục "Hướng dẫn" ghi tình huống của từng tài khoản. Hội thoại mới có câu gợi ý theo
 tài khoản. Nút cài đặt cạnh ô nhập chọn provider (chỉ bên đã có key) và model. Mỗi câu trả lời có mục "Đã xử lý câu
 hỏi" (các bước; mở ra xem tool, trích dẫn, Verifier, token, thời gian, trace id, conversation id để tra trong
 console, xem [docs/design/eval-console.md](docs/design/eval-console.md)), một dòng kiểm chứng, và nút cho từng điều

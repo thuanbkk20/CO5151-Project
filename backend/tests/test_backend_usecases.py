@@ -3,7 +3,7 @@ from backend_fakes import GRADUATION, PASS, REFUSE, REVISE, UNVERIFIED, App, Reg
 
 from co5151_backend.application.agents.advisor import prompts
 from co5151_backend.application.usecases.ask import MAX_VERIFIER_ROUNDS
-from co5151_backend.application.usecases.auth import AuthenticateOperator
+from co5151_backend.application.usecases.auth import AuthenticateOperator, SignIn
 from co5151_backend.application.usecases.operator import OperatorTraces
 from co5151_backend.application.usecases.provisions import ReadProvision, provision_of
 from co5151_backend.domain.conversation import ChatSettings, Feedback, MessageRole
@@ -17,6 +17,7 @@ from co5151_backend.domain.errors import (
 )
 from co5151_backend.domain.principal import Role
 from co5151_backend.domain.trace import Outcome
+from co5151_backend.infrastructure.identity import DemoAccountDirectory
 from co5151_contracts import ErrorCode
 
 pytestmark = pytest.mark.anyio
@@ -200,6 +201,15 @@ def test_sign_in():
     first, second = app.sign_in.execute("khach", ""), app.sign_in.execute("KHACH", "x")
     assert first.principal.user_id != second.principal.user_id and first.principal.is_guest
     assert app.authenticate.execute(first.access_token) == first.principal
+
+
+def test_guest_sign_in_can_be_turned_off():
+    app = App()
+    closed = SignIn(DemoAccountDirectory(), app.tokens, guest_login=False)
+    for password in ("", "demo"):
+        with pytest.raises(InvalidCredentials):
+            closed.execute("khach", password)
+    assert closed.execute("sv001", "demo").principal.user_id == "sv001"
 
 
 def test_operator_token_is_checked_and_the_admin_api_is_off_without_one():
