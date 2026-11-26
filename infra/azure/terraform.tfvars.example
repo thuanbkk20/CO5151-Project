@@ -1,4 +1,9 @@
-# Copy thành terraform.tfvars (đã gitignore) rồi sửa nếu cần. Biến không ghi ở đây dùng giá trị mặc định
-# trong variables.tf. Không ghi secret vào file này: Terraform lưu giá trị biến vào state ở dạng rõ.
+# Copy thành terraform.tfvars (đã gitignore) rồi điền. Biến không ghi ở đây dùng giá trị mặc định trong
+# variables.tf. Không ghi secret vào file này: Terraform lưu giá trị biến vào state ở dạng rõ.
 
-# location = "eastasia"
+# Bắt buộc. IP public hiện tại của máy bạn (xem bằng: curl -s https://api.ipify.org), thêm /32. IP nhà mạng đổi
+# thì sửa lại và chạy terraform apply.
+admin_cidr = "203.0.113.7/32"
+
+# location  = "eastasia"
+# dns_label = "co5151-g3"

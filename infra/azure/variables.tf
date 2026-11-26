@@ -18,3 +18,19 @@ variable "tags" {
     managed_by = "terraform"
   }
 }
+
+variable "admin_cidr" {
+  description = "Dải IP được SSH vào VM (cổng 22), thường là IP public hiện tại của máy bạn: \"<ip>/32\""
+  type        = string
+
+  validation {
+    condition     = can(cidrhost(var.admin_cidr, 0)) && var.admin_cidr != "0.0.0.0/0"
+    error_message = "admin_cidr phải là một dải CIDR, ví dụ 203.0.113.7/32, và không được mở cho mọi nơi."
+  }
+}
+
+variable "dns_label" {
+  description = "Nhãn DNS của IP public: <dns_label>.<location>.cloudapp.azure.com (phải chưa ai dùng trong region)"
+  type        = string
+  default     = "co5151-g3"
+}
