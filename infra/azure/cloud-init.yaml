@@ -1,0 +1,143 @@
+#cloud-config
+# Dựng máy một lần khi VM được tạo (Terraform truyền qua custom_data). Chỉ cài nền: swap, user chạy app, uv, Caddy,
+# mã nguồn, systemd unit. .env, Caddyfile và việc chạy app do deploy.sh làm.
+# Log trên VM: /var/log/cloud-init-output.log; xem đã xong chưa: cloud-init status --wait
+
+package_update: true
+package_upgrade: true
+packages:
+  - ca-certificates
+  - curl
+  - git
+  - gpg
+  - sqlite3
+
+# RAM 1 GB: 5 process của app khoảng 425 MB (đo 26/11) + hệ điều hành; swap để không bị OOM killer.
+swap:
+  filename: /swapfile
+  size: 2G
+  maxsize: 2G
+
+# User hệ thống chạy app, không đăng nhập được; code và dữ liệu ở /opt/co5151.
+users:
+  - default
+  - name: co5151
+    system: true
+    homedir: /opt/co5151
+    shell: /usr/sbin/nologin
+
+write_files:
+  # Nhóm service: `systemctl restart co5151.target` khởi động lại cả app.
+  - path: /etc/systemd/system/co5151.target
+    content: |
+      [Unit]
+      Description=CO5151 app (MCP servers, backend, chat UI)
+      Wants=co5151-student.service co5151-regulation.service co5151-api.service co5151-web.service
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/co5151-student.service
+    content: |
+      [Unit]
+      Description=CO5151 Student Record MCP
+      PartOf=co5151.target
+      After=network-online.target
+      ConditionPathExists=/opt/co5151/app/.env
+
+      [Service]
+      User=co5151
+      WorkingDirectory=/opt/co5151/app
+      ExecStart=/opt/co5151/app/.venv/bin/student-mcp serve
+      Restart=on-failure
+      RestartSec=5
+      NoNewPrivileges=true
+      PrivateTmp=true
+      ProtectSystem=full
+
+  - path: /etc/systemd/system/co5151-regulation.service
+    content: |
+      [Unit]
+      Description=CO5151 Regulation MCP
+      PartOf=co5151.target
+      After=network-online.target
+      ConditionPathExists=/opt/co5151/app/.env
+
+      [Service]
+      User=co5151
+      WorkingDirectory=/opt/co5151/app
+      ExecStart=/opt/co5151/app/.venv/bin/regulation-mcp
+      Restart=on-failure
+      RestartSec=5
+      NoNewPrivileges=true
+      PrivateTmp=true
+      ProtectSystem=full
+
+  - path: /etc/systemd/system/co5151-api.service
+    content: |
+      [Unit]
+      Description=CO5151 backend API
+      PartOf=co5151.target
+      After=co5151-student.service co5151-regulation.service
+      ConditionPathExists=/opt/co5151/app/.env
+
+      [Service]
+      User=co5151
+      WorkingDirectory=/opt/co5151/app
+      ExecStart=/opt/co5151/app/.venv/bin/co5151-api
+      Restart=on-failure
+      RestartSec=5
+      NoNewPrivileges=true
+      PrivateTmp=true
+      ProtectSystem=full
+
+  - path: /etc/systemd/system/co5151-web.service
+    content: |
+      [Unit]
+      Description=CO5151 chat UI (Chainlit)
+      PartOf=co5151.target
+      After=co5151-api.service
+      ConditionPathExists=/opt/co5151/app/.env
+
+      [Service]
+      User=co5151
+      WorkingDirectory=/opt/co5151/app
+      ExecStart=/opt/co5151/app/.venv/bin/co5151-web
+      Restart=on-failure
+      RestartSec=5
+      NoNewPrivileges=true
+      PrivateTmp=true
+      ProtectSystem=full
+
+  # Console vận hành không nằm trong co5151.target: chỉ bật tay khi cần (systemctl start co5151-console), xem qua
+  # SSH tunnel (ssh -L 8200:127.0.0.1:8200 ...), không mở ra Internet.
+  - path: /etc/systemd/system/co5151-console.service
+    content: |
+      [Unit]
+      Description=CO5151 operator console
+      After=co5151-api.service
+      ConditionPathExists=/opt/co5151/app/.env
+
+      [Service]
+      User=co5151
+      WorkingDirectory=/opt/co5151/app
+      ExecStart=/opt/co5151/app/.venv/bin/co5151-console
+      Restart=on-failure
+      RestartSec=5
+      NoNewPrivileges=true
+      PrivateTmp=true
+      ProtectSystem=full
+
+runcmd:
+  # Caddy từ apt repo chính thức của Caddy (bản trong Ubuntu cũ hơn).
+  - curl -fsSL https://dl.cloudsmith.io/public/caddy/stable/gpg.key | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+  - echo "deb [signed-by=/usr/share/keyrings/caddy-stable-archive-keyring.gpg] https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main" > /etc/apt/sources.list.d/caddy-stable.list
+  - apt-get update
+  - apt-get install -y caddy
+  # uv, cố định phiên bản, cài cho mọi user vào /usr/local/bin.
+  - curl -LsSf https://astral.sh/uv/${uv_version}/install.sh | env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh
+  - mkdir -p /opt/co5151
+  - chown co5151:co5151 /opt/co5151
+  - sudo -u co5151 git clone ${repo_url} /opt/co5151/app
+  - systemctl daemon-reload
+  - systemctl enable co5151.target

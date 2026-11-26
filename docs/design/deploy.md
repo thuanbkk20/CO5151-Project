@@ -72,7 +72,7 @@ Terraform root module, không phải package Python (không thêm vào uv worksp
 |---|---|---|
 | VM B2ats v2 | $0 | Azure for Students: 750 giờ mỗi cỡ B1s, B2pts v2, B2ats v2 |
 | Public IP Standard | khoảng $3.6/tháng | chưa kiểm chứng, xem trong Cost Management sau khi apply |
-| OS disk | $0 nếu nằm trong mức miễn phí | chưa kiểm chứng |
+| OS disk Premium SSD 64 GB (P6) | $0 nếu nằm trong mức miễn phí | chưa kiểm chứng; nếu bị tính tiền thì đổi `os_disk_type = "Standard_LRS"` (tạo lại VM) |
 | Budget, NSG, VNet | $0 | — |
 
 ## Kế hoạch commit
@@ -84,7 +84,7 @@ Mỗi bước: `terraform fmt -check` và `terraform validate` (không cần đ�
 |---|---|---|---|
 | 1 | `docs(design): deployment plan` | file này, link trong `docs/README.md` | xong `19836d0` |
 | 2 | `feat(infra): Terraform skeleton for Azure` | `versions.tf`, provider, biến, resource group, `.gitignore` cho state/tfvars, `README.md` (cài công cụ, init/plan/apply, state). Apply: chỉ tạo resource group | xong `771d559`, `fa04b28` |
-| 3 | `feat(infra): network and firewall` | VNet, subnet, NSG (80/443 mọi nơi, 22 từ `admin_cidr`), public IP có DNS label. Apply | |
+| 3 | `feat(infra): network and firewall` | VNet, subnet, NSG (80/443 mọi nơi, 22 từ `admin_cidr`), public IP có DNS label. Apply | xong `5c973aa` |
 | 4 | `feat(infra): VM with cloud-init` | VM, SSH key, cloud-init: user, swap, `uv`, Caddy, clone repo, systemd unit; output URL và lệnh SSH. Apply, SSH thử | |
 | 5 | `feat(infra): deploy script` | `deploy.sh`: đẩy `.env` và Caddyfile, checkout nhánh, `uv sync`, restart, kiểm tra `/healthz`. Chạy thật: app lên HTTPS có basic auth | |
 | 6 | `feat(infra): budget alert` | `budget.tf`: ngưỡng $10 và $20, email | |

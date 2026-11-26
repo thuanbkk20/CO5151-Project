@@ -34,3 +34,45 @@ variable "dns_label" {
   type        = string
   default     = "co5151-g3"
 }
+
+variable "vm_size" {
+  description = "Cỡ VM. Standard_B2ats_v2 (2 vCPU, 1 GB) nằm trong 750 giờ miễn phí của Azure for Students"
+  type        = string
+  default     = "Standard_B2ats_v2"
+}
+
+variable "admin_username" {
+  description = "User SSH vào VM (có sudo)"
+  type        = string
+  default     = "azureuser"
+}
+
+variable "ssh_public_key_path" {
+  description = "Đường dẫn SSH public key được đăng nhập VM (đăng nhập bằng mật khẩu bị tắt)"
+  type        = string
+  default     = "~/.ssh/co5151_azure.pub"
+}
+
+variable "os_disk_type" {
+  description = "Loại OS disk: Premium_LRS 64 GB là cỡ P6 (theo ưu đãi miễn phí, chưa kiểm chứng), Standard_LRS rẻ nhất"
+  type        = string
+  default     = "Premium_LRS"
+}
+
+variable "os_disk_size_gb" {
+  description = "Dung lượng OS disk (GB)"
+  type        = number
+  default     = 64
+}
+
+variable "repo_url" {
+  description = "Repo git cloud-init clone về VM (repo public, không cần key)"
+  type        = string
+  default     = "https://github.com/thuanbkk20/CO5151-Project.git"
+}
+
+variable "uv_version" {
+  description = "Phiên bản uv cài trên VM"
+  type        = string
+  default     = "0.13.7"
+}
