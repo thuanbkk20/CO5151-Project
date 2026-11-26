@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Cập nhật app trên VM Azure: đẩy .env và cấu hình Caddy, checkout mã nguồn, cài thư viện, khởi động lại, kiểm tra.
+# Chạy từ máy của bạn sau khi đã `terraform apply` trong infra/azure:
+#
+#   infra/azure/deploy.sh [git-ref]      # git-ref: nhánh, tag hoặc commit trên origin; mặc định main
+#
+# Cấu hình lấy từ .env.production ở gốc repo (gitignore). Secret không đi qua Terraform (state lưu dạng rõ) mà
+# được đẩy thẳng qua SSH. Biến tùy chọn: DEPLOY_ENV_FILE, DEPLOY_SSH_KEY, DEPLOY_SSH_USER, DEPLOY_HOST.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+TF_DIR="$ROOT/infra/azure"
+REF="${1:-main}"
+ENV_FILE="${DEPLOY_ENV_FILE:-$ROOT/.env.production}"
+SSH_KEY="${DEPLOY_SSH_KEY:-$HOME/.ssh/co5151_azure}"
+SSH_USER="${DEPLOY_SSH_USER:-azureuser}"
+HOST="${DEPLOY_HOST:-$(terraform -chdir="$TF_DIR" output -raw fqdn)}"
+APP=/opt/co5151/app
+
+die() {
+  echo "deploy: $*" >&2
+  exit 1
+}
+get() { grep -E "^$1=" "$ENV_FILE" | tail -n 1 | cut -d= -f2- || true; }
+on_vm() { ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$SSH_USER@$HOST" "$@"; }
+
+# 1. Kiểm tra cấu hình trước khi đụng vào server.
+[[ -f "$ENV_FILE" ]] || die "không thấy $ENV_FILE (xem infra/azure/README.md)"
+for key in BACKEND_TOKEN_SECRET STUDENT_MCP_TOKEN_SECRET CHAINLIT_AUTH_SECRET DEPLOY_BASIC_AUTH_USER \
+  DEPLOY_BASIC_AUTH_PASSWORD; do
+  value="$(get "$key")"
+  [[ -n "$value" && "$value" != change-me* ]] || die "$key trống hoặc còn giá trị mẫu trong $ENV_FILE"
+done
+for key in STUDENT_MCP_HOST REGULATION_MCP_HOST BACKEND_HOST CONSOLE_HOST CHAINLIT_HOST; do
+  value="$(get "$key")"
+  [[ -z "$value" || "$value" == 127.0.0.1 ]] || die "$key=$value: service phải nghe 127.0.0.1, chỉ Caddy ra Internet"
+done
+
+echo "==> $HOST: .env (bỏ các dòng DEPLOY_*)"
+grep -v '^DEPLOY_' "$ENV_FILE" | on_vm "sudo install -m 600 -o co5151 -g co5151 /dev/stdin $APP/.env"
+
+echo "==> Caddy: Caddyfile, tài khoản basic auth (lưu hash bcrypt, không lưu mật khẩu)"
+on_vm "sudo install -m 644 /dev/stdin /etc/caddy/Caddyfile" <"$TF_DIR/Caddyfile"
+hash="$(printf '%s' "$(get DEPLOY_BASIC_AUTH_PASSWORD)" | on_vm caddy hash-password)"
+printf 'APP_DOMAIN=%s\nBASIC_AUTH_USER=%s\nBASIC_AUTH_HASH=%s\n' "$HOST" "$(get DEPLOY_BASIC_AUTH_USER)" "$hash" |
+  on_vm "sudo install -m 640 -o root -g caddy /dev/stdin /etc/caddy/caddy.env"
+printf '[Service]\nEnvironmentFile=/etc/caddy/caddy.env\n' |
+  on_vm "sudo install -D -m 644 /dev/stdin /etc/systemd/system/caddy.service.d/env.conf"
+
+echo "==> Mã nguồn $REF, thư viện, khởi động lại"
+on_vm bash -s -- "$REF" <<'REMOTE'
+set -euo pipefail
+REF="$1"
+APP=/opt/co5151/app
+as_app() { sudo -u co5151 -H "$@"; }
+
+as_app git -C "$APP" fetch --prune --tags origin
+if as_app git -C "$APP" rev-parse -q --verify "origin/$REF^{commit}" >/dev/null; then target="origin/$REF"; else target="$REF"; fi
+# Mã nguồn trên server không sửa tay: --force bỏ thay đổi ở file được git theo dõi; .env, .venv, .data giữ nguyên.
+as_app git -C "$APP" checkout -q --detach --force "$target"
+as_app git -C "$APP" log --oneline -1
+cd "$APP"
+as_app uv sync --locked --all-packages --no-dev --quiet
+
+sudo systemctl daemon-reload
+sudo systemctl restart co5151.target
+sudo systemctl restart caddy
+
+wait_for() {
+  for _ in $(seq 1 60); do
+    curl -fsS -o /dev/null "$1" && return 0
+    sleep 2
+  done
+  echo "không lên: $1 (xem: journalctl -u 'co5151-*' -n 50)" >&2
+  return 1
+}
+wait_for http://127.0.0.1:8100/healthz
+wait_for http://127.0.0.1:8000/
+systemctl is-active co5151-student co5151-regulation co5151-api co5151-web caddy | paste -sd ' ' -
+free -h | sed -n 1,3p
+REMOTE
+
+echo "==> Kiểm tra từ Internet: https://$HOST"
+status="$(curl -s -o /dev/null -w '%{http_code}' --retry 10 --retry-delay 3 --retry-all-errors "https://$HOST/")"
+[[ "$status" == 401 ]] || die "không có basic auth: mong 401, nhận $status"
+# Mật khẩu đưa cho curl qua stdin (-K -), không nằm trên dòng lệnh.
+status="$(printf 'user = "%s:%s"\n' "$(get DEPLOY_BASIC_AUTH_USER)" "$(get DEPLOY_BASIC_AUTH_PASSWORD)" |
+  curl -s -o /dev/null -w '%{http_code}' -K - "https://$HOST/")"
+[[ "$status" == 200 ]] || die "đăng nhập basic auth: mong 200, nhận $status"
+echo "Xong: https://$HOST (401 khi chưa đăng nhập, 200 khi có tài khoản)"

@@ -28,6 +28,30 @@ Tài khoản có nhiều subscription thì chỉ định rõ, kẻo Terraform t�
 `az`: `export ARM_SUBSCRIPTION_ID=$(az account show --name "Azure for Students" --query id -o tsv)`. Trên CI
 (không có `az login`) biến này là bắt buộc.
 
+## Đưa app lên và cập nhật app
+
+Terraform chỉ dựng máy (cloud-init chạy một lần). Đưa code và cấu hình lên bằng `deploy.sh`, chạy lại mỗi khi muốn
+cập nhật:
+
+```bash
+cp .env .env.production       # ở gốc repo; gitignore. Sửa: secret mới (khác máy local), key LLM, và
+                              # DEPLOY_BASIC_AUTH_USER / DEPLOY_BASIC_AUTH_PASSWORD (tài khoản chung của trang)
+infra/azure/deploy.sh main    # hoặc tên nhánh/tag/commit khác trên origin (phải push trước)
+```
+
+Script đẩy `.env` (bỏ dòng `DEPLOY_*`, quyền 600), Caddyfile và hash mật khẩu basic auth qua SSH; checkout ref,
+`uv sync --locked --no-dev`, khởi động lại `co5151.target` và Caddy; kiểm tra trang trả 401 khi chưa đăng nhập và 200
+khi có tài khoản. Code trên server chỉ lấy từ `origin`, nên commit chưa push thì không deploy được.
+
+Trên VM (`terraform output ssh_command`):
+
+```bash
+systemctl status 'co5151-*' caddy          # trạng thái
+journalctl -u co5151-api -f                 # log backend (tương tự co5151-web, co5151-student, ...)
+sudo systemctl start co5151-console         # console vận hành; xem từ máy bạn qua tunnel:
+                                            # ssh -i ~/.ssh/co5151_azure -L 8200:127.0.0.1:8200 azureuser@<fqdn>
+```
+
 ## Terraform hoạt động thế nào
 
 - **Code `.tf` khai báo trạng thái muốn có** ("có một resource group tên `co5151-rg` ở `eastasia`"), không phải các
