@@ -22,3 +22,8 @@ output "ssh_command" {
   description = "Lệnh SSH vào VM"
   value       = "ssh -i ${trimsuffix(var.ssh_public_key_path, ".pub")} ${var.admin_username}@${azurerm_public_ip.app.fqdn}"
 }
+
+output "openai_base_url" {
+  description = "AZURE_OPENAI_BASE_URL cho .env (key lấy bằng az, xem README)"
+  value       = "${azurerm_cognitive_account.openai.endpoint}openai/v1/"
+}

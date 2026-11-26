@@ -15,5 +15,5 @@ provider "azurerm" {
 
   # Subscription mới chưa đăng ký namespace nào; chỉ đăng ký đúng những gì app dùng (provider v5 không tự đăng ký).
   resource_provider_registrations = "none"
-  resource_providers_to_register  = ["Microsoft.Compute", "Microsoft.Network"]
+  resource_providers_to_register  = ["Microsoft.Compute", "Microsoft.Network", "Microsoft.CognitiveServices"]
 }
