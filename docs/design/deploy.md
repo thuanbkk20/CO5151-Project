@@ -86,7 +86,7 @@ Mỗi bước: `terraform fmt -check` và `terraform validate` (không cần đ�
 | 2 | `feat(infra): Terraform skeleton for Azure` | `versions.tf`, provider, biến, resource group, `.gitignore` cho state/tfvars, `README.md` (cài công cụ, init/plan/apply, state). Apply: chỉ tạo resource group | xong `771d559`, `fa04b28` |
 | 3 | `feat(infra): network and firewall` | VNet, subnet, NSG (80/443 mọi nơi, 22 từ `admin_cidr`), public IP có DNS label. Apply | xong `5c973aa` |
 | 4 | `feat(infra): VM with cloud-init` | VM, SSH key, cloud-init: user, swap, `uv`, Caddy, clone repo, systemd unit; output URL và lệnh SSH. Apply, SSH thử | xong `6790365` |
-| 5 | `feat(infra): deploy script` | `deploy.sh`: đẩy `.env` và Caddyfile, checkout nhánh, `uv sync`, restart, kiểm tra `/healthz`. Chạy thật: app lên HTTPS có basic auth | |
+| 5 | `feat(infra): deploy script` | `deploy.sh`: đẩy `.env` và Caddyfile, checkout nhánh, `uv sync`, restart, kiểm tra `/healthz`. Chạy thật: app lên HTTPS có basic auth | xong `1e6d820` |
 | 6 | `feat(infra): budget alert` | `budget.tf`: ngưỡng $10 và $20, email | |
 | 7 | `ci: check Terraform format and config` | job `terraform fmt -check` + `init -backend=false` + `validate` trong `ci.yml` | |
 | 8 | `docs: deployment` | README gốc (mục "Triển khai"), `architecture.md`, README của infra: cách CI ở công ty chạy plan/apply | |

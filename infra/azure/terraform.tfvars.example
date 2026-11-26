@@ -7,3 +7,7 @@ admin_cidr = "203.0.113.7/32"
 
 # location  = "eastasia"
 # dns_label = "co5151-g3"
+
+# Bắt buộc. Email nhận cảnh báo chi tiêu (budget mặc định $20/tháng, đổi bằng budget_amount).
+alert_emails = ["you@example.com"]
+# budget_amount = 20

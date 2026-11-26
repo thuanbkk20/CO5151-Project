@@ -76,3 +76,19 @@ variable "uv_version" {
   type        = string
   default     = "0.13.7"
 }
+
+variable "budget_amount" {
+  description = "Budget mỗi tháng (USD, trừ vào credit) để gửi email cảnh báo ở 50%, 100% và khi dự báo vượt"
+  type        = number
+  default     = 20
+}
+
+variable "alert_emails" {
+  description = "Email nhận cảnh báo budget; đặt trong terraform.tfvars, không commit"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.alert_emails) > 0
+    error_message = "Cần ít nhất một email nhận cảnh báo budget."
+  }
+}
