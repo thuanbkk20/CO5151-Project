@@ -34,14 +34,16 @@ Terraform chỉ dựng máy (cloud-init chạy một lần). Đưa code và cấ
 cập nhật:
 
 ```bash
-cp .env .env.production       # ở gốc repo; gitignore. Sửa: secret mới (khác máy local), key LLM, và
-                              # DEPLOY_BASIC_AUTH_USER / DEPLOY_BASIC_AUTH_PASSWORD (tài khoản chung của trang)
-infra/azure/deploy.sh main    # hoặc tên nhánh/tag/commit khác trên origin (phải push trước)
+cp .env .env.production         # ở gốc repo; gitignore. Sửa: secret mới (khác máy local), key LLM, và
+                                # DEPLOY_DEMO_PASSWORD (mật khẩu chung của tài khoản demo, ≥ 12 ký tự)
+infra/azure/deploy.sh main      # hoặc tên nhánh/tag/commit khác trên origin (phải push trước)
 ```
 
-Script đẩy `.env` (bỏ dòng `DEPLOY_*`, quyền 600), Caddyfile và hash mật khẩu basic auth qua SSH; checkout ref,
-`uv sync --locked --no-dev`, khởi động lại `co5151.target` và Caddy; kiểm tra trang trả 401 khi chưa đăng nhập và 200
-khi có tài khoản. Code trên server chỉ lấy từ `origin`, nên commit chưa push thì không deploy được.
+Script đẩy `.env` (bỏ dòng `DEPLOY_*`, thêm `GUEST_LOGIN=off` và `DEMO_ACCOUNTS_FILE`, quyền 600) và Caddyfile qua
+SSH; checkout ref, `uv sync --locked --no-dev`; ghi `/opt/co5151/accounts.json` (tài khoản demo, hash của
+`DEPLOY_DEMO_PASSWORD`, bằng `accounts.py`); khởi động lại `co5151.target` và Caddy; kiểm tra `khach` và mật khẩu
+`demo` bị từ chối, trang trả 200. Code trên server chỉ lấy từ `origin`, nên commit chưa push thì không deploy được.
+Ref phải có `GUEST_LOGIN` (từ `ffae96f`), nếu không bước kiểm tra `khach` sẽ báo lỗi.
 
 Trên VM (`terraform output ssh_command`):
 

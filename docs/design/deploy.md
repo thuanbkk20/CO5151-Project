@@ -95,8 +95,8 @@ Mỗi bước: `terraform fmt -check` và `terraform validate` (không cần đ�
 | 4 | `feat(infra): VM with cloud-init` | VM, SSH key, cloud-init: user, swap, `uv`, Caddy, clone repo, systemd unit; output URL và lệnh SSH. Apply, SSH thử | xong `f7a5e92` |
 | 5 | `feat(infra): deploy script` | `deploy.sh`: đẩy `.env` và Caddyfile, checkout nhánh, `uv sync`, restart, kiểm tra `/healthz`. Chạy thật: app lên HTTPS có basic auth | xong `8f49f13` |
 | 6 | `feat(infra): budget alert` | `budget.tf`: 50%, 100% và dự báo vượt budget ($20), email | xong `b9f9984` |
-| 7 | `docs(design): private accounts instead of basic auth` | sửa plan: bỏ basic auth, tắt `khach`, mật khẩu riêng | |
-| 8 | `feat(backend): GUEST_LOGIN turns guest sign-in off` | biến `GUEST_LOGIN` (mặc định `on`), `SignIn` từ chối `khach` khi tắt; test | |
+| 7 | `docs(design): private accounts instead of basic auth` | sửa plan: bỏ basic auth, tắt `khach`, mật khẩu riêng | xong `9a1bacc` |
+| 8 | `feat(backend): GUEST_LOGIN turns guest sign-in off` | biến `GUEST_LOGIN` (mặc định `on`), `SignIn` từ chối `khach` khi tắt; test | xong `ffae96f` |
 | 9 | `feat(infra): open site with a private demo password` | bỏ `basic_auth` khỏi Caddyfile và `deploy.sh`; `accounts.py`; `deploy.sh` ghi `DEMO_ACCOUNTS_FILE`, `GUEST_LOGIN=off` và kiểm tra `khach`, mật khẩu `demo` bị từ chối. Chạy thật | |
 | 10 | `ci: check Terraform format and config` | job `terraform fmt -check` + `init -backend=false` + `validate` trong `ci.yml` | |
 | 11 | `docs: deployment` | README gốc (mục "Triển khai"), `architecture.md`, README của infra: cách CI ở công ty chạy plan/apply | |
