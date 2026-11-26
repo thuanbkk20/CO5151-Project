@@ -20,13 +20,6 @@
       <text x="150" y="494">Mỗi câu trả lời kèm điều khoản trích dẫn và</text>
       <text x="150" y="532">được Verifier kiểm tra lại trước khi gửi.</text>
     </g>
-    <rect x="150" y="590" width="600" height="190" rx="18" fill="#fff" opacity=".1"/>
-    <text x="180" y="638" font-size="22" font-weight="700" fill="#f2b705">TÀI KHOẢN DEMO</text>
-    <g font-size="23">
-      <text x="180" y="684"><tspan font-weight="700">sv001 … sv008</tspan> · mật khẩu <tspan font-weight="700">demo</tspan></text>
-      <text x="180" y="720" opacity=".85">mỗi tài khoản là một tình huống học vụ khác nhau</text>
-      <text x="180" y="756"><tspan font-weight="700">khach</tspan> · mật khẩu bất kỳ, chỉ hỏi quy chế chung</text>
-    </g>
-    <text x="150" y="850" font-size="19" opacity=".6">Quy chế là bản nháp chưa phê duyệt · dữ liệu sinh viên là mô phỏng</text>
+    <text x="150" y="640" font-size="19" opacity=".6">Quy chế là bản nháp chưa phê duyệt · dữ liệu sinh viên là mô phỏng</text>
   </g>
 </svg>

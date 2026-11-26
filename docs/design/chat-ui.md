@@ -72,7 +72,7 @@ Advisor, Verifier hay luồng dữ liệu.
 |---|---|---|---|
 | 1 | `docs(design): chat UI redesign plan` | file này, link trong `docs/README.md` | xong |
 | 2 | `feat(web): Vietnamese interface` | `vi-VN.json`, `language = "vi-VN"` + test | xong `d3da21b` |
-| 3 | `feat(web): light theme, logo and favicon` | `public/theme.json`, logo SVG, ảnh trang đăng nhập (tài khoản demo), `config.toml` | xong `23fd544` |
+| 3 | `feat(web): light theme, logo and favicon` | `public/theme.json`, logo SVG, ảnh trang đăng nhập (đã bỏ tài khoản demo khỏi ảnh khi deploy public), `config.toml` | xong `23fd544` |
 | 4 | `feat(web): welcome and starters by account` | một chat profile mỗi tài khoản (lời chào + câu gợi ý theo vai trò, lấy từ `tasks.json`), "Thử bảo mật", `chainlit.md` + test | xong `95c7176` |
 | 5 | `feat(web): plain progress labels` | step "Đang/Đã xử lý câu hỏi", nhãn tiến trình, "Chi tiết kỹ thuật" bên dưới + test | xong `7843ef3` |
 | 6 | `feat(backend): GET /provisions/{id}` | use case `ReadProvision` qua `RegulationGateway`, 404/422/503, schema, test với MCP server thật (fixture có sẵn) | xong `2eb3713` |

@@ -165,7 +165,7 @@ alert_style = "classic"
 # custom_js_attributes = "async type = \"module\""
 
 # Custom login page image, relative to public directory or external URL
-# The right half of the sign-in page: what the assistant does and the demo accounts
+# The right half of the sign-in page: what the assistant does (no account names or passwords: the site is public)
 login_page_image = "/public/login.svg"
 
 # Custom login page image filter (Tailwind internal filters, no dark/light variants)
