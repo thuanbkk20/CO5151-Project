@@ -1,5 +1,6 @@
 import argparse
 import importlib
+import json
 import subprocess
 import sys
 import time
@@ -81,6 +82,20 @@ def cmd_check_gold(a) -> int:
     return 1 if problems else 0
 
 
+def cmd_retrieval(a) -> int:
+    from . import retrieval
+    from .backend_agent import regulation_service
+
+    service = regulation_service(a.engine)
+    rows = retrieval.run(service.call, retrieval.load_cases(a.cases))
+    summary = retrieval.summarize(rows)
+    print(retrieval.to_markdown(summary, rows, a.engine))
+    if a.json:
+        a.json.write_text(json.dumps({"engine": a.engine, "commit": git_commit(), "summary": summary, "rows": rows},
+                                     ensure_ascii=False, indent=2), "utf-8")  # fmt: skip
+    return 0
+
+
 def cmd_security(a) -> int:
     from . import security
 
@@ -119,6 +134,12 @@ def main(argv: list[str] | None = None) -> int:
     g = sub.add_parser("check-gold", help="đối chiếu đáp án facts với mock data của Student Record MCP")
     g.add_argument("--tasks")
     g.set_defaults(fn=cmd_check_gold)
+
+    rt = sub.add_parser("retrieval", help="đo truy xuất quy chế (recall, MRR) trên các lượt cần quy chế, không gọi LLM")
+    rt.add_argument("--engine", choices=["bm25"], default="bm25", help="RAG quy chế cần đo")
+    rt.add_argument("--cases", help="file JSON câu đo riêng (mặc định data/retrieval_cases.json)")
+    rt.add_argument("--json", type=Path, help="ghi thêm kết quả dạng JSON để so cấu hình")
+    rt.set_defaults(fn=cmd_retrieval)
 
     s = sub.add_parser("security", help="kiểm thử tấn công tầng tool vào Student Record MCP qua HTTP")
     s.add_argument("--url", help="server đang chạy (cần STUDENT_MCP_TOKEN_SECRET trùng); mặc định tự dựng server local")

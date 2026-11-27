@@ -9,6 +9,7 @@ Phục vụ mục 5 (Bộ đánh giá và số liệu) và mục 6 (Threat model
 uv sync                                                                    # ở thư mục gốc repo
 uv run co5151-eval check-gold                                              # đáp án facts khớp mock data
 uv run co5151-eval security                                                # 16 ca tấn công Student Record MCP qua HTTP
+uv run co5151-eval retrieval --engine bm25 --json bm25.json                  # đo truy xuất quy chế (recall, MRR), không gọi LLM
 uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2
 uv run co5151-eval run --agent <package.module>:make_agent --suite injection
 uv run co5151-eval report <thư mục run 1> <thư mục run 2> -o report.html   # so sánh nhiều cấu hình trên một trang

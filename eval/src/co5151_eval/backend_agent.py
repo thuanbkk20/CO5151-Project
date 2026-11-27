@@ -73,6 +73,13 @@ def _regulations() -> RegulationServiceV2:
     return RegulationServiceV2(REGULATION_BASE, allow_draft=allow_draft)
 
 
+def regulation_service(engine: str = "bm25"):
+    """The regulation service the in-process agent searches: `bm25` is the Regulation MCP of `regulation-server`."""
+    if engine == "bm25":
+        return _regulations()
+    raise ValueError(f"unknown regulation engine: {engine}")
+
+
 def _settings(**overrides: Any) -> Settings:
     """The API's settings, with the Student Record secret of the in-process service and no chat database."""
     secret = _oracle().settings.token_secret
