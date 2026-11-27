@@ -263,9 +263,18 @@ async def test_internal_error_is_retried_once_others_are_refused_safely():
     assert "đăng nhập lại" in g.final_text and "raw server detail" not in g.final_text
 
 
-async def test_no_regulation_found_is_a_refusal():
+async def test_no_regulation_found_is_a_refusal_only_without_a_record():
     g, _ = await gather(GRADUATION, regulations=Regulations([]))
+    assert g.final_text is None and g.steps == ["SUMMARY", "REGULATIONS", "RESPOND"]
+    assert g.evidence.has_regulations and g.evidence.regulations == []
+    model = Model("ok")
+    await Advisor(Student(), Regulations()).write(GRADUATION, g.evidence, model=model, history=[], token=TOKEN)
+    assert "Không tra được đoạn quy chế nào" in model.calls[0]["prompt"] and "113/128" in model.calls[0]["prompt"]
+    g, _ = await gather(GRADUATION, regulations=Regulations([]), token=None)  # a guest has no record
     assert (g.final_outcome, g.final_text) == (Outcome.REFUSE, prompts.NO_REGULATION)
+    router = LLMActionRouter(Model('{"action": "REGULATIONS"}', '{"action": "RESPOND"}'))
+    g, _ = await gather("Học phí bao nhiêu?", regulations=Regulations([]), router=router)
+    assert (g.final_outcome, g.final_text) == (Outcome.REFUSE, prompts.NO_REGULATION)  # nothing to answer from
 
 
 # Writing -------------------------------------------------------------------------------------------------------

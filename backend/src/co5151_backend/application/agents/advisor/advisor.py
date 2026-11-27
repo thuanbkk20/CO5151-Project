@@ -95,6 +95,8 @@ class Advisor:
                 asked = prompts.sanitize(decision.clarify_question, token) if decision.clarify_question else None
                 return self._end(g, asked or prompts.CLARIFY, Outcome.CLARIFY)
             if action is Action.RESPOND:
+                if _nothing_to_answer_from(g.evidence):
+                    return self._end(g, prompts.NO_REGULATION, Outcome.REFUSE)
                 if need_standalone:
                     await self._rewrite(g, question, history, planner, spans)
                 return g
@@ -114,8 +116,9 @@ class Advisor:
             # The cohort comes from the record, never from what the user typed (that stays in the query text)
             context = {"cohort": g.evidence.cohort} if g.evidence.cohort else None
             docs = await self._regulations.search(query, context=context, spans=spans)
-            if not docs:
+            if not docs and token is None:  # a guest has no record to answer from instead
                 return self._end(g, prompts.NO_REGULATION, Outcome.REFUSE)
+            # Nothing found but a student: answer from the record and say the regulations were not found (C3)
             g.evidence = g.evidence.model_copy(update={"regulations_checked": True, "regulations": docs})
         return self._end(g, prompts.INCOMPLETE, Outcome.REFUSE)
 
@@ -204,6 +207,12 @@ class Advisor:
         if revise is not None:
             return None
         return Draft(prompts.template_answer(question, evidence), Outcome.ANSWER, llm_error=error)
+
+
+def _nothing_to_answer_from(evidence: Evidence) -> bool:
+    """The regulations were searched without result and no record was read."""
+    record = evidence.has_academic_summary or evidence.has_warnings
+    return evidence.has_regulations and not evidence.regulations and not record
 
 
 def _planner_input(question: str, g: Gathered, token: str | None, history: Sequence[ChatTurn]) -> dict:

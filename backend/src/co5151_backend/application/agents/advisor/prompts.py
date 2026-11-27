@@ -104,6 +104,12 @@ def answer_prompt(
             f"{semesters})"
         )
         parts.append(f"- Quyết định học vụ: {decision_lines(evidence)}")
+    if evidence.has_regulations and not evidence.regulations:
+        parts.append(
+            "\nKhông tra được đoạn quy chế nào cho câu hỏi này. Chỉ trả lời phần dựa trên hồ sơ ở trên, nói rõ là "
+            "chưa tra được quy chế liên quan và đề nghị sinh viên hỏi Phòng Đào tạo; không nêu quy định hay điều "
+            "khoản nào."
+        )
     if evidence.regulations:
         regulations = "\n".join(f"[{doc.id}] {doc.title}: {doc.content}" for doc in evidence.regulations)
         parts.append(f"\nVăn bản quy chế đào tạo trích dẫn:\n<regulations>\n{_data(regulations)}\n</regulations>")
