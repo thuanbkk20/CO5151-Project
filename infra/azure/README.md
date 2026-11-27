@@ -66,19 +66,18 @@ lại vào `.env` và chạy `deploy.sh`.
 
 `foundry.tf` tạo resource `AIServices` ở `koreacentral` và một deployment cho mỗi model trong `foundry_models`
 (`variables.tf`; lý do và kết quả gọi thử: [docs/design/foundry-models.md](../../docs/design/foundry-models.md)).
-Thêm model: thêm một dòng vào `foundry_models` (tên, format, phiên bản, capacity), `terraform apply`, cập nhật
-`AZURE_FOUNDRY_MODELS`; model gửi tham số khác mặc định thì thêm vào `MODEL_PROFILES` trong backend. Model bán qua
-Marketplace (Mistral...) không deploy được trên subscription miễn phí.
+Thêm model: thêm một dòng vào `foundry_models` (tên, format, phiên bản, capacity), `terraform apply`, thêm tên vào
+danh sách của provider `foundry` trong `PROVIDERS` (`backend/src/co5151_backend/infrastructure/llm.py`); model gửi
+tham số khác mặc định thì thêm vào `MODEL_PROFILES` cùng file. Model bán qua Marketplace (Mistral...) không deploy
+được trên subscription miễn phí.
 
 ```bash
 # ở gốc repo; đổi .env thành .env.production cho bản deploy
 { echo "AZURE_FOUNDRY_BASE_URL=$(terraform -chdir=infra/azure output -raw foundry_base_url)"
-  echo "AZURE_FOUNDRY_MODELS=$(terraform -chdir=infra/azure output -raw foundry_models)"
   echo "AZURE_FOUNDRY_API_KEY=$(az cognitiveservices account keys list -n co5151-foundry -g co5151-rg --query key1 -o tsv)"
 } >> .env
 ```
 
-`foundry_models` của Terraform xếp theo tên; model đầu của `AZURE_FOUNDRY_MODELS` là mặc định, đổi thứ tự nếu muốn.
 Đổi key: như Azure OpenAI, thay `co5151-openai` bằng `co5151-foundry`.
 
 ## Vận hành trên VM

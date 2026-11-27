@@ -107,7 +107,7 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 | 6 | `docs: Foundry models` | README gốc, README infra (lấy key), `architecture.md` | xong `6ff7419` |
 | 7 | `docs(design): a prepared model list for every provider` | sửa plan theo yêu cầu của Kiên (27/11) | xong `e942abd` |
 | 8 | `feat(backend): a prepared model list for every provider` | `Provider.models`, bỏ `models_env` và output `foundry_models`; hội thoại cũ về model mặc định; `.env.example`; test | xong `a3e7144` |
-| 9 | `feat(web): no free-text model` | bỏ ô gõ tên model; test | |
+| 9 | `feat(web): no free-text model` | bỏ ô gõ tên model; test | xong `db9158b` |
 | 10 | `docs: model list` | README, README infra, `architecture.md`. Deploy lên VM (cần push nhánh), hỏi thử mỗi model một câu | |
 
 ## Chưa quyết

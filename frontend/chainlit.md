@@ -27,6 +27,6 @@ Mật khẩu của mọi tài khoản sinh viên: `demo`.
 - Trợ lý chỉ đọc được hồ sơ của tài khoản đang đăng nhập; hỏi hồ sơ người khác sẽ bị từ chối.
 - Mục **Đã xử lý câu hỏi** dưới câu hỏi: các bước trợ lý đã làm; mở ra để xem chi tiết kỹ thuật (tool, trích
   dẫn, Verifier, token, thời gian, trace id).
-- Nút cài đặt cạnh ô nhập: chọn model, dạng `nhà cung cấp · model` (chỉ hiện nhà cung cấp backend có key; nhà cung
-  cấp có danh sách model thì chỉ chọn trong danh sách đó).
+- Nút cài đặt cạnh ô nhập: chọn model trong danh sách, dạng `nhà cung cấp · model` (chỉ hiện nhà cung cấp backend có
+  key).
 - 👍/👎 dưới câu trả lời để góp ý; các hội thoại cũ nằm ở thanh bên trái.
