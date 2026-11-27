@@ -107,6 +107,8 @@ def verification_line(trace: dict[str, Any]) -> str:
     rounds = trace.get("verifier_rounds")
     if rounds is None:  # not drafted: refused or asked back by rule, or the Verifier is off
         parts = [RULED.get(trace.get("outcome") or "", "Không qua Verifier")]
+    elif trace.get("outcome") == "refuse":  # the drafts did not pass: the reply is the refusal, not a draft
+        parts = [f"✗ Verifier không cho qua sau {rounds} lượt kiểm, nên trợ lý từ chối"]
     else:
         parts = ["✓ Verifier đã kiểm" + (f", viết lại {rounds - 1} lần" if rounds > 1 else "")]
     if not trace.get("llm"):

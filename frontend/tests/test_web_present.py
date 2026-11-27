@@ -126,3 +126,5 @@ def test_verification_line_under_an_answer():
     refused = verification_line({**TRACE, "verifier_rounds": None, "outcome": "refuse", "llm": None})
     assert refused.startswith("_Từ chối theo quy tắc") and "Verifier" not in refused
     assert "LLM lỗi một phần" in verification_line({**TRACE, "llm_error": "hết quota"})
+    rejected = verification_line({**TRACE, "verifier_rounds": 2, "outcome": "refuse"})
+    assert rejected.startswith("_✗ Verifier không cho qua sau 2 lượt kiểm") and "✓" not in rejected
