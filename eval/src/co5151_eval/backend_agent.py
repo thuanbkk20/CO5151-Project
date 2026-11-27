@@ -19,7 +19,7 @@ import regulation_server
 from co5151_backend.container import Adapters, Container, build_container
 from co5151_backend.domain.conversation import Message, MessageRole, utcnow
 from co5151_backend.domain.principal import Principal, Role
-from co5151_backend.domain.trace import Trace
+from co5151_backend.domain.trace import Span, Trace
 from co5151_backend.infrastructure.config import Settings
 from co5151_backend.infrastructure.identity import DemoAccountDirectory
 from co5151_backend.infrastructure.llm import ProviderChatModels
@@ -28,7 +28,7 @@ from co5151_contracts import ToolResult
 from co5151_contracts.security import AuthError
 from regulation_server.regulation_service_v2 import RegulationServiceV2
 
-from .agent import AgentResponse, Usage
+from .agent import AgentResponse, RoleUsage, Usage
 from .gold import RecordOracle
 from .tasks import Outcome
 
@@ -102,8 +102,27 @@ def _settings(**overrides: Any) -> Settings:
     return dataclasses.replace(Settings.from_env(), student_token_secret=secret, database_url=None, **overrides)
 
 
-def _response(trace: Trace, text: str) -> AgentResponse:
+ROLE_OF_NODE = {"planner": "router", "writer": "writer", "verifier": "judge"}
+
+
+def usage_by_role(trace: Trace, spans: list[Span]) -> list[RoleUsage]:
+    """Tokens per role and model, from the spans of the answer (the judge may run on its own model)."""
+    rows: dict[tuple[str, str], RoleUsage] = {}
+    for span in spans:
+        role = ROLE_OF_NODE.get(span.node)
+        if role is None or not span.usage.total:
+            continue
+        judge = (span.input.get("checks") or {}).get("judge") if role == "judge" else None
+        model = f"{judge['provider']}/{judge['model']}" if judge else (trace.llm or "unknown")
+        row = rows.setdefault((role, model), RoleUsage(role=role, model=model))
+        row.input_tokens += span.usage.input_tokens
+        row.output_tokens += span.usage.output_tokens
+    return list(rows.values())
+
+
+def _response(trace: Trace, text: str, spans: list[Span] = ()) -> AgentResponse:
     return AgentResponse(
+        usage_by_role=usage_by_role(trace, list(spans)),
         text=text,
         outcome=Outcome(trace.outcome.value) if trace.outcome else Outcome.ANSWER,
         citations=list(trace.citations),
@@ -158,7 +177,8 @@ class BackendAgent:
             await container.chats.add_message(Message(str(uuid.uuid4()), conversation.id, role, turn["content"],
                                                       utcnow()))  # fmt: skip
         answer = await container.ask.execute(principal, conversation.id, question)
-        return _response(answer.trace, answer.message.content)
+        spans = await container.conversations.spans(principal, answer.trace.trace_id)
+        return _response(answer.trace, answer.message.content, spans)
 
 
 def make_agent(seed: int = 0) -> BackendAgent:

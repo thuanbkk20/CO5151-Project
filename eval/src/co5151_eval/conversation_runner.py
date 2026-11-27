@@ -14,6 +14,7 @@ from pathlib import Path
 
 from .agent import AgentResponse
 from .conversations import USE_CASES, Conversation, Turn
+from .cost import cost_line, cost_usd, summarize_cost
 from .gold import RecordOracle
 from .runner import AgentFactory, _cell, _pct, _rate
 from .scoring import score
@@ -45,6 +46,8 @@ class TurnRecord:
     verifier_rounds: int | None = None
     input_tokens: int = 0
     output_tokens: int = 0
+    usage_by_role: list[dict] = field(default_factory=list)
+    cost_usd: float | None = None
 
 
 def turn_record(conv: Conversation, turn: Turn, seed: int, latency: float, resp: AgentResponse,
@@ -54,7 +57,8 @@ def turn_record(conv: Conversation, turn: Turn, seed: int, latency: float, resp:
                       resp.usage.total, s.outcome.value, s.outcome_ok, s.facts_hit, s.facts_total, s.citations_hit,
                       s.citations_total, s.forbidden_hits, False if error else s.passed, resp.tool_calls, resp.text,
                       error, resp.citations, resp.verifier_rounds, resp.usage.input_tokens,
-                      resp.usage.output_tokens)  # fmt: skip
+                      resp.usage.output_tokens, [u.model_dump() for u in resp.usage_by_role],
+                      cost_usd(resp.usage_by_role)[0])  # fmt: skip
 
 
 def _history(conv: Conversation) -> list[dict[str, str]]:
@@ -167,6 +171,7 @@ def summarize_conversations(records: list[TurnRecord]) -> dict:
         "conversation_pass_rate_by_seed": per_seed,
         "conversation_pass_rate_mean": round(statistics.fmean(per_seed), 4) if per_seed else None,
         "conversation_pass_rate_std": round(statistics.pstdev(per_seed), 4) if len(per_seed) > 1 else 0.0,
+        "cost": summarize_cost(records, per="conversation_id"),
     }
 
 
@@ -186,7 +191,7 @@ def conversations_markdown(summary: dict, title: str) -> str:
     lines = [f"## {title}", "",
              f"**Hội thoại đạt:** {_cell(c['pass_rate'])} ({c['conversations']} hội thoại × seed, {c['needs_human']} "
              f"cần chấm tay) · seeds {summary['seeds']}: {summary['conversation_pass_rate_mean']} ± "
-             f"{summary['conversation_pass_rate_std']}", "", "### Theo lượt", "",
+             f"{summary['conversation_pass_rate_std']}", "", cost_line(summary["cost"]), "", "### Theo lượt", "",
              "| | " + " | ".join(h for _, h in _TURN_COLUMNS) + " |", "|---|" + "---|" * len(_TURN_COLUMNS),
              "| Tổng | " + " | ".join(_cell(summary["turns"][k]) for k, _ in _TURN_COLUMNS) + " |", "",
              "### Theo use case", "", "| Use case | Hội thoại | Hội thoại đạt | Lượt | Lượt đạt | Leaks |",

@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from .agent import Agent, AgentResponse
+from .cost import cost_line, cost_usd, summarize_cost
 from .gold import RecordOracle
 from .scoring import Score, score
 from .tasks import Group, Outcome, Task
@@ -33,13 +34,16 @@ class Record:
     error: str | None = None
     citations: list[str] = field(default_factory=list)
     verifier_rounds: int | None = None
+    usage_by_role: list[dict] = field(default_factory=list)
+    cost_usd: float | None = None
 
 
 def _record(task: Task, seed: int, latency: float, resp: AgentResponse, s: Score, error: str | None) -> Record:
     return Record(task.id, task.group.value, seed, round(latency, 4), resp.usage.total, s.outcome.value,
                   s.outcome_ok, s.facts_hit, s.facts_total, s.citations_hit, s.citations_total, s.forbidden_hits,
                   False if error else s.passed, resp.tool_calls, resp.text, error, resp.citations,
-                  resp.verifier_rounds)  # fmt: skip
+                  resp.verifier_rounds, [u.model_dump() for u in resp.usage_by_role],
+                  cost_usd(resp.usage_by_role)[0])  # fmt: skip
 
 
 def run(
@@ -117,6 +121,7 @@ def summarize(records: list[Record]) -> dict:
         "pass_rate_by_seed": per_seed,
         "pass_rate_mean": round(statistics.fmean(per_seed), 4) if per_seed else None,
         "pass_rate_std": round(statistics.pstdev(per_seed), 4) if len(per_seed) > 1 else 0.0,
+        "cost": summarize_cost(records),
     }
 
 
@@ -152,6 +157,8 @@ def to_markdown(summary: dict, title: str) -> str:
         lines.append(f"| {name} | " + " | ".join(_cell(block[k]) for k, _ in _COLUMNS) + " |")
     if summary.get("agent_config"):
         lines += ["", f"Cấu hình: `{json.dumps(summary['agent_config'], ensure_ascii=False)}`"]
+    if summary.get("cost"):
+        lines += ["", cost_line(summary["cost"])]
     lines += ["", f"Seeds: {summary['seeds']} · pass rate {summary['pass_rate_mean']} ± {summary['pass_rate_std']}",
               "", "`–`: không áp dụng. Chấm tay: câu chưa có đáp án kiểm được tự động (chưa có trích dẫn đã xác nhận),",
               "so với `reference_answer`; không tính vào Pass."]  # fmt: skip
