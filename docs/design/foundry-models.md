@@ -8,7 +8,8 @@ Cập nhật: 2026-11-27. Nhánh `feat/foundry-models` (tách từ `feat/azure-o
   hỏi, đánh giá 👍/👎. Không cần key mới, không cần tài khoản ở dịch vụ khác.
 - Mọi model nằm trên **một** resource Azure AI Foundry (một endpoint, một key), trừ vào credit Azure for Students,
   khai báo bằng Terraform như phần còn lại của `infra/azure/`.
-- Người dùng chỉ chọn được model đã deploy (danh sách), không gõ tên tùy ý.
+- Mọi provider có danh sách model chuẩn bị sẵn; người dùng chỉ chọn trong danh sách, không gõ tên (Kiên, 27/11).
+  Danh sách nằm một chỗ (`PROVIDERS` trong `infrastructure/llm.py`), Kiên tự cập nhật.
 
 Ngoài phạm vi: OpenRouter, giới hạn số câu mỗi tài khoản, chạy eval cho từng model (xem "Chưa quyết").
 
@@ -53,8 +54,8 @@ Ngoài phạm vi: OpenRouter, giới hạn số câu mỗi tài khoản, chạy 
 | `azurerm_cognitive_deployment.foundry` | `for_each = var.foundry_models`; tên deployment = tên model; `model { format, name, version }`, `sku { GlobalStandard, capacity }` |
 
 - `var.foundry_models`: map tên → `{ format, version, capacity }`. Thêm model = thêm một dòng rồi `apply`.
-- Output `foundry_base_url` (`https://<subdomain>.openai.azure.com/openai/v1/`) và `foundry_models` (tên nối bằng
-  dấu phẩy) để chép vào `.env`. Key lấy bằng `az ... keys list` như Azure OpenAI.
+- Output `foundry_base_url` (`https://<subdomain>.openai.azure.com/openai/v1/`) để chép vào `.env`. Key lấy bằng
+  `az ... keys list` như Azure OpenAI. Thêm deployment thì thêm tên vào danh sách của provider `foundry` trong code.
 - Resource `OpenAI` cũ giữ nguyên đến khi Foundry chạy ổn (xem "Chưa quyết" 1).
 - Model không phải của OpenAI cần resource loại `AIServices`; resource loại `OpenAI` chỉ deploy được model OpenAI
   (memory, chưa kiểm chứng). Endpoint v1 `https://<subdomain>.openai.azure.com/openai/v1/` gọi được cả 4 model
@@ -69,17 +70,19 @@ Ngoài phạm vi: OpenRouter, giới hạn số câu mỗi tài khoản, chạy 
    - `reasoning_headroom`: token suy nghĩ tính vào giới hạn token ra; router chỉ cho 32 token, model reasoning sẽ
      trả về rỗng. Cộng thêm phần này vào giới hạn khi gọi model reasoning.
    Không có profile thì dùng mặc định của provider như hiện nay. Giá trị theo bảng gọi thử ở trên.
-2. **Provider `foundry`**: `base_url_env = AZURE_FOUNDRY_BASE_URL`, `key_env = AZURE_FOUNDRY_API_KEY`, danh sách
-   model từ `AZURE_FOUNDRY_MODELS` (model đầu là mặc định). Thêm trường chung `models_env` vào `Provider`.
-3. Port `ChatModels` thêm `models(provider) -> list[str]` (rỗng = gõ tự do như cũ). `GET /llm/providers` trả thêm
-   `models: {provider: [...]}`. `Conversations` từ chối model không có trong danh sách của provider đó, để không ai
-   gọi được deployment hay model ngoài ý muốn.
+2. **Provider `foundry`**: `base_url_env = AZURE_FOUNDRY_BASE_URL`, `key_env = AZURE_FOUNDRY_API_KEY`.
+3. **Danh sách model trong code**: `Provider.models` (tuple, model đầu là mặc định) thay cho `Provider.model`, cho mọi
+   provider. Bỏ `models_env` / `AZURE_FOUNDRY_MODELS` của commit 4: hai chỗ phải cập nhật là thừa. `LLM_MODEL` (cấu
+   hình của người vận hành, ví dụ server local) được thêm vào đầu danh sách của provider mặc định.
+4. Port `ChatModels.models(provider)`; `GET /llm/providers` trả `models: {provider: [...]}`. `Conversations` từ chối
+   model ngoài danh sách (người dùng không gọi được model ngoài ý muốn). Hội thoại cũ lưu model không còn trong danh
+   sách thì `AskQuestion` dùng model mặc định của provider, không báo lỗi. Cấu hình của server (`VERIFIER_LLM_MODEL`)
+   không bị danh sách chặn.
 
 ### Giao diện
 
-Nút cài đặt: một ô `Select` "Model" liệt kê `provider · model` cho model trong danh sách và `provider · model mặc định`
-cho provider không có danh sách (form của Chainlit không đổi được ô này khi ô kia đổi, nên gộp làm một); ô chữ "Tên
-model khác" chỉ hiện khi có provider không có danh sách. Khung chi tiết của mỗi câu
+Nút cài đặt: một ô `Select` "Model" liệt kê `provider · model` của mọi provider có key (form của Chainlit không đổi
+được ô này khi ô kia đổi, nên gộp provider và model làm một); không còn ô gõ tên model. Khung chi tiết của mỗi câu
 trả lời đã có dòng "LLM" (`present.py`), người test biết câu nào do model nào trả lời.
 
 ### Gửi cho người test
@@ -101,7 +104,11 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 | 3 | `feat(backend): per-model parameters` | `ModelProfile`, profile cho các model ở bảng trên; test (không gọi LLM thật) | xong `da51f09` |
 | 4 | `feat(backend): foundry provider with a fixed model list` | `models_env`, provider `foundry`, `ChatModels.models`, API trả `models`, kiểm tra model; `.env.example`; test | xong `bf00571` |
 | 5 | `feat(web): pick the model from a list` | một ô `Select` gộp provider và model (form Chainlit không đổi ô này theo ô kia), ô chữ cho provider không có danh sách; test | xong `c8b1013` |
-| 6 | `docs: Foundry models` | README gốc, README infra (lấy key), `architecture.md`. Deploy lên VM (cần push nhánh), hỏi thử mỗi model một câu | |
+| 6 | `docs: Foundry models` | README gốc, README infra (lấy key), `architecture.md` | xong `6ff7419` |
+| 7 | `docs(design): a prepared model list for every provider` | sửa plan theo yêu cầu của Kiên (27/11) | |
+| 8 | `feat(backend): a prepared model list for every provider` | `Provider.models`, bỏ `models_env`; hội thoại cũ về model mặc định; `.env.example`; test | |
+| 9 | `feat(web): no free-text model` | bỏ ô gõ tên model; test | |
+| 10 | `docs: model list` | README, README infra, `architecture.md`. Deploy lên VM (cần push nhánh), hỏi thử mỗi model một câu | |
 
 ## Chưa quyết
 
