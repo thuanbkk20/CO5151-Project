@@ -6,7 +6,8 @@ Quyết định ngày 2026-11-12, thay cho cách cũ: web ráp Advisor trực ti
 
 ```
 frontend/  (Chainlit)  --HTTP/SSE-->  backend/ (FastAPI)  --MCP Streamable HTTP-->  mcp/student-server
-                                          |                                       mcp/regulation-server
+                                          |                                       mcp/regulation-server (BM25)
+                                          |                                       hoặc mcp/regulation-graph (graph)
                                           +--> LLM (OpenAI-compatible), database (SQLAlchemy)
 ```
 
@@ -51,8 +52,11 @@ sách đó ([foundry-models.md](foundry-models.md)).
 7. **Async từ đầu đến cuối**: FastAPI, `AsyncOpenAI`, MCP client async. Regulation MCP chạy Streamable HTTP như
    Student Record.
 8. **Database mới**, không migrate dữ liệu chat cũ (dữ liệu demo). Bảng mới không theo format của Chainlit.
-9. **eval dùng gateway trong process** (gọi thẳng service của MCP server) để chạy nhanh; app luôn đi qua MCP.
-10. **Span từng node** (planner, MCP, writer, Verifier) lưu cùng trace trong bảng `trace_spans`, đọc qua
+9. **Hai RAG quy chế cùng contract**: `regulation-server` (BM25, của Đức) và `regulation-graph` (graph phiên bản +
+   khái niệm, [regulation-graph.md](regulation-graph.md)) phục vụ cùng hai tool trên cùng cổng; `REGULATION_ENGINE`
+   chọn bản chạy. Backend không biết đang dùng bản nào.
+10. **eval dùng gateway trong process** (gọi thẳng service của MCP server) để chạy nhanh; app luôn đi qua MCP.
+11. **Span từng node** (planner, MCP, writer, Verifier) lưu cùng trace trong bảng `trace_spans`, đọc qua
     `GET /traces/{id}/spans`, không stream: nháp bị Verifier loại chỉ thấy sau khi có câu trả lời cuối. Chi tiết:
     [agent-flow.md](agent-flow.md).
 

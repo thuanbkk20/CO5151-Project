@@ -92,7 +92,25 @@ recall@8, MRR, tỉ lệ rỗng. Khoản ứng viên **chưa đối chiếu PDF*
 | 8 | `feat(regulation-graph): hybrid retrieval with versions` | truy xuất lai, service hai tool, `--engine graph` trong lệnh đo. Đo (tính Điều ↔ Khoản con): graph hit@3 1.00, recall@3 0.92, MRR 0.84, rỗng 0%; BM25 0.42 / 0.36 / 0.27 / 19% | xong `81a6d1d` |
 | 9 | `feat(regulation-graph): MCP server` | `regulation-graph-mcp` (khung server của regulation-server), `REGULATION_ENGINE` trong `.env.example`/README, deploy chạy server theo biến này (drop-in systemd), eval trong process cũng theo biến này | xong |
 | 10 | `feat(eval): pick the regulation engine` | gộp vào 8 (`--engine`) và 9 (`REGULATION_ENGINE`) | bỏ |
-| 11 | `docs: regulation graph results` | số đo, architecture, README | |
+| 11 | `docs: regulation graph results` | mục Kết quả, architecture, README | xong |
+
+## Kết quả (27/11, không gọi LLM)
+
+`uv run co5151-eval retrieval --engine bm25|graph`, 36 lượt, `top_k=3, hops=1` như Advisor gửi. Kết quả trả Điều
+thì tính cả Khoản con và ngược lại; bản bị thay (`superseded`) tính là trúng.
+
+| Engine | hit@3 | recall@3 | MRR | Rỗng | Kết quả/câu | Ký tự/câu |
+|---|---|---|---|---|---|---|
+| BM25 (`regulation-server`) | 0.417 | 0.361 | 0.269 | 19% | | 4248 |
+| Graph (`regulation-graph`) | 1.00 | 0.921 | 0.838 | 0% | 3.42 | 3841 |
+
+Cần nói rõ khi báo cáo:
+
+- Khái niệm và từ đồng nghĩa viết khi **đã thấy** các lượt hỏi test, nên số của graph là lạc quan; cần một bộ câu
+  khác (do người khác viết) để đo công bằng.
+- Khoản mong đợi chưa đối chiếu PDF (A2).
+- Lượt còn yếu (recall@3 < 1): H01-2, H03-2, H06-3, H07-3, H11-1, H11-3.
+- Đây chỉ là truy xuất; chất lượng câu trả lời cuối đo ở ablation (E2/E4).
 
 Sau 11: hỏi thử vài câu với Verifier (tốn LLM, báo trước), rồi deploy server mới lên VM.
 
