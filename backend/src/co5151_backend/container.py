@@ -154,6 +154,7 @@ def build_container(settings: Settings, adapters: Adapters | None = None) -> Con
             router_for=router_factory(settings),
             verifier_for=verifier_factory(settings, models),
             history_messages=settings.history_messages,
+            max_questions=settings.max_questions,
         ),
         operator_traces=OperatorTraces(traces),
         read_provision=ReadProvision(regulations),

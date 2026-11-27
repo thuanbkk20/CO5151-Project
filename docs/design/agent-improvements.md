@@ -68,8 +68,8 @@ chương trình), số tín chỉ còn thiếu, ĐTBTL thang 4 trong bản nháp
 | 1 | `docs(design): agent improvements plan` | file này | xong `0c4a80e` |
 | 2 | `feat(backend): cohort, retakes and decisions in the evidence` | C2 | xong `fc4a1fe` |
 | 3 | `fix(backend): the template answer draws no conclusion` | C4 | xong `4671cfc` |
-| 4 | `fix(backend): fixed replies R1, R2 and one form of address` | C5 | xong |
-| 5 | `feat(backend): ten questions per conversation` | C6 backend: biến, kết cục `limit`, `questions_left` trong API, eval/console biết `limit` | |
+| 4 | `fix(backend): fixed replies R1, R2 and one form of address` | C5 | xong `317f03c` |
+| 5 | `feat(backend): ten questions per conversation` | C6 backend: biến, kết cục `limit`, `questions_left` trong API, eval/console biết `limit` | xong |
 | 6 | `feat(web): stop asking when the conversation is full` | C6 frontend | |
 | 7 | `feat(backend): the router reads the conversation and rewrites the question` | C1 | |
 | 8 | `feat(backend): the Verifier judges the standalone question` | D1 | |

@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 from co5151_contracts import RegulationExcerpt, VerdictStatus, VerificationRequest
 
-from ...domain.conversation import ChatSettings, Message, MessageRole, title_from, utcnow
+from ...domain.conversation import ChatSettings, Conversation, Message, MessageRole, title_from, utcnow
 from ...domain.errors import AnswerFailed, InvalidRequest, NotFound
 from ...domain.evidence import Evidence
 from ...domain.principal import Principal, Role
@@ -41,12 +41,15 @@ logger = logging.getLogger(__name__)
 # The Verifier checks a draft at most this many times, so the Advisor rewrites at most once before refusing.
 MAX_VERIFIER_ROUNDS = 2
 MAX_QUESTION_CHARS = 4000
+# From this many questions left, the answer says how many remain (questions 8, 9, 10 of 10).
+WARN_QUESTIONS_LEFT = 2
 
 
 @dataclass(frozen=True)
 class Answer:
     message: Message
     trace: Trace
+    questions_left: int
 
 
 async def _no_events(_event) -> None:
@@ -66,6 +69,7 @@ class AskQuestion:
         router_for: Callable[[ChatModel | None], ActionRouter | None],
         verifier_for: Callable[[ChatModel | None], ComplianceVerifier | None],
         history_messages: int = 10,
+        max_questions: int = 10,
     ):
         self._chats = chats
         self._traces = traces
@@ -76,6 +80,11 @@ class AskQuestion:
         self._router_for = router_for
         self._verifier_for = verifier_for
         self._history_messages = history_messages
+        self._max_questions = max_questions
+
+    def questions_left(self, conversation: Conversation) -> int:
+        asked = sum(m.role is MessageRole.USER for m in conversation.messages)
+        return max(0, self._max_questions - asked)
 
     def _offered(self, settings: ChatSettings) -> tuple[str | None, str | None]:
         """The conversation's provider and model; a model no longer offered falls back to the provider's default."""
@@ -102,12 +111,16 @@ class AskQuestion:
             ChatTurn(m.role.value, m.content)
             for m in await self._chats.recent_messages(conversation_id, self._history_messages)
         ]
+        left = self.questions_left(conversation)  # before this question
         asked = Message(str(uuid.uuid4()), conversation_id, MessageRole.USER, question, utcnow())
         await self._chats.add_message(asked)
         if conversation.title is None:
             await self._chats.update(conversation_id, principal.user_id, title=title_from(question))
 
         trace_id, start = new_trace_id(), time.perf_counter()
+        if left == 0:  # UC9: the fixed reply R1, no planner and no LLM call
+            return await self._limit_reached(conversation_id, asked, trace_id, start)
+        left -= 1
         spans = SpanRecorder(secrets=[prompts.CANARY])
         model = self._models.create(*self._offered(conversation.settings))
         llm = f"{model.provider}/{model.model}" if model else None
@@ -121,7 +134,10 @@ class AskQuestion:
             await self._traces.save(failed, spans.spans)
             raise AnswerFailed(trace_id) from e
 
-        answer = Message(str(uuid.uuid4()), conversation_id, MessageRole.ASSISTANT, turn.text, utcnow(), trace_id)
+        text = turn.text
+        if left <= WARN_QUESTIONS_LEFT:  # a fixed line after the Verifier, not written by the LLM
+            text = f"{text}\n\n{prompts.questions_left_note(left)}"
+        answer = Message(str(uuid.uuid4()), conversation_id, MessageRole.ASSISTANT, text, utcnow(), trace_id)
         await self._chats.add_message(answer)
         trace = Trace(
             trace_id=trace_id,
@@ -143,7 +159,18 @@ class AskQuestion:
         logger.info("trace=%s outcome=%s tools=%s verifier_rounds=%s tokens=%s ms=%s", trace_id,
                     trace.outcome.value if trace.outcome else "llm", ",".join(trace.tool_calls) or "-",
                     trace.verifier_rounds, trace.usage.total, trace.latency_ms)  # fmt: skip
-        return Answer(answer, trace)
+        return Answer(answer, trace, left)
+
+    async def _limit_reached(self, conversation_id: str, asked: Message, trace_id: str, start: float) -> Answer:
+        text = prompts.limit_reached(self._max_questions)
+        answer = Message(str(uuid.uuid4()), conversation_id, MessageRole.ASSISTANT, text, utcnow(), trace_id)
+        await self._chats.add_message(answer)
+        trace = Trace(trace_id=trace_id, conversation_id=conversation_id, user_message_id=asked.id,
+                      answer_message_id=answer.id, outcome=Outcome.LIMIT, steps=["LIMIT"], latency_ms=_ms(start),
+                      created_at=answer.created_at)  # fmt: skip
+        await self._traces.save(trace, [])
+        logger.info("trace=%s outcome=limit", trace_id)
+        return Answer(answer, trace, 0)
 
     async def _answer(
         self,

@@ -16,6 +16,7 @@ class Outcome(str, Enum):
     ANSWER = "answer"
     CLARIFY = "clarify"
     REFUSE = "refuse"
+    LIMIT = "limit"  # the conversation already has the maximum number of questions (UC9)
 
 
 @dataclass(frozen=True)

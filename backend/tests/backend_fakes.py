@@ -111,7 +111,7 @@ class ScriptedVerifier:
 class App:
     """The use cases wired to in-memory and fake adapters."""
 
-    def __init__(self, *replies, verifier=None, student=None, use_llm=True):
+    def __init__(self, *replies, verifier=None, student=None, use_llm=True, max_questions=10):
         self.model = Model(*replies) if use_llm else None
         self.models = Models(self.model)
         self.chats = InMemoryChatRepository()
@@ -133,4 +133,5 @@ class App:
             router_for=lambda model: None,  # rule planner: the scripted replies only write answers
             verifier_for=lambda model: self.verifier,
             history_messages=4,
+            max_questions=max_questions,
         )

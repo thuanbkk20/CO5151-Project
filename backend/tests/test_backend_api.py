@@ -66,6 +66,7 @@ def test_conversation_lifecycle(client):
 
     detail = client.get(f"/conversations/{CONV}", headers=auth).json()
     assert [m["role"] for m in detail["messages"]] == ["user", "assistant"] and detail["title"] == GRADUATION
+    assert detail["questions_left"] == 9 and answer["questions_left"] == 9
     answer_id = detail["messages"][1]["id"]
     assert client.put(f"/messages/{answer_id}/feedback", json={"value": 1}, headers=auth).status_code == 204
     assert client.put(f"/messages/{answer_id}/feedback", json={"value": 3}, headers=auth).status_code == 422

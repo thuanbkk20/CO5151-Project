@@ -23,6 +23,19 @@ LIMIT_REACHED = (  # R1
     "Hội thoại này đã đủ 10 câu hỏi. Để được giải đáp chi tiết, bạn vui lòng liên hệ Phòng Đào tạo hoặc bộ phận học "
     "vụ của khoa. Nếu cần hỏi nội dung khác, bạn có thể mở hội thoại mới."
 )
+
+
+def limit_reached(max_questions: int) -> str:
+    return LIMIT_REACHED.replace("đủ 10 câu", f"đủ {max_questions} câu")
+
+
+def questions_left_note(left: int) -> str:
+    """Appended to the answers of the last questions of a conversation."""
+    if left > 0:
+        return f"(Hội thoại này còn {left} câu hỏi.)"
+    return "(Đây là câu hỏi cuối của hội thoại này. Bạn có thể mở hội thoại mới để hỏi tiếp.)"
+
+
 REFUSAL_UNGROUNDED = (  # R2
     "Tôi chưa đủ căn cứ từ quy chế và hồ sơ đã tra cứu để trả lời chắc chắn câu hỏi này. Bạn vui lòng liên hệ Phòng "
     "Đào tạo hoặc bộ phận học vụ của khoa để được hướng dẫn."

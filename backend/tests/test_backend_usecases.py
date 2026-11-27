@@ -51,6 +51,24 @@ async def test_passed_draft_is_sent_and_everything_is_saved():
     assert (await app.conversations.trace(principal, trace.trace_id)).answer_message_id == answer.message.id
 
 
+async def test_questions_are_limited_per_conversation_without_an_llm_call():
+    app = App("Một", "Hai", "Ba", max_questions=3)
+    principal, conv = await started(app)
+    answers = [await app.ask.execute(principal, conv.id, f"Em đã tích lũy bao nhiêu tín chỉ? ({i})") for i in range(4)]
+    assert [a.questions_left for a in answers] == [2, 1, 0, 0]
+    assert answers[0].message.content == "Một\n\n(Hội thoại này còn 2 câu hỏi.)"
+    assert answers[2].message.content.startswith("Ba\n\n(Đây là câu hỏi cuối")
+    limited = answers[3]
+    assert limited.message.content == prompts.limit_reached(3) and "đủ 3 câu hỏi" in limited.message.content
+    assert (limited.trace.outcome, limited.trace.steps, limited.trace.usage.total) == (Outcome.LIMIT, ["LIMIT"], 0)
+    assert len(app.model.calls) == 3 and await app.traces.get(limited.trace.trace_id, principal.user_id)
+    saved = await app.conversations.get(principal, conv.id)
+    assert len(saved.messages) == 8 and app.ask.questions_left(saved) == 0
+    assert prompts.limit_reached(10) == prompts.LIMIT_REACHED
+    _, other = await started(app)  # a new conversation starts again from 3
+    assert app.ask.questions_left(await app.conversations.get(principal, other.id)) == 3
+
+
 async def test_history_comes_from_the_store_and_the_student_token_is_fresh():
     app = App("Lần 1", "Lần 2")
     principal, conv = await started(app)
