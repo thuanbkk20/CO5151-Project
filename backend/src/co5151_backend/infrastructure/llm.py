@@ -31,6 +31,9 @@ class Provider:
     max_tokens_param: str = "max_tokens"
     # Variable holding the base URL when it depends on the customer's resource (Azure); it then replaces `base_url`
     base_url_env: str | None = None
+    # Variable listing, comma-separated, the only models users may pick (deployments on the resource); the first one
+    # is the default. Unset: any model name, `model` by default.
+    models_env: str | None = None
 
 
 PROVIDERS: dict[str, Provider] = {
@@ -56,6 +59,15 @@ PROVIDERS: dict[str, Provider] = {
         json_schema=True,
         max_tokens_param="max_completion_tokens",
         base_url_env="AZURE_OPENAI_BASE_URL",
+    ),
+    # Azure AI Foundry: several model families behind one v1 endpoint; MODEL_PROFILES adapts the parameters per model
+    "foundry": Provider(
+        base_url="",
+        model="gpt-5-mini",
+        key_env="AZURE_FOUNDRY_API_KEY",
+        json_schema=True,
+        base_url_env="AZURE_FOUNDRY_BASE_URL",
+        models_env="AZURE_FOUNDRY_MODELS",
     ),
 }
 
@@ -151,7 +163,7 @@ class OpenAICompatibleChatModel:
 
 
 class ProviderChatModels:
-    """The providers that have a key (and a base URL, for Azure) in the environment.
+    """The providers that have a key (and a base URL, for Azure) in the environment, and their allowed models.
 
     `LLM_PROVIDER` is the default. `LLM_MODEL`, `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_REASONING_EFFORT` override
     the profile of that default provider only, e.g. to point it at a local OpenAI-compatible server.
@@ -174,6 +186,8 @@ class ProviderChatModels:
             self._keys[self._default] = self._overrides["api_key"]
         if self._overrides["base_url"]:
             self._base_urls[self._default] = self._overrides["base_url"]
+        self._model_lists = {name: [m.strip() for m in (get(p.models_env) or "").split(",") if m.strip()]
+                             for name, p in PROVIDERS.items() if p.models_env}  # fmt: skip
         self._timeout = float(get("LLM_TIMEOUT") or DEFAULT_TIMEOUT_S)
 
     def providers(self) -> list[str]:
@@ -183,6 +197,9 @@ class ProviderChatModels:
         available = self.providers()
         return self._default if self._default in available or not available else available[0]
 
+    def models(self, provider: str) -> list[str]:
+        return list(self._model_lists.get(provider, []))
+
     def create(self, provider: str | None, model: str | None) -> OpenAICompatibleChatModel | None:
         name = (provider or self.default_provider()).lower()
         if name not in PROVIDERS:
@@ -190,11 +207,15 @@ class ProviderChatModels:
         if name not in self.providers():
             return None
         overrides = self._overrides if name == self._default else {}
+        allowed = self.models(name)
+        model = model or overrides.get("model") or (allowed[0] if allowed else None)
+        if allowed and model not in allowed:
+            raise InvalidRequest(f"Model {model!r} is not deployed for {name}; choose one of {allowed}")
         return OpenAICompatibleChatModel(
             name,
             PROVIDERS[name],
             api_key=self._keys[name],
-            model=model or overrides.get("model"),
+            model=model,
             base_url=self._base_urls[name],
             reasoning_effort=overrides.get("reasoning_effort"),
             timeout=self._timeout,

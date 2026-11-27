@@ -90,6 +90,21 @@ async def test_model_profile_changes_parameters_per_model():
     assert "response_format" not in sent and sent["temperature"] == 0.0 and sent["max_completion_tokens"] == 10
 
 
+async def test_foundry_offers_only_its_deployments():
+    url = "https://x.openai.azure.com/openai/v1/"
+    env = {"AZURE_FOUNDRY_API_KEY": "f", "AZURE_FOUNDRY_BASE_URL": url, "AZURE_FOUNDRY_MODELS": " Phi-4, gpt-5-mini ,"}
+    models = ProviderChatModels(env)
+    assert models.providers() == ["foundry"] and models.models("foundry") == ["Phi-4", "gpt-5-mini"]
+    assert models.models("gemini") == []
+    default = models.create("foundry", None)
+    assert (default.base_url, default.model) == (url, "Phi-4")
+    assert models.create("foundry", "gpt-5-mini").model == "gpt-5-mini"
+    with pytest.raises(InvalidRequest):
+        models.create("foundry", "gpt-4o")
+    unlisted = ProviderChatModels({k: v for k, v in env.items() if k != "AZURE_FOUNDRY_MODELS"})
+    assert unlisted.models("foundry") == [] and unlisted.create("foundry", None).model == PROVIDERS["foundry"].model
+
+
 async def test_overrides_apply_to_the_default_provider_only():
     env = {"LLM_PROVIDER": "openai", "LLM_API_KEY": "local", "LLM_BASE_URL": "http://localhost:11434/v1",
            "LLM_MODEL": "my-model", "LLM_REASONING_EFFORT": "low", "GEMINI_API_KEY": "g"}  # fmt: skip

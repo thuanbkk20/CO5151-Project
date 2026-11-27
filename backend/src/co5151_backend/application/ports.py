@@ -151,8 +151,11 @@ class ChatModels(Protocol):
 
     def default_provider(self) -> str: ...
 
+    def models(self, provider: str) -> list[str]:
+        """The only models users may pick for that provider; empty when any model name is accepted."""
+
     def create(self, provider: str | None, model: str | None) -> ChatModel | None:
-        """None when that provider has no key; raises InvalidRequest for an unknown provider."""
+        """None when that provider has no key; raises InvalidRequest for an unknown provider or a model not allowed."""
 
 
 class ActionRouter(Protocol):

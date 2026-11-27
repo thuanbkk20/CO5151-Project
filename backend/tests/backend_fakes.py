@@ -79,14 +79,18 @@ class Model:
 class Models:
     """ChatModels with one fake provider; `model` is returned for every conversation (None: no key)."""
 
-    def __init__(self, model: Model | None):
+    def __init__(self, model: Model | None, allowed: list[str] | None = None):
         self.model = model
+        self.allowed = allowed or []
 
     def providers(self):
         return ["fake"] if self.model else []
 
     def default_provider(self):
         return "fake"
+
+    def models(self, provider):
+        return list(self.allowed)
 
     def create(self, provider, model):
         return self.model

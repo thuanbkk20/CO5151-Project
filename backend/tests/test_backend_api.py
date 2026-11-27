@@ -43,7 +43,11 @@ def test_health_and_auth(client):
 
 def test_conversation_lifecycle(client):
     auth = login(client)
-    assert client.get("/llm/providers", headers=auth).json() == {"providers": ["fake"], "default": "fake"}
+    assert client.get("/llm/providers", headers=auth).json() == {
+        "providers": ["fake"],
+        "default": "fake",
+        "models": {"fake": []},
+    }
     res = client.post("/conversations", json={"id": CONV, "settings": {"provider": "fake"}}, headers=auth)
     assert res.status_code == 201 and res.json()["settings"] == {"provider": "fake", "model": None}
     assert client.post("/conversations", json={"settings": {"provider": "openai"}}, headers=auth).status_code == 422
