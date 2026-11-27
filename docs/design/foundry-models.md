@@ -77,7 +77,9 @@ Ngoài phạm vi: OpenRouter, giới hạn số câu mỗi tài khoản, chạy 
 
 ### Giao diện
 
-Nút cài đặt: provider có danh sách model thì hiện `Select`, không có thì giữ `TextInput`. Khung chi tiết của mỗi câu
+Nút cài đặt: một ô `Select` "Model" liệt kê `provider · model` cho model trong danh sách và `provider · model mặc định`
+cho provider không có danh sách (form của Chainlit không đổi được ô này khi ô kia đổi, nên gộp làm một); ô chữ "Tên
+model khác" chỉ hiện khi có provider không có danh sách. Khung chi tiết của mỗi câu
 trả lời đã có dòng "LLM" (`present.py`), người test biết câu nào do model nào trả lời.
 
 ### Gửi cho người test
@@ -97,8 +99,8 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 | 1 | `docs(design): models on Azure AI Foundry` | file này, link trong `docs/README.md` | xong `7532c86` |
 | 2 | `feat(infra): Foundry account and model deployments` | `foundry.tf`, biến, output. Apply; gọi thử mỗi model một câu ngắn có `json_schema` (báo token) | xong `70f4705` |
 | 3 | `feat(backend): per-model parameters` | `ModelProfile`, profile cho các model ở bảng trên; test (không gọi LLM thật) | xong `da51f09` |
-| 4 | `feat(backend): foundry provider with a fixed model list` | `models_env`, provider `foundry`, `ChatModels.models`, API trả `models`, kiểm tra model; `.env.example`; test | |
-| 5 | `feat(web): pick the model from a list` | `Select` khi có danh sách; test | |
+| 4 | `feat(backend): foundry provider with a fixed model list` | `models_env`, provider `foundry`, `ChatModels.models`, API trả `models`, kiểm tra model; `.env.example`; test | xong `bf00571` |
+| 5 | `feat(web): pick the model from a list` | một ô `Select` gộp provider và model (form Chainlit không đổi ô này theo ô kia), ô chữ cho provider không có danh sách; test | |
 | 6 | `docs: Foundry models` | README gốc, README infra (lấy key), `architecture.md`. Deploy lên VM, hỏi thử mỗi model một câu | |
 
 ## Chưa quyết

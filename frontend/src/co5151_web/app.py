@@ -13,7 +13,9 @@ from co5151_web.history import TOKEN_KEY, BackendDataLayer
 from co5151_web.present import (
     STEP_NAME,
     chat_settings_body,
-    pick_provider,
+    has_free_model,
+    llm_options,
+    pick_llm,
     progress_line,
     provision_markdown,
     source_label,
@@ -79,16 +81,17 @@ async def _settings_form(saved: dict | None) -> dict:
         choices = await CLIENT.llm_providers(_token())
     except (BackendError, httpx.HTTPError):
         choices = {"providers": [], "default": ""}
-    providers = choices["providers"]
-    if not providers:  # nothing to choose: the backend answers from templates
+    options = llm_options(choices)
+    if not options:  # nothing to choose: the backend answers from templates
         await _notice("Backend chưa có key LLM nào. Advisor sẽ trả lời bằng mẫu (template), không qua LLM.")
         return {}
-    return await cl.ChatSettings([
-        Select(id="provider", label="Nhà cung cấp LLM", values=providers,
-               initial_value=pick_provider(saved.get("provider"), providers, choices["default"])),
-        TextInput(id="model", label="Model", initial=saved.get("model") or "",
-                  placeholder="để trống = model mặc định của nhà cung cấp"),
-    ]).send()  # fmt: skip
+    initial = pick_llm(saved, options, choices["default"])
+    widgets: list[Any] = [Select(id="llm", label="Model", items=options, initial_value=initial)]
+    if has_free_model(choices):
+        free = saved.get("model") if "/" not in initial else None
+        widgets.append(TextInput(id="model", label="Tên model khác (tùy chọn)", initial=free or "",
+                                 placeholder="chỉ cho mục \"model mặc định\"; để trống = mặc định"))  # fmt: skip
+    return await cl.ChatSettings(widgets).send()
 
 
 @cl.on_chat_start
