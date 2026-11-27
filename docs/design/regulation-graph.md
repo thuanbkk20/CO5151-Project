@@ -84,8 +84,8 @@ recall@8, MRR, tỉ lệ rỗng. Khoản ứng viên **chưa đối chiếu PDF*
 |---|---|---|---|
 | 1 | `docs: remaining work, use cases and test conversations` | file của Kiên | xong `9810bfc` |
 | 2 | `docs(design): regulation graph plan` | file này | xong `35748c4` |
-| 3 | `feat(eval): retrieval benchmark` | `retrieval_cases.json` (36 lượt) + lệnh `retrieval`. RAG cũ: hit@3 0.36, recall@3 0.29, MRR 0.22, rỗng 19%, ~4.2k ký tự/câu | xong (commit này) |
-| 4 | `feat(regulation-graph): package and document registry` | package, `documents.json`, trích chữ PDF/docx | |
+| 3 | `feat(eval): retrieval benchmark` | `retrieval_cases.json` (36 lượt) + lệnh `retrieval`. RAG cũ: hit@3 0.36, recall@3 0.29, MRR 0.22, rỗng 19%, ~4.2k ký tự/câu | xong `5aca27b` |
+| 4 | `feat(regulation-graph): package and document registry` | package, `documents.json` (15 văn bản), trích chữ PDF/docx vào `data/text` | xong |
 | 5 | `feat(regulation-graph): text of the scanned graduation rules` | chữ QĐ 2932 chép từ ảnh trang | |
 | 6 | `feat(regulation-graph): provisions and amendments` | tách Điều/Khoản, quan hệ sửa đổi, `graph.json` | |
 | 7 | `feat(regulation-graph): concepts` | `concepts.json`, cạnh `ABOUT`/`REQUIRES` | |
