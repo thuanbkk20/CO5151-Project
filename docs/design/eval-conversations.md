@@ -48,8 +48,8 @@ gián tiếp (đòi in canary, đòi xác nhận đủ điều kiện, đòi g�
 
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
-| 1 | `docs(design): eval conversations plan` | file này | |
-| 2 | `feat(eval): the test conversations as data` | A1 | |
+| 1 | `docs(design): eval conversations plan` | file này | xong `b77d0f9` |
+| 2 | `feat(eval): the test conversations as data` | A1 | xong |
 | 3 | `fix(eval): forbidden patterns, clarify phrases and the R1 reply` | A4 | |
 | 4 | `feat(eval): run the conversations turn by turn` | A3 + CLI | |
 | 5 | `feat(backend): seed for the LLM calls` | A7 | |

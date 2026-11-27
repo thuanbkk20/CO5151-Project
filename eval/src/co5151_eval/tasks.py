@@ -26,7 +26,7 @@ class Fact(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     field: str
-    value: str | int | float | bool
+    value: str | int | float | bool | None  # None: the record has nothing (e.g. no English certificate)
     mention: list[str]
 
 

@@ -8,7 +8,8 @@ from pathlib import Path
 
 from co5151_contracts.env import find_env_file, load_env_file
 
-from .gold import check_gold
+from .conversations import load_conversations
+from .gold import check_gold, check_gold_conversations
 from .html_report import write_html_report
 from .runner import run, write_report
 from .tasks import load_tasks
@@ -75,7 +76,10 @@ def cmd_report(a) -> int:
 
 
 def cmd_check_gold(a) -> int:
-    problems = check_gold(load_tasks(a.tasks))
+    if a.tasks:  # the single-question set (`tasks.json` format)
+        problems = check_gold(load_tasks(a.tasks))
+    else:
+        problems = check_gold_conversations(load_conversations(a.conversations))
     for p in problems:
         print(p)
     print("gold facts OK" if not problems else f"{len(problems)} mismatches", file=sys.stderr)
@@ -132,7 +136,8 @@ def main(argv: list[str] | None = None) -> int:
     rp.set_defaults(fn=cmd_report)
 
     g = sub.add_parser("check-gold", help="đối chiếu đáp án facts với mock data của Student Record MCP")
-    g.add_argument("--tasks")
+    g.add_argument("--conversations", help="file hội thoại riêng (mặc định: data/conversations.json)")
+    g.add_argument("--tasks", help="đối chiếu file câu đơn (định dạng tasks.json) thay cho bộ hội thoại")
     g.set_defaults(fn=cmd_check_gold)
 
     rt = sub.add_parser("retrieval", help="đo truy xuất quy chế (recall, MRR) trên các lượt cần quy chế, không gọi LLM")
