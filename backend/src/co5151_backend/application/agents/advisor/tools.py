@@ -5,7 +5,7 @@ from typing import Any
 
 from co5151_contracts import ErrorCode
 
-from ....domain.evidence import Action, Regulation
+from ....domain.evidence import Action, Decision, Regulation
 from ...ports import RegulationGateway, StudentRecordGateway
 from ...tracing import DISCARD, SpanRecorder
 
@@ -49,6 +49,7 @@ class StudentTools:
         if action is Action.SUMMARY:
             return StudentFacts(
                 {
+                    "cohort": data.cohort,
                     "ctdt": data.ctdt,
                     "program_credits": data.program_credits,
                     "credits_earned": data.credits_earned,
@@ -59,6 +60,7 @@ class StudentTools:
                     "english_cert": data.english_cert,
                     "gdtc_completed": data.gdtc_completed,
                     "gdqp_completed": data.gdqp_completed,
+                    "retake_credits": data.retake_credits,
                 }
             )
         return StudentFacts(
@@ -66,6 +68,16 @@ class StudentTools:
                 "warnings_checked": True,
                 "currently_warned": data.currently_warned,
                 "consecutive_warnings": data.consecutive_warnings,
+                "decisions": [
+                    Decision(
+                        semester=d.semester_label,
+                        type=d.type,
+                        content=d.content,
+                        decision_no=d.decision_no,
+                        is_warning=d.is_warning,
+                    )  # fmt: skip
+                    for d in data.decisions
+                ],
             }
         )
 

@@ -1,5 +1,5 @@
 from co5151_backend.domain.conversation import MAX_TITLE, title_from
-from co5151_backend.domain.evidence import Action, Evidence
+from co5151_backend.domain.evidence import Action, Decision, Evidence
 from co5151_backend.domain.trace import Usage, new_trace_id
 from co5151_backend.infrastructure.config import Settings
 
@@ -9,6 +9,17 @@ def test_evidence_knows_what_was_collected():
     assert ev.collected(Action.SUMMARY) and not ev.collected(Action.WARNINGS) and not ev.collected(Action.RESPOND)
     assert ev.student_facts()["credits_earned"] == 92 and "currently_warned" not in ev.student_facts()
     assert Evidence().student_facts() == {}
+
+
+def test_warning_facts_list_the_semesters_and_decisions_on_one_line():
+    warned = Decision(semester="Học kỳ 2 (2024 - 2025)", type="Cảnh báo học tập", content="Cảnh báo mức 1",
+                      decision_no="1/QĐ-ĐHBK", is_warning=True)  # fmt: skip
+    thesis = Decision(semester="Học kỳ 1 (2025 - 2026)", type="Quyết định khác", content="Giao đề tài",
+                      decision_no="2/QĐ-ĐHBK")  # fmt: skip
+    ev = Evidence(warnings_checked=True, currently_warned=False, consecutive_warnings=0, decisions=[thesis, warned])
+    facts = ev.student_facts()
+    assert ev.warning_semesters == ["Học kỳ 2 (2024 - 2025)"] and facts["warning_semesters"] == "Học kỳ 2 (2024 - 2025)"
+    assert facts["decisions"].startswith("Học kỳ 1 (2025 - 2026): Quyết định khác: Giao đề tài (2/QĐ-ĐHBK); ")
 
 
 def test_usage_adds_up_and_trace_ids_are_w3c_shaped():

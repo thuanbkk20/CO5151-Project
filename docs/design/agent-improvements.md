@@ -65,8 +65,8 @@ chương trình), số tín chỉ còn thiếu, ĐTBTL thang 4 trong bản nháp
 
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
-| 1 | `docs(design): agent improvements plan` | file này | |
-| 2 | `feat(backend): cohort, retakes and decisions in the evidence` | C2 | |
+| 1 | `docs(design): agent improvements plan` | file này | xong `0c4a80e` |
+| 2 | `feat(backend): cohort, retakes and decisions in the evidence` | C2 | xong |
 | 3 | `fix(backend): the template answer draws no conclusion` | C4 | |
 | 4 | `fix(backend): fixed replies R1, R2 and one form of address` | C5 | |
 | 5 | `feat(backend): ten questions per conversation` | C6 backend: biến, kết cục `limit`, `questions_left` trong API, eval/console biết `limit` | |

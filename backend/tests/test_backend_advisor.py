@@ -15,7 +15,7 @@ from co5151_backend.domain.evidence import Action, Evidence, Regulation
 from co5151_backend.domain.trace import Outcome
 from co5151_backend.infrastructure.laya import LayaActionRouter
 from co5151_contracts import ErrorCode, IssueCode, Verdict, VerdictStatus, VerificationIssue, err, ok
-from co5151_contracts.student import AcademicDecisions, AcademicSummary
+from co5151_contracts.student import AcademicDecision, AcademicDecisions, AcademicSummary
 
 pytestmark = pytest.mark.anyio
 
@@ -139,6 +139,30 @@ async def test_guest_gets_regulations_instead_of_a_record():
 async def test_warning_question_reads_the_decisions():
     g, _ = await gather("Em có đang bị cảnh báo học tập không?")
     assert g.tool_calls == ["get_my_academic_decisions"] and g.evidence.currently_warned is True
+
+
+WARNED = AcademicDecision(semester="20242", semester_label="Học kỳ 2 (2024 - 2025)", decision_no="9/QĐ-ĐHBK",
+                          decision_date="01/07/2025", type="Cảnh báo học tập", content="Cảnh báo học tập mức 1",
+                          reason=None, student_status="Đang theo học", is_warning=True,
+                          updated="01/07/2025")  # fmt: skip
+
+
+async def test_the_prompt_has_the_cohort_retakes_and_each_decision():
+    decisions = AcademicDecisions(student_id="2310001", currently_warned=True, consecutive_warnings=1,
+                                  decisions=[WARNED])  # fmt: skip
+    advisor = Advisor(Student(ok(decisions)), Regulations())
+    warned = (await advisor.gather("Em bị cảnh báo học tập kỳ nào?", token=TOKEN, planner=Planner())).evidence
+    record = (await Advisor(Student(), Regulations()).gather(CREDITS, token=TOKEN, planner=Planner())).evidence
+    evidence = warned.model_copy(
+        update=record.model_dump(include={"cohort", "ctdt", "retake_credits", "credits_earned", "program_credits"})
+    )
+    assert evidence.cohort == 2023 and evidence.retake_credits == 0 and evidence.decisions[0].is_warning
+    model = Model("ok")
+    await advisor.write("q", evidence, model=model, history=[], token=TOKEN)
+    prompt = model.calls[0]["prompt"]
+    assert "Khóa tuyển sinh: 2023 · CTĐT: 2023" in prompt and "Quy chế áp dụng" not in prompt
+    assert "Tín chỉ đã học lại: 0" in prompt and "các học kỳ từng bị cảnh báo: Học kỳ 2 (2024 - 2025)" in prompt
+    assert "Học kỳ 2 (2024 - 2025): Cảnh báo học tập: Cảnh báo học tập mức 1 (9/QĐ-ĐHBK)" in prompt
 
 
 async def test_internal_error_is_retried_once_others_are_refused_safely():

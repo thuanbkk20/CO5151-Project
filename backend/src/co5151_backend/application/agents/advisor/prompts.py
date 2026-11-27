@@ -41,6 +41,12 @@ def english_status(evidence: Evidence) -> str:
     return ", ".join(dict.fromkeys(p.strip() for p in parts if p))
 
 
+def decision_lines(evidence: Evidence) -> str:
+    if not evidence.decisions:
+        return "không có"
+    return "".join(f"\n  + {d.semester}: {d.type}: {d.content} ({d.decision_no})" for d in evidence.decisions)
+
+
 def answer_prompt(question: str, evidence: Evidence, *, logged_in: bool, preferences: list[str]) -> str:
     parts = [f"Câu hỏi của sinh viên: {question}\n\nBằng chứng học vụ cá nhân đã xác thực:"]
     if not logged_in:
@@ -52,17 +58,21 @@ def answer_prompt(question: str, evidence: Evidence, *, logged_in: bool, prefere
         parts.append(
             f"- Tín chỉ tích lũy: {evidence.credits_earned}/{evidence.program_credits}\n"
             f"- Điểm TB tích lũy (CGPA thang 4): {evidence.cgpa}\n"
-            f"- Quy chế áp dụng: {evidence.ctdt}\n"
+            f"- Khóa tuyển sinh: {evidence.cohort} · CTĐT: {evidence.ctdt}\n"
+            f"- Tín chỉ đã học lại: {evidence.retake_credits}\n"
             f"- Đồ án chuyên ngành: {'Đã đạt' if evidence.capstone_project_passed else 'Chưa đạt'}\n"
             f"- GDTC: {'Hoàn thành' if evidence.gdtc_completed else 'Chưa hoàn thành'}\n"
             f"- GDQP-AN: {'Hoàn thành' if evidence.gdqp_completed else 'Chưa hoàn thành'}\n"
             f"- Chuẩn ngoại ngữ: {english_status(evidence)}"
         )
     if evidence.has_warnings:
+        semesters = ", ".join(evidence.warning_semesters) or "không có"
         parts.append(
             f"- Trạng thái cảnh báo: {'Đang bị cảnh báo' if evidence.currently_warned else 'Không bị cảnh báo'} "
-            f"(số lần: {evidence.consecutive_warnings})"
+            f"(số học kỳ chính liên tiếp bị cảnh báo: {evidence.consecutive_warnings}; các học kỳ từng bị cảnh báo: "
+            f"{semesters})"
         )
+        parts.append(f"- Quyết định học vụ: {decision_lines(evidence)}")
     if evidence.regulations:
         regulations = "\n".join(f"[{doc.id}] {doc.title}: {doc.content}" for doc in evidence.regulations)
         parts.append(f"\nVăn bản quy chế đào tạo trích dẫn:\n<regulations>\n{_data(regulations)}\n</regulations>")
@@ -104,7 +114,7 @@ def template_answer(question: str, evidence: Evidence) -> str:
         capstone = "đã đạt" if evidence.capstone_project_passed else "chưa đạt"
         parts.append(
             f"Hồ sơ học vụ của bạn: Đã tích lũy {evidence.credits_earned}/{evidence.program_credits} tín chỉ, "
-            f"ĐTBTL {evidence.cgpa}, {capstone} Đồ án chuyên ngành, quy chế {evidence.ctdt}, "
+            f"ĐTBTL {evidence.cgpa}, {capstone} Đồ án chuyên ngành, khóa {evidence.cohort}, CTĐT {evidence.ctdt}, "
             f"ngoại ngữ: {english_status(evidence)}."
         )
     if evidence.regulations:
