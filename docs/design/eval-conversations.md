@@ -61,8 +61,8 @@ lời không có fact vẫn được chấm khi có mẫu cấm (đạt = kết 
 | 8 | `feat(eval): zero-shot and naive RAG baselines` | E1 | xong `11c1ff5` |
 | 9 | `feat(eval): ablation factories` | E2 | xong `b5fadeb` |
 | 10 | `feat(eval): indirect prompt injection fixtures` | E3 | xong `275088b` |
-| 11 | `docs: threat model v2` | F1 | xong |
-| 12 | `docs: eval conversations in README` | README eval, remaining-work | |
+| 11 | `docs: threat model v2` | F1 | xong `d9d7fa2` |
+| 12 | `docs: eval conversations in README` | README eval, remaining-work | xong |
 
 ## Chưa quyết
 
