@@ -70,10 +70,10 @@ chương trình), số tín chỉ còn thiếu, ĐTBTL thang 4 trong bản nháp
 | 3 | `fix(backend): the template answer draws no conclusion` | C4 | xong `4671cfc` |
 | 4 | `fix(backend): fixed replies R1, R2 and one form of address` | C5 | xong `317f03c` |
 | 5 | `feat(backend): ten questions per conversation` | C6 backend: biến, kết cục `limit`, `questions_left` trong API, eval/console biết `limit` | xong `33b96c4` |
-| 6 | `feat(web): stop asking when the conversation is full` | C6 frontend | xong |
-| 7 | `feat(backend): the router reads the conversation and rewrites the question` | C1 | |
+| 6 | `feat(web): stop asking when the conversation is full` | C6 frontend | xong `417046d` |
+| 7 | `feat(backend): the router reads the conversation and rewrites the question` | C1 | xong |
 | 8 | `feat(backend): the Verifier judges the standalone question` | D1 | |
-| 9 | `feat(backend): specific clarifying questions, answers without regulations` | C3 | |
+| 9 | `feat(backend): answers without regulations` | C3 phần truy xuất rỗng (câu hỏi lại cụ thể đã nằm trong 7 vì cùng lời gọi router) | |
 | 10 | `feat(backend): search again before a rewrite` | D2 | |
 | 11 | `feat(backend): rule check of the record numbers` | D3 | |
 | 12 | `docs: agent improvements in architecture and README` | chi phí LLM mỗi câu, luồng mới | |

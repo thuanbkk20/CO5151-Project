@@ -31,6 +31,11 @@ class ComplianceVerifier:
         self._checks = tuple(checks)
         self._judge = judge
 
+    @property
+    def judges(self) -> bool:
+        """Whether an LLM judge reads the question (then a follow-up question is worth making standalone)."""
+        return self._judge is not None
+
     def describe(self) -> dict[str, Any]:
         describe = getattr(self._judge, "describe", None)
         return {"rule_checks": len(self._checks), "judge": describe() if callable(describe) else None}

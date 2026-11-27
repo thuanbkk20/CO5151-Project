@@ -73,8 +73,13 @@ def decision_lines(evidence: Evidence) -> str:
     return "".join(f"\n  + {d.semester}: {d.type}: {d.content} ({d.decision_no})" for d in evidence.decisions)
 
 
-def answer_prompt(question: str, evidence: Evidence, *, logged_in: bool, preferences: list[str]) -> str:
-    parts = [f"Câu hỏi của sinh viên: {question}\n\nBằng chứng học vụ cá nhân đã xác thực:"]
+def answer_prompt(
+    question: str, evidence: Evidence, *, logged_in: bool, preferences: list[str], standalone: str | None = None
+) -> str:
+    parts = [f"Câu hỏi của sinh viên: {question}"]
+    if standalone and standalone != question:
+        parts.append(f"Câu hỏi đầy đủ (đã điền ngữ cảnh từ hội thoại): {standalone}")
+    parts.append("\nBằng chứng học vụ cá nhân đã xác thực:")
     if not logged_in:
         parts.append(
             "- Người hỏi chưa đăng nhập nên không có hồ sơ cá nhân. Nếu câu trả lời phụ thuộc khóa, chương trình "

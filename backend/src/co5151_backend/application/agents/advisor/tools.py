@@ -95,8 +95,12 @@ class RegulationSearch:
         self._hops = hops
         self._max_chars = max_chars
 
-    async def search(self, query: str, *, spans: SpanRecorder = DISCARD) -> list[Regulation]:
-        args = {"query": query, "top_k": self._top_k, "hops": self._hops}
+    async def search(
+        self, query: str, *, context: dict | None = None, top_k: int | None = None, spans: SpanRecorder = DISCARD
+    ) -> list[Regulation]:
+        args: dict = {"query": query, "top_k": top_k or self._top_k, "hops": self._hops}
+        if context:
+            args["context"] = context
         with spans.span("regulation", REGULATION_TOOL, {"tool": REGULATION_TOOL, "args": args}) as span:
             res = await self._gateway.call(REGULATION_TOOL, args)
             span.output = res.model_dump(mode="json", exclude_none=True)

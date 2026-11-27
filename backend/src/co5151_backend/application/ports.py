@@ -164,8 +164,12 @@ class ActionRouter(Protocol):
 
     name: str
 
-    async def route(self, question: str, state: dict[str, bool], choices: list[Action]) -> "Routed":
-        """Never raises: a failed call comes back with `action=None` and `error` set."""
+    async def route(
+        self, question: str, state: dict[str, bool], choices: list[Action], history: Sequence["ChatTurn"] = ()
+    ) -> "Routed":
+        """Never raises: a failed call comes back with `action=None` and `error` set. A router that reads the
+        conversation (`history`) may also rewrite the question (`standalone_question`, `regulation_query`) and word
+        a clarifying question; one that does not leaves them None."""
 
 
 @dataclass(frozen=True)
@@ -174,6 +178,9 @@ class Routed:
     input_tokens: int = 0
     output_tokens: int = 0
     error: str | None = None
+    standalone_question: str | None = None  # the question with what it refers to filled in from the conversation
+    regulation_query: str | None = None  # a short search phrase for the regulations
+    clarify_question: str | None = None  # with CLARIFY: what to ask the student
 
 
 # Streaming -----------------------------------------------------------------------------------------------------

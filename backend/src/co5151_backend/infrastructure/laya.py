@@ -5,10 +5,11 @@ choices in a single forward pass (~20-40 ms), so routing costs no LLM call. Unre
 """
 
 import logging
+from collections.abc import Sequence
 
 import httpx
 
-from ..application.ports import Routed
+from ..application.ports import ChatTurn, Routed
 from ..domain.evidence import Action
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,10 @@ class LayaActionRouter:
         self.url = url or DEFAULT_URL
         self._timeout = timeout
 
-    async def route(self, question: str, state: dict[str, bool], choices: list[Action]) -> Routed:
+    async def route(
+        self, question: str, state: dict[str, bool], choices: list[Action], history: Sequence[ChatTurn] = ()
+    ) -> Routed:
+        """Laya decides the action only: it neither reads the conversation nor rewrites the question."""
         payload = {
             "state": {"body": question, **state},
             "questions": {

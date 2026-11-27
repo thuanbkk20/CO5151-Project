@@ -181,7 +181,9 @@ class AskQuestion:
         emit: EventSink,
         spans: SpanRecorder,
     ) -> "_Turn":
+        verifier = self._verifier_for(model)
         gathered = await self._advisor.gather(question, token=token, planner=Planner(self._router_for(model)),
+                                              history=history, need_standalone=bool(getattr(verifier, "judges", False)),
                                               emit=emit, spans=spans)  # fmt: skip
         turn = _Turn(gathered.steps, gathered.tool_calls, gathered.citations, gathered.usage, list(gathered.llm_errors))
         if gathered.final_text is not None:  # refusal or clarification of the planner: nothing to verify
@@ -190,9 +192,10 @@ class AskQuestion:
 
         evidence = gathered.evidence
         await emit(events.step("write"))
-        draft = await self._advisor.write(question, evidence, model=model, history=history, token=token, spans=spans)
+        standalone = gathered.standalone_question
+        draft = await self._advisor.write(question, evidence, model=model, history=history, token=token,
+                                          standalone=standalone, spans=spans)  # fmt: skip
         turn.add_draft(draft)
-        verifier = self._verifier_for(model)
         if verifier is None:
             return turn
 
@@ -215,7 +218,8 @@ class AskQuestion:
             if verdict.status is VerdictStatus.REVISE and turn.verifier_rounds < MAX_VERIFIER_ROUNDS:
                 await emit(events.step("write", revision=True))
                 rewrite = await self._advisor.write(question, evidence, model=model, history=history, token=token,
-                                                    revise=(turn.text, verdict), spans=spans)  # fmt: skip
+                                                    revise=(turn.text, verdict), standalone=standalone,
+                                                    spans=spans)  # fmt: skip
             if rewrite is None:
                 turn.text, turn.outcome = prompts.refusal(verdict), Outcome.REFUSE
                 return turn
