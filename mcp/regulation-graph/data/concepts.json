@@ -37,7 +37,7 @@
    "synonyms": ["chuẩn ngoại ngữ", "ngoại ngữ", "toeic", "ielts", "toefl", "chứng chỉ", "tiếng anh", "anh văn", "chuẩn đầu ra", "quy đổi chứng chỉ", "vstep", "aptis"],
    "about": ["QD2749-2026-APP1", "QD1260-2026-APP1", "QD2933-2021-APP1"]},
   {"id": "hoc_phan_tot_nghiep", "label": "Học phần tốt nghiệp: luận văn, khoá luận, đồ án tốt nghiệp",
-   "synonyms": ["luận văn", "khoá luận", "khóa luận", "lvtn", "đồ án tốt nghiệp", "học phần tốt nghiệp", "làm luận văn", "đề tài tốt nghiệp", "giao đề tài", "bảo vệ"],
+   "synonyms": ["luận văn tốt nghiệp", "khoá luận tốt nghiệp", "khóa luận tốt nghiệp", "đăng ký luận văn", "luận văn", "khoá luận", "khóa luận", "lvtn", "đồ án tốt nghiệp", "học phần tốt nghiệp", "làm luận văn", "đề tài tốt nghiệp", "giao đề tài", "bảo vệ"],
    "about": ["QD2933-2021-CL5.5", "QD1260-2026-CL5.5", "QD2932-2021-ART6", "QD2932-2021-ART7", "QD2932-2021-CL7.5"],
    "requires": ["chuan_ngoai_ngu"]},
   {"id": "do_an_chuyen_nganh", "label": "Đồ án chuyên ngành",

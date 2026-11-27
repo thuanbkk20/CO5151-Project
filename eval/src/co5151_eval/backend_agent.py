@@ -74,10 +74,20 @@ def _regulations() -> RegulationServiceV2:
 
 
 def regulation_service(engine: str = "bm25"):
-    """The regulation service the in-process agent searches: `bm25` is the Regulation MCP of `regulation-server`."""
+    """The regulation service the in-process agent searches: `bm25` is the Regulation MCP of `regulation-server`,
+    `graph` the one of `regulation-graph`."""
     if engine == "bm25":
         return _regulations()
+    if engine == "graph":
+        return _graph_regulations()
     raise ValueError(f"unknown regulation engine: {engine}")
+
+
+@cache
+def _graph_regulations():
+    from regulation_graph.service import RegulationGraphService
+
+    return RegulationGraphService()
 
 
 def _settings(**overrides: Any) -> Settings:

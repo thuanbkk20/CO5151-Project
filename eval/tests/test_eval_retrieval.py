@@ -43,3 +43,9 @@ def test_cli_measures_the_bm25_engine(tmp_path, capsys):
     assert "Truy xuất quy chế: bm25" in capsys.readouterr().out
     data = json.loads(out.read_text("utf-8"))
     assert data["summary"]["cases"] == len(retrieval.load_cases())
+
+
+def test_an_article_and_its_clauses_stand_for_each_other():
+    clause = retrieval.score_case(_case("QD1-2021-ART14"), ok({"results": [_result("QD1-2021-CL14.3")]}))
+    article = retrieval.score_case(_case("QD1-2021-CL14.3"), ok({"results": [_result("QD1-2021-ART14")]}))
+    assert clause["rr"] == 1.0 and article["rr"] == 1.0

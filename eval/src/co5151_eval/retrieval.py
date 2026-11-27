@@ -6,6 +6,7 @@ not checked against the PDF yet (task A2), so the numbers compare engines, they 
 """
 
 import json
+import re
 import statistics
 from collections.abc import Callable
 from importlib import resources
@@ -47,16 +48,28 @@ def _text(result: dict) -> str:
     return " ".join(text.split())[:MAX_CHARS]
 
 
+def article_of(pid: str) -> str:
+    """The article a clause id belongs to: QD2933-2021-CL14.3 -> QD2933-2021-ART14 (other ids are their own)."""
+    return re.sub(r"-CL(\d+)\.\d+$", r"-ART\1", pid)
+
+
 def ranked_ids(results: list[dict]) -> list[set[str]]:
     """Ids per rank. A result also stands for the older versions it replaces (`superseded`), so an engine that
-    returns only the version in force is not punished for leaving the old text out."""
-    return [{r["id"], *(r.get("superseded") or [])} for r in results]
+    returns only the version in force is not punished for leaving the old text out; and for its article, since an
+    article holds the text of its clauses (a clause of an expected article, or the article of an expected clause,
+    counts)."""
+    out = []
+    for r in results:
+        ids = {r["id"], *(r.get("superseded") or [])}
+        out.append(ids | {article_of(i) for i in ids})
+    return out
 
 
 def score_case(case: RetrievalCase, res: ToolResult) -> dict:
     results = (res.data or {}).get("results", []) if res.ok else []
     ranks = ranked_ids(results)
     expected = set(case.expected)
+    ranks = [ids | {e for e in expected if article_of(e) in ids} for ids in ranks]
     row = {"id": case.id, "ok": res.ok, "returned": [r["id"] for r in results], "n": len(results),
            "chars": sum(len(_text(r)) for r in results)}  # fmt: skip
     first = next((i for i, ids in enumerate(ranks, 1) if ids & expected), None)

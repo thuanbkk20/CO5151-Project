@@ -136,7 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     g.set_defaults(fn=cmd_check_gold)
 
     rt = sub.add_parser("retrieval", help="đo truy xuất quy chế (recall, MRR) trên các lượt cần quy chế, không gọi LLM")
-    rt.add_argument("--engine", choices=["bm25"], default="bm25", help="RAG quy chế cần đo")
+    rt.add_argument("--engine", choices=["bm25", "graph"], default="bm25", help="RAG quy chế cần đo")
     rt.add_argument("--cases", help="file JSON câu đo riêng (mặc định data/retrieval_cases.json)")
     rt.add_argument("--json", type=Path, help="ghi thêm kết quả dạng JSON để so cấu hình")
     rt.set_defaults(fn=cmd_retrieval)

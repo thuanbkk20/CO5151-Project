@@ -88,8 +88,8 @@ recall@8, MRR, tỉ lệ rỗng. Khoản ứng viên **chưa đối chiếu PDF*
 | 4 | `feat(regulation-graph): package and document registry` | package, `documents.json` (15 văn bản), trích chữ PDF/docx vào `data/text` | xong `34adcad` |
 | 5 | `feat(regulation-graph): text of the scanned graduation rules` | chữ QĐ 2932 chép từ ảnh 12 trang (`data/vision`), hai trang biểu mẫu chỉ tóm mục | xong `cb09eda` |
 | 6 | `feat(regulation-graph): provisions and amendments` | `regulation-graph-build`: 244 khoản (Điều, Khoản, Phụ lục, nội dung sửa đổi, mục kết luận HĐHV), 135 cạnh (`CONTAINS`, `AMENDS` gồm 14 cạnh QĐ 1259 → 2931, `REPLACES`, `REPEALS`) | xong `cb8ca1f` |
-| 7 | `feat(regulation-graph): concepts` | `concepts.json`: 24 khái niệm, từ đồng nghĩa, 77 cạnh `ABOUT`, 5 cạnh `REQUIRES` | xong |
-| 8 | `feat(regulation-graph): hybrid retrieval with versions` | truy xuất 6 bước, service hai tool | |
+| 7 | `feat(regulation-graph): concepts` | `concepts.json`: 24 khái niệm, từ đồng nghĩa, 77 cạnh `ABOUT`, 5 cạnh `REQUIRES` | xong `b3725d8` |
+| 8 | `feat(regulation-graph): hybrid retrieval with versions` | truy xuất lai, service hai tool, `--engine graph` trong lệnh đo. Đo (tính Điều ↔ Khoản con): graph hit@3 1.00, recall@3 0.92, MRR 0.84, rỗng 0%; BM25 0.42 / 0.36 / 0.27 / 19% | xong |
 | 9 | `feat(regulation-graph): MCP server` | server HTTP, `.env.example`, README | |
 | 10 | `feat(eval): pick the regulation engine` | `REGULATION_ENGINE`, so hai RAG bằng B1 | |
 | 11 | `docs: regulation graph results` | số đo, architecture, README | |

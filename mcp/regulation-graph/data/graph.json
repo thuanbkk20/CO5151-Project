@@ -3289,6 +3289,10 @@
    "id": "hoc_phan_tot_nghiep",
    "label": "Học phần tốt nghiệp: luận văn, khoá luận, đồ án tốt nghiệp",
    "synonyms": [
+    "luận văn tốt nghiệp",
+    "khoá luận tốt nghiệp",
+    "khóa luận tốt nghiệp",
+    "đăng ký luận văn",
     "luận văn",
     "khoá luận",
     "khóa luận",
@@ -4611,5 +4615,5 @@
    "target": "cong_tac_xa_hoi"
   }
  ],
- "version": "66ebc2404b05cbd31d3a9576a8aefe4b81c4e280bbbc70dda353bd464474bedd"
+ "version": "01af695503ccd989209f42e452ba2e70cde39e13b65dd9c1c5283484972008e6"
 }
