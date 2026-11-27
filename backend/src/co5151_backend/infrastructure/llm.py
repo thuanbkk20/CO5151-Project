@@ -42,10 +42,11 @@ class Provider:
 # Model lists are kept by hand: update them when a vendor adds or retires a model, or when a deployment changes
 # (Azure: infra/azure/openai.tf, foundry.tf). A model that needs other parameters also goes into MODEL_PROFILES.
 PROVIDERS: dict[str, Provider] = {
-    # Names from GET /v1beta/models (27/11)
+    # Names from GET /v1beta/models (27/11); gemini-2.5-flash is listed there but answers 404 "no longer available
+    # to new users"
     "gemini": Provider(
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-        models=("gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"),
+        models=("gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash"),
         key_env="GEMINI_API_KEY",
         json_schema=True,
     ),

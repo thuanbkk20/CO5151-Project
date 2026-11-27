@@ -107,9 +107,9 @@ async def test_foundry_offers_its_deployments():
 
 
 def test_llm_model_goes_first_in_the_default_providers_list():
-    models = ProviderChatModels({"LLM_PROVIDER": "gemini", "LLM_MODEL": "gemini-2.5-flash", "GEMINI_API_KEY": "g"})
-    assert models.models("gemini")[0] == "gemini-2.5-flash"
-    assert models.models("gemini").count("gemini-2.5-flash") == 1
+    models = ProviderChatModels({"LLM_PROVIDER": "gemini", "LLM_MODEL": "gemini-3.5-flash", "GEMINI_API_KEY": "g"})
+    assert models.models("gemini")[0] == "gemini-3.5-flash"
+    assert models.models("gemini").count("gemini-3.5-flash") == 1
     assert models.models("openai") == list(PROVIDERS["openai"].models)
 
 
