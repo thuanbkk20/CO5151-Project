@@ -6,14 +6,13 @@ from typing import Any
 
 import chainlit as cl
 import httpx
-from chainlit.input_widget import Select, TextInput
+from chainlit.input_widget import Select
 
 from co5151_web.client import BackendClient, BackendError, SessionExpired
 from co5151_web.history import TOKEN_KEY, BackendDataLayer
 from co5151_web.present import (
     STEP_NAME,
     chat_settings_body,
-    has_free_model,
     llm_options,
     pick_llm,
     progress_line,
@@ -86,12 +85,7 @@ async def _settings_form(saved: dict | None) -> dict:
         await _notice("Backend chưa có key LLM nào. Advisor sẽ trả lời bằng mẫu (template), không qua LLM.")
         return {}
     initial = pick_llm(saved, options, choices["default"])
-    widgets: list[Any] = [Select(id="llm", label="Model", items=options, initial_value=initial)]
-    if has_free_model(choices):
-        free = saved.get("model") if "/" not in initial else None
-        widgets.append(TextInput(id="model", label="Tên model khác (tùy chọn)", initial=free or "",
-                                 placeholder="chỉ cho mục \"model mặc định\"; để trống = mặc định"))  # fmt: skip
-    return await cl.ChatSettings(widgets).send()
+    return await cl.ChatSettings([Select(id="llm", label="Model", items=options, initial_value=initial)]).send()
 
 
 @cl.on_chat_start

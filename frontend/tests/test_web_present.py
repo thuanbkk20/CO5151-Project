@@ -5,7 +5,6 @@ from co5151_web.present import (
     SECURITY_STARTER,
     chat_settings_body,
     details_markdown,
-    has_free_model,
     llm_options,
     pick_llm,
     plain_markdown,
@@ -56,29 +55,27 @@ def test_thread_keeps_backend_message_ids_and_feedback():
     assert answer["id"] == "m2" and answer["feedback"]["forId"] == "m2" and answer["feedback"]["value"] == 1
 
 
-CHOICES = {"providers": ["azure", "foundry"], "default": "azure", "models": {"azure": [], "foundry": ["a", "b"]}}
+CHOICES = {"providers": ["azure", "foundry"], "default": "azure",
+           "models": {"azure": ["gpt-4.1-mini"], "foundry": ["a", "b"]}}  # fmt: skip
 
 
 def test_settings_body_splits_provider_and_model():
-    assert chat_settings_body({"llm": "foundry/b", "model": "ignored"}) == {"provider": "foundry", "model": "b"}
-    assert chat_settings_body({"llm": "gemini", "model": "  "}) == {"provider": "gemini", "model": None}
-    assert chat_settings_body({"llm": "gemini", "model": " x "}) == {"provider": "gemini", "model": "x"}
-    assert chat_settings_body({"provider": "gemini"}) == {"provider": "gemini", "model": None}
+    assert chat_settings_body({"llm": "foundry/b"}) == {"provider": "foundry", "model": "b"}
+    assert chat_settings_body({"llm": "gemini"}) == {"provider": "gemini", "model": None}
     assert chat_settings_body(None) == {"provider": None, "model": None}
 
 
-def test_one_option_per_listed_model_or_provider_default():
-    options = llm_options(CHOICES)
-    assert options == {"azure · model mặc định": "azure", "foundry · a": "foundry/a", "foundry · b": "foundry/b"}
-    assert has_free_model(CHOICES) and not has_free_model({**CHOICES, "providers": ["foundry"]})
+def test_one_option_per_offered_model():
+    assert llm_options(CHOICES) == {"azure · gpt-4.1-mini": "azure/gpt-4.1-mini", "foundry · a": "foundry/a",
+                                    "foundry · b": "foundry/b"}  # fmt: skip
     assert llm_options({"providers": ["gemini"], "default": "gemini"}) == {"gemini · model mặc định": "gemini"}
 
 
 def test_choice_falls_back_when_the_backend_no_longer_offers_it():
     options = llm_options(CHOICES)
     assert pick_llm({"provider": "foundry", "model": "b"}, options, "azure") == "foundry/b"
-    assert pick_llm({"provider": "azure", "model": "custom"}, options, "foundry") == "azure"
-    assert pick_llm({"provider": "foundry", "model": "gone"}, options, "azure") == "azure"
+    assert pick_llm({"provider": "foundry", "model": "gone"}, options, "azure") == "azure/gpt-4.1-mini"
+    assert pick_llm({"provider": "foundry"}, options, "azure") == "azure/gpt-4.1-mini"
     assert pick_llm(None, options, "foundry") == "foundry/a"
     assert pick_llm({"provider": "kimi"}, llm_options({**CHOICES, "providers": ["foundry"]}), "kimi") == "foundry/a"
 

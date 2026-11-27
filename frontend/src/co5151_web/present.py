@@ -227,7 +227,7 @@ def thread_dict(conversation: dict[str, Any], identifier: str) -> dict[str, Any]
 
 
 def llm_options(choices: dict[str, Any]) -> dict[str, str]:
-    """One entry per model to pick, label -> value: `provider/model` for a listed model, `provider` for its default.
+    """One entry per model the backend offers, label -> value `provider/model` (a provider without a list: `provider`).
 
     Chainlit settings cannot change one field when another changes, so provider and model are a single choice.
     """
@@ -236,14 +236,9 @@ def llm_options(choices: dict[str, Any]) -> dict[str, str]:
         models = (choices.get("models") or {}).get(provider) or []
         for model in models:
             options[f"{provider} · {model}"] = f"{provider}/{model}"
-        if not models:
+        if not models:  # an older backend without model lists
             options[f"{provider} · model mặc định"] = provider
     return options
-
-
-def has_free_model(choices: dict[str, Any]) -> bool:
-    """Some provider takes any model name, so the form keeps a text field for it."""
-    return any(not (choices.get("models") or {}).get(p) for p in choices.get("providers", []))
 
 
 def pick_llm(saved: dict[str, Any] | None, options: dict[str, str], default_provider: str) -> str:
@@ -259,13 +254,7 @@ def pick_llm(saved: dict[str, Any] | None, options: dict[str, str], default_prov
 
 
 def chat_settings_body(settings: dict[str, Any] | None) -> dict[str, Any]:
-    """The Chainlit settings form as backend conversation settings.
-
-    `llm` is `provider/model` or a bare provider; a bare provider takes the free-text `model` (empty = its default).
-    """
+    """The Chainlit settings form (`llm` = `provider/model` or a bare provider) as backend conversation settings."""
     settings = settings or {}
-    choice = settings.get("llm") or settings.get("provider") or ""
-    provider, _, model = choice.partition("/")
-    if not model:
-        model = (settings.get("model") or "").strip()
+    provider, _, model = (settings.get("llm") or "").partition("/")
     return {"provider": provider or None, "model": model or None}
