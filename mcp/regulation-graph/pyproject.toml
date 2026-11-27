@@ -16,6 +16,7 @@ extract = ["pypdf>=5"]
 
 [project.scripts]
 regulation-graph-extract = "regulation_graph.extract:main"
+regulation-graph-build = "regulation_graph.build:main"
 
 [tool.uv.sources]
 co5151-contracts = { workspace = true }
