@@ -108,7 +108,7 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 | 7 | `docs(design): a prepared model list for every provider` | sửa plan theo yêu cầu của Kiên (27/11) | xong `e942abd` |
 | 8 | `feat(backend): a prepared model list for every provider` | `Provider.models`, bỏ `models_env` và output `foundry_models`; hội thoại cũ về model mặc định; `.env.example`; test | xong `a3e7144` |
 | 9 | `feat(web): no free-text model` | bỏ ô gõ tên model; test | xong `db9158b` |
-| 10 | `docs: model list` | README, README infra, `architecture.md`. Deploy lên VM (cần push nhánh), hỏi thử mỗi model một câu | |
+| 10 | `docs: model list` | README, README infra, `architecture.md`. Deploy lên VM (cần push nhánh), hỏi thử mỗi model một câu | xong `f6b438c`; deploy 27/11 |
 
 ## Chưa quyết
 
@@ -121,3 +121,10 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
    structured output, như provider `kimi`).
 5. **Giới hạn số câu mỗi tài khoản mỗi ngày**: chưa có. Làm nếu chi phí buổi test cao hơn dự kiến.
 6. **Eval theo từng model**: tốn token, chỉ chạy khi Kiên bảo.
+7. **Hỏi thử trên bản deploy** (27/11, `sv001`, "Điều kiện để được xét tốt nghiệp là gì?", 5 câu, tổng 43.606 token
+   vào + 7.270 ra, khoảng $0.02 theo giá ở bảng trên):
+   - chỉ `gpt-oss-120b` trả lời (44 s); `gpt-4.1-mini`, `Llama-3.3-70B-Instruct`, `Phi-4` bị Verifier từ chối
+     (`outcome=refuse`, 2 vòng). `gpt-4.1-mini` gửi tham số như trước nhánh này, nên từ chối nhiều khả năng không do
+     nhánh này (đoán); cần xem trace trong console.
+   - `gpt-5-mini`: bước soạn câu trả lời trả rỗng (`answer LLM call failed, falling back: empty reply`), chưa rõ vì
+     sao (log không ghi `finish_reason`).
