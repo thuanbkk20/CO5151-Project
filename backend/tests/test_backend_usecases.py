@@ -1,7 +1,21 @@
+import json
+
 import pytest
-from backend_fakes import GRADUATION, PASS, REFUSE, REVISE, UNVERIFIED, App, Regulations, ScriptedVerifier, Student
+from backend_fakes import (
+    GRADUATION,
+    PASS,
+    REFUSE,
+    REVISE,
+    UNVERIFIED,
+    App,
+    Model,
+    Regulations,
+    ScriptedVerifier,
+    Student,
+)
 
 from co5151_backend.application.agents.advisor import prompts
+from co5151_backend.application.agents.advisor.planner import LLMActionRouter
 from co5151_backend.application.usecases.ask import MAX_VERIFIER_ROUNDS
 from co5151_backend.application.usecases.auth import AuthenticateOperator, SignIn
 from co5151_backend.application.usecases.operator import OperatorTraces
@@ -21,6 +35,18 @@ from co5151_backend.infrastructure.identity import DemoAccountDirectory
 from co5151_contracts import ErrorCode
 
 pytestmark = pytest.mark.anyio
+
+
+class Script(Model):
+    """A router model that replies the same JSON every time."""
+
+    def __init__(self, reply):
+        super().__init__()
+        self.reply = reply
+
+    async def complete(self, prompt, **kw):
+        self.replies.append(self.reply)
+        return await super().complete(prompt, **kw)
 
 
 async def started(app: App, username: str = "sv001"):
@@ -92,6 +118,23 @@ async def test_verifier_sees_only_the_evidence_the_draft_was_written_from():
     assert request.student_facts["credits_earned"] == 113 and "currently_warned" not in request.student_facts
     assert [r.id for r in request.regulations] == ["QD2933-2021-CL5.5"]
     assert "student_id" not in request.model_dump_json()
+
+
+async def test_the_verifier_judges_the_standalone_question_of_a_follow_up():
+    app = App("Lần 1", "Bạn còn thiếu 15 tín chỉ.", verifier=ScriptedVerifier(PASS, PASS))
+    standalone = "Em còn thiếu bao nhiêu tín chỉ để tốt nghiệp?"
+    app.ask._router_for = lambda model: LLMActionRouter(
+        Script(
+            json.dumps(
+                {"action": "RESPOND", "standalone_question": standalone, "regulation_query": "", "clarify_question": ""}
+            )
+        )
+    )
+    principal, conv = await started(app)
+    await app.ask.execute(principal, conv.id, GRADUATION)
+    await app.ask.execute(principal, conv.id, "Cái đó em còn thiếu mấy tín chỉ?")
+    assert app.verifier.requests[0].question == GRADUATION and app.verifier.requests[1].question == standalone
+    assert "Câu hỏi đầy đủ (đã điền ngữ cảnh từ hội thoại): " + standalone in app.model.calls[1]["prompt"]
 
 
 async def test_revise_rewrites_once_with_the_issues():

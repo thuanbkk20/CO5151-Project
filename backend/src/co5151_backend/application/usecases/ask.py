@@ -201,7 +201,8 @@ class AskQuestion:
 
         turn.verifier_rounds = 0
         while True:
-            request = _verification_request(question, turn.text, evidence)
+            # The judge never sees the conversation, so it checks the follow-up made standalone (D1)
+            request = _verification_request(standalone or question, turn.text, evidence)
             with spans.span(
                 "verifier", f"round {turn.verifier_rounds + 1}", _verifier_input(verifier, request)
             ) as span:
