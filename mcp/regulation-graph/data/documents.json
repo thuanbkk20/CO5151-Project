@@ -21,7 +21,7 @@
    "file_name": "1259 QĐ điều chỉnh_HVu chung_2931_2026.signed.pdf",
    "sha256": "8754204320cc8a33eb741cb3efe955b800f8aed4e48fa1a2f9e4bbbec9339990", "text_method": "pdf_text",
    "note": "Ngày ký nằm ở chữ ký số, không có trong lớp chữ"},
-  {"id": "QD2932-2021", "number": "2932/QĐ-ĐHBK", "issued": null, "kind": "regulation", "level": "dh",
+  {"id": "QD2932-2021", "number": "2932/QĐ-ĐHBK", "issued": "2021-09-10", "kind": "regulation", "level": "dh",
    "title": "Quy định hướng dẫn và chấm tốt nghiệp bậc Đại học",
    "file_name": "2932_Quyết định ban hành Quy định hướn dẫn và chấm tốt nghiệp bậc Đại học.pdf",
    "sha256": "3cc33c853076b4636ce9f6c77b94e5b943d3563c8b2fcf41062645438564ce51", "text_method": "vision",

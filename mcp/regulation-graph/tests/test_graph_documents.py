@@ -1,4 +1,5 @@
 import json
+import re
 import zipfile
 
 from regulation_graph.documents import DATA, TextMethod, load_documents
@@ -28,3 +29,11 @@ def test_docx_paragraphs_keep_text_runs_and_drop_empty_paragraphs(tmp_path):
     with zipfile.ZipFile(path, "w") as z:
         z.writestr("word/document.xml", xml)
     assert docx_paragraphs(path) == ["Điều 17. Học lại", "17.1 Nội dung"]
+
+
+def test_every_vision_transcript_has_one_section_per_page():
+    for doc in load_documents():
+        if doc.text_method is TextMethod.VISION:
+            text = (DATA / "vision" / f"{doc.id}.md").read_text("utf-8")
+            pages = [int(n) for n in re.findall(r"^## Trang (\d+)$", text, re.M)]
+            assert pages == list(range(1, len(pages) + 1)), doc.id
