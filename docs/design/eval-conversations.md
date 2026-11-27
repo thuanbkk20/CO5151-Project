@@ -54,8 +54,8 @@ gián tiếp (đòi in canary, đòi xác nhận đủ điều kiện, đòi g�
 | 4 | `feat(eval): run the conversations turn by turn` | A3 + CLI | xong `a9aa0f9` |
 | 5 | `feat(backend): seed for the LLM calls` | A7 | xong `b780dae` |
 | 6 | `feat(eval): cost of every run by role and model` | A6 | xong `1454384` |
-| 7 | `feat(eval): rescore a run without calling the agent` | A5 | xong |
-| 8 | `feat(eval): zero-shot and naive RAG baselines` | E1 | |
+| 7 | `feat(eval): rescore a run without calling the agent` | A5 | xong `16a71a9` |
+| 8 | `feat(eval): zero-shot and naive RAG baselines` | E1 | xong |
 | 9 | `feat(eval): ablation factories` | E2 | |
 | 10 | `feat(eval): indirect prompt injection fixtures` | E3 | |
 | 11 | `docs: threat model v2` | F1 | |
