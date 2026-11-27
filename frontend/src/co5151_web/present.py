@@ -76,6 +76,8 @@ def progress_line(step: dict[str, Any]) -> str:
         action = step.get("action", "")
         return f"Hiểu câu hỏi: {PLAN.get(action, action)}"
     if name == "tool":
+        if step.get("again"):
+            return "Tra thêm quy chế vì Verifier thấy thiếu căn cứ"
         return TOOLS.get(step.get("tool", ""), f"Gọi tool `{step.get('tool', '')}`")
     if name == "write":
         return "Viết lại theo góp ý của Verifier" if step.get("revision") else "Soạn câu trả lời"

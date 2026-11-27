@@ -95,6 +95,10 @@ class RegulationSearch:
         self._hops = hops
         self._max_chars = max_chars
 
+    @property
+    def top_k(self) -> int:
+        return self._top_k
+
     async def search(
         self, query: str, *, context: dict | None = None, top_k: int | None = None, spans: SpanRecorder = DISCARD
     ) -> list[Regulation]:

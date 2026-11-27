@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from co5151_contracts import Verdict
 
 from ....domain.errors import LLMError
-from ....domain.evidence import Action, Evidence
+from ....domain.evidence import Action, Evidence, Regulation
 from ....domain.trace import Outcome, Usage
 from ... import events
 from ...ports import ChatModel, ChatTurn, EventSink, RegulationGateway, Routed, StudentRecordGateway
@@ -24,6 +24,8 @@ from .tools import REGULATION_TOOL, STUDENT_TOOLS, RegulationSearch, StudentTool
 logger = logging.getLogger(__name__)
 
 MAX_STEPS = 5
+# Provisions in the prompt after a second search (D2): the first search gives `top_k` (3)
+MAX_REGULATIONS = 6
 ANSWER_MAX_OUTPUT_TOKENS = 1024
 
 
@@ -121,6 +123,17 @@ class Advisor:
             # Nothing found but a student: answer from the record and say the regulations were not found (C3)
             g.evidence = g.evidence.model_copy(update={"regulations_checked": True, "regulations": docs})
         return self._end(g, prompts.INCOMPLETE, Outcome.REFUSE)
+
+    async def search_more(self, query: str, evidence: Evidence, *, spans: SpanRecorder = DISCARD) -> list[Regulation]:
+        """A second, wider search when the Verifier found a claim without grounds: only provisions not yet in the
+        evidence, up to MAX_REGULATIONS in all. An MCP call, no LLM."""
+        room = MAX_REGULATIONS - len(evidence.regulations)
+        if room <= 0:
+            return []
+        have = {d.id for d in evidence.regulations}
+        context = {"cohort": evidence.cohort} if evidence.cohort else None
+        docs = await self._regulations.search(query, context=context, top_k=2 * self._regulations.top_k, spans=spans)
+        return [d for d in docs if d.id not in have][:room]
 
     @staticmethod
     def _count(g: Gathered, usage: Usage, error: str | None) -> None:

@@ -11,7 +11,7 @@ import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from co5151_contracts import RegulationExcerpt, VerdictStatus, VerificationRequest
+from co5151_contracts import IssueCode, RegulationExcerpt, Verdict, VerdictStatus, VerificationRequest
 
 from ...domain.conversation import ChatSettings, Conversation, Message, MessageRole, title_from, utcnow
 from ...domain.errors import AnswerFailed, InvalidRequest, NotFound
@@ -22,6 +22,7 @@ from .. import events
 from ..agents.advisor import prompts
 from ..agents.advisor.advisor import Advisor, Draft
 from ..agents.advisor.planner import Planner
+from ..agents.advisor.tools import REGULATION_TOOL
 from ..agents.verifier import ComplianceVerifier
 from ..ports import (
     AccountDirectory,
@@ -40,6 +41,8 @@ logger = logging.getLogger(__name__)
 
 # The Verifier checks a draft at most this many times, so the Advisor rewrites at most once before refusing.
 MAX_VERIFIER_ROUNDS = 2
+# Issues a wider regulation search may fix before the rewrite (D2); FACT_MISMATCH is about the record
+SEARCH_AGAIN_CODES = frozenset({IssueCode.MISSING_EVIDENCE, IssueCode.UNGROUNDED_CLAIM})
 MAX_QUESTION_CHARS = 4000
 # From this many questions left, the answer says how many remain (questions 8, 9, 10 of 10).
 WARN_QUESTIONS_LEFT = 2
@@ -217,6 +220,7 @@ class AskQuestion:
                 return turn
             rewrite = None
             if verdict.status is VerdictStatus.REVISE and turn.verifier_rounds < MAX_VERIFIER_ROUNDS:
+                evidence = await self._search_again(standalone or question, evidence, verdict, turn, emit, spans)
                 await emit(events.step("write", revision=True))
                 rewrite = await self._advisor.write(question, evidence, model=model, history=history, token=token,
                                                     revise=(turn.text, verdict), standalone=standalone,
@@ -225,6 +229,20 @@ class AskQuestion:
                 turn.text, turn.outcome = prompts.refusal(verdict), Outcome.REFUSE
                 return turn
             turn.add_draft(rewrite)
+
+    async def _search_again(
+        self, query: str, evidence: Evidence, verdict: Verdict, turn: "_Turn", emit: EventSink, spans: SpanRecorder
+    ) -> Evidence:
+        if not any(issue.code in SEARCH_AGAIN_CODES for issue in verdict.issues):
+            return evidence
+        turn.tool_calls.append(REGULATION_TOOL)
+        turn.steps.append("SEARCH_AGAIN")
+        await emit(events.step("tool", tool=REGULATION_TOOL, again=True))
+        found = await self._advisor.search_more(query, evidence, spans=spans)
+        if not found:
+            return evidence
+        turn.citations.extend(d.id for d in found)
+        return evidence.model_copy(update={"regulations_checked": True, "regulations": [*evidence.regulations, *found]})
 
 
 @dataclass

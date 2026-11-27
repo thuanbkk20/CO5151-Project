@@ -12,6 +12,7 @@ from backend_fakes import (
     Regulations,
     ScriptedVerifier,
     Student,
+    verdict,
 )
 
 from co5151_backend.application.agents.advisor import prompts
@@ -32,7 +33,7 @@ from co5151_backend.domain.errors import (
 from co5151_backend.domain.principal import Role
 from co5151_backend.domain.trace import Outcome
 from co5151_backend.infrastructure.identity import DemoAccountDirectory
-from co5151_contracts import ErrorCode
+from co5151_contracts import ErrorCode, IssueCode, VerdictStatus, ok
 
 pytestmark = pytest.mark.anyio
 
@@ -137,6 +138,45 @@ async def test_the_verifier_judges_the_standalone_question_of_a_follow_up():
     assert "Câu hỏi đầy đủ (đã điền ngữ cảnh từ hội thoại): " + standalone in app.model.calls[1]["prompt"]
 
 
+class Growing(Regulations):
+    """The first search finds REGULATION; a wider one also finds two more provisions."""
+
+    def __init__(self):
+        super().__init__()
+        self.searches = []
+
+    async def call(self, tool, args):
+        res = await super().call(tool, args)
+        if tool != "search_regulations":
+            return res
+        self.searches.append(args)
+        more = [{"id": f"x{i}", "evidence": {"provision_id": f"QD2933-2021-CL10.{i}", "source_text": "Điều kiện"}}
+                for i in (1, 2)]  # fmt: skip
+        return res if len(self.searches) == 1 else ok({"results": res.data["results"] + more})
+
+
+async def test_ungrounded_claim_searches_the_regulations_again_before_the_rewrite():
+    regs = Growing()
+    app = App("Nháp", "Bản sửa.", verifier=ScriptedVerifier(REVISE, PASS), regulations=regs)
+    principal, conv = await started(app)
+    answer = await app.ask.execute(principal, conv.id, GRADUATION)
+    assert [s["top_k"] for s in regs.searches] == [3, 6] and regs.searches[1]["context"] == {"cohort": 2023}
+    assert answer.trace.steps == ["SUMMARY", "REGULATIONS", "RESPOND", "VERIFY_REVISE", "SEARCH_AGAIN", "VERIFY_PASS"]
+    assert answer.trace.citations == ["QD2933-2021-CL5.5", "QD2933-2021-CL10.1", "QD2933-2021-CL10.2"]
+    assert "[QD2933-2021-CL10.2]" in app.model.calls[1]["prompt"]  # the rewrite reads the new provisions
+    assert [r.id for r in app.verifier.requests[1].regulations][-1] == "QD2933-2021-CL10.2"
+    assert len(app.model.calls) == 2  # no LLM call to search again
+
+
+async def test_a_record_mismatch_is_rewritten_without_searching_again():
+    regs = Growing()
+    mismatch = verdict(VerdictStatus.REVISE, IssueCode.FACT_MISMATCH, "Sai số tín chỉ.")
+    app = App("Nháp", "Bản sửa.", verifier=ScriptedVerifier(mismatch, PASS), regulations=regs)
+    principal, conv = await started(app)
+    answer = await app.ask.execute(principal, conv.id, GRADUATION)
+    assert len(regs.searches) == 1 and "SEARCH_AGAIN" not in answer.trace.steps
+
+
 async def test_revise_rewrites_once_with_the_issues():
     app = App("Bạn đủ điều kiện vì đạt 105 tín chỉ.", "Bản sửa.", verifier=ScriptedVerifier(REVISE, PASS))
     principal, conv = await started(app)
@@ -153,9 +193,9 @@ async def test_spans_show_what_each_node_received_and_returned():
     assert [(s.node, s.name) for s in spans] == [
         ("planner", "rules"), ("student_record", "get_my_academic_summary"), ("planner", "rules"),
         ("regulation", "search_regulations"), ("planner", "rules"), ("writer", "draft"), ("verifier", "round 1"),
-        ("writer", "rewrite"), ("verifier", "round 2"),
+        ("regulation", "search_regulations"), ("writer", "rewrite"), ("verifier", "round 2"),
     ]  # fmt: skip
-    planner, student, _, regulation, _, draft, verify, rewrite, _ = spans
+    planner, student, _, regulation, _, draft, verify, _, rewrite, _ = spans
     assert planner.output == {"action": "SUMMARY", "by": "rule", "error": None}
     assert student.output["data"]["credits_earned"] == 113 and student.input["token"] == "(ẩn)"
     assert regulation.input["args"]["query"] == GRADUATION
@@ -181,8 +221,8 @@ async def test_a_rewrite_that_still_fails_is_refused_without_a_third_llm_call():
 
 
 async def test_refuse_and_unverified_verdicts_are_strict_refusals():
-    for verdict, text in [(REFUSE, prompts.REFUSAL_UNGROUNDED), (UNVERIFIED, prompts.REFUSAL_UNVERIFIED)]:
-        app = App("Nháp", verifier=ScriptedVerifier(verdict))
+    for refused, text in [(REFUSE, prompts.REFUSAL_UNGROUNDED), (UNVERIFIED, prompts.REFUSAL_UNVERIFIED)]:
+        app = App("Nháp", verifier=ScriptedVerifier(refused))
         principal, conv = await started(app)
         answer = await app.ask.execute(principal, conv.id, GRADUATION)
         assert answer.message.content == text and len(app.model.calls) == 1

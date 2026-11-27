@@ -30,6 +30,7 @@ def test_progress_lines_are_plain_words():
     assert progress_line({"name": "plan", "action": "MOI"}) == "Hiểu câu hỏi: MOI"
     assert progress_line({"name": "tool", "tool": "get_x"}) == "Gọi tool `get_x`"
     assert progress_line({"name": "khac"}) == "khac"
+    assert progress_line({"name": "tool", "tool": "search_regulations", "again": True}).startswith("Tra thêm")
 
 
 def test_step_lists_the_steps_then_the_technical_details():
