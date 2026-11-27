@@ -13,6 +13,7 @@ Tài liệu dùng chung cho cả hệ thống. Tài liệu của riêng từng t
 | [agent-flow.md](design/agent-flow.md) | Luồng agent trên UI: span từng node, lưu, API, sidebar; kế hoạch commit |
 | [deploy.md](design/deploy.md) | Triển khai lên Azure for Students bằng Terraform: lý do chọn, hạ tầng, bảo mật, chi phí; kế hoạch commit |
 | [azure-openai.md](design/azure-openai.md) | LLM trên Azure OpenAI (`gpt-4.1-mini`, `koreacentral`) vì Gemini chặn VM ở Hong Kong; kế hoạch commit |
+| [foundry-models.md](design/foundry-models.md) | Nhiều model (GPT-5 mini, gpt-oss, Llama, Mistral) trên Azure AI Foundry để nhóm thử trên bản deploy; kế hoạch commit |
 | [threat-model.md](design/threat-model.md) | Threat model v1 (D2, mục 6): tài sản, điểm vào, kẻ tấn công, biện pháp và trạng thái từng biện pháp |
 
 ## `eval/` — kết quả đánh giá
