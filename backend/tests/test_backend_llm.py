@@ -7,7 +7,7 @@ import pytest
 
 from co5151_backend.application.ports import ChatTurn
 from co5151_backend.domain.errors import InvalidRequest, LLMError
-from co5151_backend.infrastructure.llm import PROVIDERS, ProviderChatModels
+from co5151_backend.infrastructure.llm import MODEL_PROFILES, PROVIDERS, ProviderChatModels
 
 pytestmark = pytest.mark.anyio
 SCHEMA = {"type": "json_schema", "json_schema": {"name": "x", "schema": {"type": "object"}}}
@@ -70,6 +70,24 @@ async def test_azure_needs_its_resource_url_and_calls_the_deployment():
     await azure.complete("q", system="s", max_output_tokens=10, json_schema=SCHEMA)
     sent = create.call_args.kwargs
     assert sent["model"] == "gpt-4.1-mini" and sent["max_completion_tokens"] == 10 and sent["response_format"] == SCHEMA
+
+
+async def test_model_profile_changes_parameters_per_model():
+    url = "https://x.openai.azure.com/openai/v1/"
+    models = ProviderChatModels({"AZURE_OPENAI_API_KEY": "a", "AZURE_OPENAI_BASE_URL": url})
+
+    reasoning = models.create("azure", "gpt-5-mini")
+    create = _mocked(reasoning)
+    await reasoning.complete("q", system="s", max_output_tokens=32, json_schema=SCHEMA)
+    sent = create.call_args.kwargs
+    assert "temperature" not in sent and sent["reasoning_effort"] == "minimal" and sent["response_format"] == SCHEMA
+    assert sent["max_completion_tokens"] == 32 + MODEL_PROFILES["gpt-5-mini"].reasoning_headroom
+
+    no_schema = models.create("azure", "Phi-4")
+    create = _mocked(no_schema)
+    await no_schema.complete("q", system="s", max_output_tokens=10, json_schema=SCHEMA)
+    sent = create.call_args.kwargs
+    assert "response_format" not in sent and sent["temperature"] == 0.0 and sent["max_completion_tokens"] == 10
 
 
 async def test_overrides_apply_to_the_default_provider_only():

@@ -2,6 +2,7 @@
 
 Parameters that not every provider accepts (`response_format` json_schema, `reasoning_effort`) are only sent when the
 profile or an environment variable turns them on: an OpenAI-compatible endpoint may answer 400 to an unknown one.
+One endpoint can serve several model families (Azure AI Foundry), so a `ModelProfile` may change them per model.
 """
 
 import logging
@@ -57,6 +58,30 @@ PROVIDERS: dict[str, Provider] = {
         base_url_env="AZURE_OPENAI_BASE_URL",
     ),
 }
+
+
+@dataclass(frozen=True)
+class ModelProfile:
+    """What one model takes that differs from its provider's defaults; None keeps the provider's value."""
+
+    # False: the model only accepts its default temperature (the gpt-5 family answers 400 to temperature=0)
+    temperature: bool = True
+    json_schema: bool | None = None
+    max_tokens_param: str | None = None
+    reasoning_effort: str | None = None
+    # Reasoning tokens count against the output limit: a 32-token router call would come back empty without room
+    reasoning_headroom: int = 0
+
+
+# Keyed by model (deployment) name, whatever the provider. Values from one probe call per model on Azure AI Foundry
+# (docs/design/foundry-models.md).
+MODEL_PROFILES: dict[str, ModelProfile] = {
+    "gpt-5-mini": ModelProfile(temperature=False, max_tokens_param="max_completion_tokens",
+                               reasoning_effort="minimal", reasoning_headroom=256),
+    "gpt-oss-120b": ModelProfile(max_tokens_param="max_completion_tokens", reasoning_effort="low",
+                                 reasoning_headroom=512),
+    "Phi-4": ModelProfile(json_schema=False),
+}  # fmt: skip
 DEFAULT_PROVIDER = "gemini"
 DEFAULT_TIMEOUT_S = 60.0
 MAX_RETRIES = 1
@@ -78,14 +103,20 @@ class OpenAICompatibleChatModel:
         self.model = model or profile.model
         self.base_url = base_url or profile.base_url
         self._profile = profile
-        self._reasoning_effort = reasoning_effort or profile.reasoning_effort
+        self._model_profile = MODEL_PROFILES.get(self.model, ModelProfile())
+        self._reasoning_effort = reasoning_effort or self._model_profile.reasoning_effort or profile.reasoning_effort
         self._client = AsyncOpenAI(base_url=self.base_url, api_key=api_key, timeout=timeout, max_retries=MAX_RETRIES)
 
     def options(self, max_output_tokens: int, json_schema: dict[str, Any] | None) -> dict[str, Any]:
-        options: dict[str, Any] = {"temperature": 0.0, self._profile.max_tokens_param: max_output_tokens}
+        provider, model = self._profile, self._model_profile
+        limit = max_output_tokens + model.reasoning_headroom
+        options: dict[str, Any] = {model.max_tokens_param or provider.max_tokens_param: limit}
+        if model.temperature:
+            options["temperature"] = 0.0
         if self._reasoning_effort:
             options["reasoning_effort"] = self._reasoning_effort
-        if json_schema and self._profile.json_schema:
+        supports_schema = provider.json_schema if model.json_schema is None else model.json_schema
+        if json_schema and supports_schema:
             options["response_format"] = json_schema
         return options
 

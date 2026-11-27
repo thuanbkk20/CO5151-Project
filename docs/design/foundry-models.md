@@ -95,7 +95,7 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
 | 1 | `docs(design): models on Azure AI Foundry` | file này, link trong `docs/README.md` | xong `7532c86` |
-| 2 | `feat(infra): Foundry account and model deployments` | `foundry.tf`, biến, output. Apply; gọi thử mỗi model một câu ngắn có `json_schema` (báo token) | |
+| 2 | `feat(infra): Foundry account and model deployments` | `foundry.tf`, biến, output. Apply; gọi thử mỗi model một câu ngắn có `json_schema` (báo token) | xong `70f4705` |
 | 3 | `feat(backend): per-model parameters` | `ModelProfile`, profile cho các model ở bảng trên; test (không gọi LLM thật) | |
 | 4 | `feat(backend): foundry provider with a fixed model list` | `models_env`, provider `foundry`, `ChatModels.models`, API trả `models`, kiểm tra model; `.env.example`; test | |
 | 5 | `feat(web): pick the model from a list` | `Select` khi có danh sách; test | |
