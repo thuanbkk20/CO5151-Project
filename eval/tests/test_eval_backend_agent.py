@@ -4,7 +4,15 @@ import pytest
 
 from co5151_backend.infrastructure.llm import PROVIDERS
 from co5151_eval.agent import Agent
-from co5151_eval.backend_agent import make_agent, make_agent_no_verifier, regulation_ids
+from co5151_eval.backend_agent import (
+    ablation_rule_planner,
+    ablation_rules_verifier,
+    ablation_same_model_judge,
+    make_agent,
+    make_agent_config,
+    make_agent_no_verifier,
+    regulation_ids,
+)
 from co5151_eval.conversation_runner import run_conversations
 from co5151_eval.conversations import load_conversations
 from co5151_eval.gold import RecordOracle
@@ -18,7 +26,8 @@ QUESTION = "Với bảng điểm hiện tại em có đủ điều kiện làm l
 def offline(monkeypatch):
     for name in ["LLM_PROVIDER", "LLM_MODEL", "LLM_API_KEY", "LLM_BASE_URL", "STUDENT_MCP_TOKEN_SECRET",
                  "ADVISOR_VERIFIER", "ADVISOR_PLANNER_MODE", "MAX_QUESTIONS_PER_CONVERSATION", "LLM_SEED",
-                 "REGULATION_ENGINE"] + [p.key_env for p in PROVIDERS.values()]:  # fmt: skip
+                 "REGULATION_ENGINE", "VERIFIER_LLM_PROVIDER", "VERIFIER_LLM_MODEL",
+                 "AZURE_FOUNDRY_BASE_URL"] + [p.key_env for p in PROVIDERS.values()]:  # fmt: skip
         monkeypatch.delenv(name, raising=False)
 
 
@@ -62,3 +71,23 @@ def test_every_conversation_runs_and_the_question_limit_costs_no_llm_call():
     limited = records["H18-11"]
     assert (limited.outcome, limited.passed, limited.tokens, limited.tool_calls) == ("limit", True, 0, [])
     assert records["H18-12"].outcome == "answer"  # a new conversation answers again
+
+
+def test_ablation_cells_override_the_environment(monkeypatch):
+    monkeypatch.setenv("AZURE_FOUNDRY_API_KEY", "not-a-key")  # describe() builds the judge, never calls it
+    monkeypatch.setenv("AZURE_FOUNDRY_BASE_URL", "http://127.0.0.1:9/v1")
+    monkeypatch.setenv("ADVISOR_PLANNER_MODE", "llm")
+    monkeypatch.setenv("VERIFIER_LLM_PROVIDER", "foundry")
+    monkeypatch.setenv("VERIFIER_LLM_MODEL", "gpt-5-mini")
+    assert make_agent().describe()["verifier_model"] == "gpt-5-mini"
+    cells = {f.__name__: f(3).describe() for f in (ablation_rule_planner, ablation_rules_verifier,
+                                                   ablation_same_model_judge)}  # fmt: skip
+    assert (
+        cells["ablation_rule_planner"]["planner"] == "rule" and cells["ablation_rules_verifier"]["verifier"] == "rules"
+    )
+    same = cells["ablation_same_model_judge"]
+    assert (same["verifier_provider"], same["verifier_model"], same["seed"]) == (None, None, 3)
+    judged = make_agent_config(judge="foundry/Phi-4").describe()
+    assert (judged["verifier_provider"], judged["verifier_model"]) == ("foundry", "Phi-4")
+    with pytest.raises(ValueError, match="provider/model"):
+        make_agent_config(judge="Phi-4")

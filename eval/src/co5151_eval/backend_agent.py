@@ -151,7 +151,13 @@ class BackendAgent:
         return build_container(self._settings, adapters)
 
     def describe(self) -> dict[str, Any]:
-        return {**self._container().describe(), "regulation_source": f"{_engine()} (in-process)"}
+        return {
+            **self._container().describe(),
+            "name": self.name,
+            "seed": self._seed,
+            "verifier_provider": self._settings.verifier_provider,
+            "regulation_source": f"{_engine()} (in-process)",
+        }
 
     @staticmethod
     def _principal(session_token: str | None) -> Principal:
@@ -189,6 +195,38 @@ def make_agent(seed: int = 0) -> BackendAgent:
 def make_agent_no_verifier(seed: int = 0) -> BackendAgent:
     """Baseline of the proposal: the same Advisor as a single agent, whatever `ADVISOR_VERIFIER` says."""
     return BackendAgent("advisor-no-verifier", _settings(verifier_mode="off"), seed)
+
+
+def make_agent_config(seed: int = 0, *, planner: str = "llm", verifier: str = "llm",
+                      judge: str | None = None) -> BackendAgent:  # fmt: skip
+    """One ablation cell (E2), whatever the environment says for these three axes:
+
+    - `planner`: `rule` (rules only) or `llm` (rules, then the LLM router where they stop);
+    - `verifier`: `off` (single agent), `rules` (free checks only) or `llm` (checks, then the LLM judge);
+    - `judge`: None for a judge on the answer's own model, or `provider/model` for a separate judge.
+
+    The fourth axis, retrieval, is `REGULATION_ENGINE` (bm25 / graph), measured without LLM by `co5151-eval retrieval`.
+    """
+    provider, _, model = (judge or "").partition("/")
+    if judge and not model:
+        raise ValueError(f"judge must look like provider/model, got {judge!r}")
+    settings = _settings(planner_mode=planner, verifier_mode=verifier, verifier_provider=provider or None,
+                         verifier_model=model or None)  # fmt: skip
+    return BackendAgent(f"advisor[planner={planner},verifier={verifier},judge={judge or 'same'}]", settings, seed)
+
+
+# Named cells for `co5151-eval run --agent co5151_eval.backend_agent:<name>`; the full system is `make_agent`
+# (judge from VERIFIER_LLM_*), the single agent `make_agent_no_verifier`.
+def ablation_rule_planner(seed: int = 0) -> BackendAgent:
+    return make_agent_config(seed, planner="rule")
+
+
+def ablation_rules_verifier(seed: int = 0) -> BackendAgent:
+    return make_agent_config(seed, verifier="rules")
+
+
+def ablation_same_model_judge(seed: int = 0) -> BackendAgent:
+    return make_agent_config(seed, verifier="llm", judge=None)
 
 
 def regulation_ids(question: str) -> list[str]:
