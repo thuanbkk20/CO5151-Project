@@ -204,7 +204,8 @@ async def test_llm_writes_from_the_evidence_and_leaks_nothing():
 async def test_failed_llm_falls_back_to_the_template_but_not_for_a_rewrite():
     advisor = Advisor(Student(), Regulations())
     draft = await advisor.write(GRADUATION, EVIDENCE, model=Model(None), history=[], token=TOKEN)
-    assert draft.outcome is Outcome.ANSWER and draft.text.startswith("Đủ điều kiện:") and draft.llm_error == "boom"
+    assert draft.outcome is Outcome.ANSWER and draft.llm_error == "boom" and "113/128" in draft.text
+    assert "đủ điều kiện" not in draft.text.lower()
     verdict = Verdict(
         status=VerdictStatus.REVISE, issues=[VerificationIssue(code=IssueCode.FACT_MISMATCH, message="x")]
     )

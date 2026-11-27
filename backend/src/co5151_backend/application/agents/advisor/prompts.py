@@ -105,7 +105,7 @@ def refusal(verdict: Verdict) -> str:
 
 
 def template_answer(question: str, evidence: Evidence) -> str:
-    """The answer written without an LLM, from the evidence alone."""
+    """The answer written without an LLM: the record figures and the provisions, no conclusion."""
     parts: list[str] = []
     if evidence.has_warnings:
         status = "đang bị cảnh báo học tập" if evidence.currently_warned else "không bị cảnh báo học tập"
@@ -119,9 +119,7 @@ def template_answer(question: str, evidence: Evidence) -> str:
         )
     if evidence.regulations:
         parts.append("Căn cứ theo quy chế đào tạo: " + " ".join(d.content for d in evidence.regulations))
-    if any(k in question.lower() for k in ["đủ điều kiện", "luận văn", "lvtn", "tốt nghiệp"]):
-        eligible = bool(evidence.credits_earned and evidence.credits_earned >= 105 and evidence.capstone_project_passed)
-        parts.insert(0, "Đủ điều kiện:" if eligible else "Chưa đủ điều kiện:")
+    # No "eligible / not eligible" here: only the LLM writer, checked by the Verifier, may draw a conclusion.
     return " ".join(parts) if parts else "Đã hoàn thành tra cứu thông tin học vụ theo yêu cầu của bạn."
 
 
