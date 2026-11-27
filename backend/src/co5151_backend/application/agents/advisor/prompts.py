@@ -37,7 +37,8 @@ def english_status(evidence: Evidence) -> str:
     if evidence.toeic is None and not evidence.english_cert:
         return "chưa nộp chứng chỉ"
     parts = [f"TOEIC {evidence.toeic}" if evidence.toeic is not None else None, evidence.english_cert]
-    return ", ".join(p for p in parts if p)
+    # The record often has both toeic=500 and english_cert="TOEIC 500": say it once
+    return ", ".join(dict.fromkeys(p.strip() for p in parts if p))
 
 
 def answer_prompt(question: str, evidence: Evidence, *, logged_in: bool, preferences: list[str]) -> str:

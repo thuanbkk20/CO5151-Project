@@ -267,3 +267,9 @@ def test_memory_gate_keeps_preferences_and_rejects_identifiers():
             gate.store("preference", bad, source="user")
     assert gate.store("goal", "ra trường", source="user", ttl=10, current_time=0).is_expired(11)
     assert stated_preferences(["Em ưu tiên học hè", "Em muốn xem MSSV 2310002", "chào"]) == ["Em ưu tiên học hè"]
+
+
+def test_english_certificate_is_said_once():
+    assert prompts.english_status(Evidence(toeic=500, english_cert="TOEIC 500")) == "TOEIC 500"
+    assert prompts.english_status(Evidence(toeic=500, english_cert="IELTS 6.0")) == "TOEIC 500, IELTS 6.0"
+    assert prompts.english_status(Evidence()) == "chưa nộp chứng chỉ"

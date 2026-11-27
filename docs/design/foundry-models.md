@@ -153,7 +153,8 @@ Kiên test trên bản deploy: gần như câu nào cũng ra câu từ chối. T
 | 14 | `fix(backend): say why a reply is empty` | `LLMError` ghi `finish_reason`; gọi thử `gpt-5-mini` 1 câu để biết lý do rồi sửa profile | xong `60bff72`: `finish_reason=length`, hết 1280 token cho suy nghĩ dù `minimal`; `reasoning_headroom` 2048 |
 | 15 | `fix(backend): drop gemini-2.5-flash` | bỏ khỏi danh sách; `.env.production` bỏ key Gemini | xong `2829d5f` |
 | 16 | `fix(web): a refused answer is not shown as verified` | dòng dưới câu trả lời ghi "Verifier không cho qua" khi `outcome=refuse` | xong `4366c2c` |
-| 17 | `fix(backend): the Advisor does not invent conditions or thresholds` | sau khi đổi judge, lỗi còn lại là thật: model coi Đồ án chuyên ngành là điều kiện, tự đặt ngưỡng CGPA 2.0 / TOEIC 450, ghi sai GDQP. Prompt: chỉ nêu điều kiện, ngưỡng có trong quy chế; quy chế không nêu ngưỡng thì nói rõ; viết lại thì bỏ hẳn ý không có căn cứ. Chạy thử 3 model (24.0k + 4.4k token): cả 3 qua | |
+| 17 | `fix(backend): the Advisor does not invent conditions or thresholds` | sau khi đổi judge, lỗi còn lại là thật: model coi Đồ án chuyên ngành là điều kiện, tự đặt ngưỡng CGPA 2.0 / TOEIC 450, ghi sai GDQP. Prompt: chỉ nêu điều kiện, ngưỡng có trong quy chế; quy chế không nêu ngưỡng thì nói rõ; viết lại thì bỏ hẳn ý không có căn cứ. Chạy thử 3 model (24.0k + 4.4k token): cả 3 qua | xong `3b5ff39` |
+| 18 | `fix(backend): the English certificate is said once` | hồ sơ in "TOEIC 500, TOEIC 500" (`toeic` và `english_cert`), model chép lặp và judge báo `FACT_MISMATCH` | |
 
 Chọn judge (chạy trong process như eval, `sv001`, "Điều kiện để được xét tốt nghiệp là gì?", 27/11): judge
 `azure/gpt-4.1-mini` sau các sửa trên cho `gpt-4.1-mini` qua (viết lại 1 lần) nhưng vẫn từ chối `gpt-5-mini` vì coi
@@ -163,3 +164,8 @@ câu "có thể chưa đạt" về ngưỡng CGPA/TOEIC là khẳng định. Jud
 token (đoán theo số in ra, dưới $0.1).
 
 Sau đó deploy và hỏi lại 5 câu như lần trước (báo token).
+
+Hỏi lại 5 câu trên bản deploy sau commit 17 (36.6k + 8.1k token): `gpt-4.1-mini`, `gpt-5-mini`, `Llama-3.3-70B-Instruct`
+trả lời; `gpt-oss-120b` (tự cho là đã hoàn thành rèn luyện; chép lặp TOEIC) và `Phi-4` (kết luận CGPA 2.51 chưa đạt)
+bị từ chối vì lỗi thật của bản nháp. Còn mở: `MAX_VERIFIER_ROUNDS` = 2, tăng lên thì ít từ chối hơn nhưng tốn thêm
+một lượt viết + chấm.
