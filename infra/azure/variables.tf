@@ -122,3 +122,27 @@ variable "openai_capacity" {
   type        = number
   default     = 50
 }
+
+variable "foundry_subdomain" {
+  description = "Subdomain của resource Foundry: https://<foundry_subdomain>.openai.azure.com (duy nhất toàn cầu)"
+  type        = string
+  default     = "co5151-g3-foundry"
+}
+
+variable "foundry_models" {
+  description = <<-EOT
+    Model deploy trên Foundry, tên model -> format, phiên bản, capacity (nghìn token mỗi phút, không vượt quota).
+    Xem model và phiên bản: az cognitiveservices model list -l koreacentral; quota: az cognitiveservices usage list.
+  EOT
+  type = map(object({
+    format   = string
+    version  = string
+    capacity = number
+  }))
+  default = {
+    "gpt-5-mini"             = { format = "OpenAI", version = "2025-08-07", capacity = 50 }
+    "gpt-oss-120b"           = { format = "OpenAI-OSS", version = "1", capacity = 50 }
+    "Llama-3.3-70B-Instruct" = { format = "Meta", version = "9", capacity = 10 }
+    "Phi-4"                  = { format = "Microsoft", version = "7", capacity = 10 }
+  }
+}

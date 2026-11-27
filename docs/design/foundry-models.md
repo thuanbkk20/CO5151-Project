@@ -25,10 +25,23 @@ Ngoài phạm vi: OpenRouter, giới hạn số câu mỗi tài khoản, chạy 
 | `gpt-5-mini` | OpenAI, reasoning | 500 | $0.25 / $2.00 | $0.007 + token suy nghĩ |
 | `gpt-oss-120b` | OpenAI open-weight, reasoning | 5000 | $0.15 / $0.60 | $0.003 + token suy nghĩ |
 | `Llama-3.3-70B-Instruct` | Meta | 20 | $0.71 / $0.71 | $0.010 |
-| `mistral-medium-2505` | Mistral AI | 20 | chưa rõ (không thấy trong API) | chưa rõ |
+| `Phi-4` | Microsoft | 20 | $0.125 / $0.50 (eastus, không thấy giá koreacentral) | $0.002 |
 
   P02 là 12.264 token vào + 1.675 token ra ([architecture.md](architecture.md)). DeepSeek, Kimi, Qwen, `gpt-5.x` có
-  trong catalog nhưng quota bằng 0.
+  trong catalog nhưng quota bằng 0. `mistral-medium-2505` có quota nhưng ngừng chạy 09/12/2026
+  (`az cognitiveservices model list`, `deprecation.inference`), trùng ngày bảo vệ. `mistral-small-2503` bị từ chối khi
+  apply (27/11): model của Mistral mua qua Marketplace, `PaidPurchaseWithFreeSubscription: The plan
+  'mistral-small-2503-plan' can't be purchased using a free subscription`. Llama, Phi do Azure bán trực tiếp nên được.
+
+- Gọi thử mỗi model một câu (27/11, 8 lần gọi, 245 token vào + 132 ra), `temperature=0` và `response_format`
+  json_schema strict:
+
+| Model | `temperature=0` | `json_schema` | Ghi chú |
+|---|---|---|---|
+| `gpt-5-mini` | 400 `Only the default (1) value is supported` | được | `reasoning_effort=minimal`: 0 token suy nghĩ |
+| `gpt-oss-120b` | được | được | `reasoning_effort=low`: 51 token ra cho JSON 1 trường, có token suy nghĩ (API không báo số) |
+| `Llama-3.3-70B-Instruct` | được | được | |
+| `Phi-4` | được | 422 `response_format.type` không hợp lệ | |
 
 ## Thiết kế
 
@@ -44,7 +57,8 @@ Ngoài phạm vi: OpenRouter, giới hạn số câu mỗi tài khoản, chạy 
   dấu phẩy) để chép vào `.env`. Key lấy bằng `az ... keys list` như Azure OpenAI.
 - Resource `OpenAI` cũ giữ nguyên đến khi Foundry chạy ổn (xem "Chưa quyết" 1).
 - Model không phải của OpenAI cần resource loại `AIServices`; resource loại `OpenAI` chỉ deploy được model OpenAI
-  (memory, chưa kiểm chứng; nếu sai thì vẫn dùng resource mới cho gọn).
+  (memory, chưa kiểm chứng). Endpoint v1 `https://<subdomain>.openai.azure.com/openai/v1/` gọi được cả 4 model
+  (gọi thử 27/11).
 
 ### Backend
 
@@ -54,8 +68,7 @@ Ngoài phạm vi: OpenRouter, giới hạn số câu mỗi tài khoản, chạy 
    - `json_schema`, `max_tokens_param`, `reasoning_effort` (`gpt-5-mini`: `minimal`, `gpt-oss-120b`: `low`);
    - `reasoning_headroom`: token suy nghĩ tính vào giới hạn token ra; router chỉ cho 32 token, model reasoning sẽ
      trả về rỗng. Cộng thêm phần này vào giới hạn khi gọi model reasoning.
-   Không có profile thì dùng mặc định của provider như hiện nay. Giá trị cụ thể chốt sau khi gọi thử mỗi model một
-   lần (commit 2).
+   Không có profile thì dùng mặc định của provider như hiện nay. Giá trị theo bảng gọi thử ở trên.
 2. **Provider `foundry`**: `base_url_env = AZURE_FOUNDRY_BASE_URL`, `key_env = AZURE_FOUNDRY_API_KEY`, danh sách
    model từ `AZURE_FOUNDRY_MODELS` (model đầu là mặc định). Thêm trường chung `models_env` vào `Provider`.
 3. Port `ChatModels` thêm `models(provider) -> list[str]` (rỗng = gõ tự do như cũ). `GET /llm/providers` trả thêm
@@ -81,7 +94,7 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
-| 1 | `docs(design): models on Azure AI Foundry` | file này, link trong `docs/README.md` | |
+| 1 | `docs(design): models on Azure AI Foundry` | file này, link trong `docs/README.md` | xong `7532c86` |
 | 2 | `feat(infra): Foundry account and model deployments` | `foundry.tf`, biến, output. Apply; gọi thử mỗi model một câu ngắn có `json_schema` (báo token) | |
 | 3 | `feat(backend): per-model parameters` | `ModelProfile`, profile cho các model ở bảng trên; test (không gọi LLM thật) | |
 | 4 | `feat(backend): foundry provider with a fixed model list` | `models_env`, provider `foundry`, `ChatModels.models`, API trả `models`, kiểm tra model; `.env.example`; test | |
@@ -92,11 +105,10 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 
 1. **Gộp `gpt-4.1-mini` vào resource Foundry** rồi xóa resource `OpenAI` cũ và provider `azure`: gọn hơn (một
    provider), nhưng đổi cấu hình bản deploy đang chạy. Đề xuất làm sau buổi test, nhánh riêng.
-2. **Endpoint v1 cho model không phải OpenAI** (`/openai/v1/chat/completions`, `model` = tên deployment): memory,
-   chưa kiểm chứng; kiểm ở commit 2.
-3. **Azure for Students có cho deploy Llama/Mistral không** (model của bên thứ ba): chỉ biết khi apply. Bị từ chối
-   thì bỏ model đó khỏi `foundry_models`.
-4. **`json_schema` với Llama/Mistral**: chưa rõ; mặc định tắt (Advisor đã chạy được khi không có structured output,
-   như provider `kimi`), bật nếu gọi thử thành công.
+2. ~~Endpoint v1 cho model không phải OpenAI~~ → **được** (gọi thử 27/11).
+3. ~~Azure for Students có cho deploy Llama/Mistral không~~ → Llama **được**, Mistral **không** (Marketplace); thay
+   bằng `Phi-4`.
+4. ~~`json_schema` với model ngoài OpenAI~~ → Llama được, Phi-4 không (tắt cho Phi-4; Advisor vẫn chạy khi không có
+   structured output, như provider `kimi`).
 5. **Giới hạn số câu mỗi tài khoản mỗi ngày**: chưa có. Làm nếu chi phí buổi test cao hơn dự kiến.
 6. **Eval theo từng model**: tốn token, chỉ chạy khi Kiên bảo.
