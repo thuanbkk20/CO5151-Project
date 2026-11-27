@@ -147,10 +147,18 @@ Kiên test trên bản deploy: gần như câu nào cũng ra câu từ chối. T
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
 | 11 | `docs(design): fixes after the first test` | mục này | xong `c411494` |
-| 12 | `feat(backend): Verifier judge on its own provider` | `VERIFIER_LLM_PROVIDER` (+ `VERIFIER_LLM_MODEL` có sẵn): judge cố định, không theo model hội thoại; bản deploy dùng `azure/gpt-4.1-mini` | xong `2371989` |
-| 13 | `fix(backend): judge flags only errors that make the answer wrong` | prompt judge: diễn đạt lại một trường hồ sơ không phải lỗi; một điều kiện không đạt đủ để kết luận chưa đủ điều kiện; thông tin bản nháp nói rõ là chưa có không phải lỗi; không liệt kê điều đúng | |
-| 14 | `fix(backend): say why a reply is empty` | `LLMError` ghi `finish_reason`; gọi thử `gpt-5-mini` 1 câu để biết lý do rồi sửa profile | |
-| 15 | `fix(backend): drop gemini-2.5-flash` | bỏ khỏi danh sách; `.env.production` bỏ key Gemini | |
-| 16 | `fix(web): a refused answer is not shown as verified` | dòng dưới câu trả lời ghi "Verifier từ chối" khi `outcome=refuse` | |
+| 12 | `feat(backend): Verifier judge on its own provider` | `VERIFIER_LLM_PROVIDER` (+ `VERIFIER_LLM_MODEL` có sẵn): judge cố định, không theo model hội thoại; bản deploy dùng `foundry/gpt-oss-120b` (xem dưới) | xong `2371989` |
+| 13 | `fix(backend): judge flags only errors that make the answer wrong` | prompt judge: diễn đạt lại một trường hồ sơ không phải lỗi; một điều kiện không đạt đủ để kết luận chưa đủ điều kiện; thông tin bản nháp nói rõ là chưa có không phải lỗi; không liệt kê điều đúng | xong `276ffb5` |
+| 13b | `fix(backend): the judge's missing evidence asks for a rewrite` | judge vẫn báo `MISSING_EVIDENCE` cho một ý phụ, từ chối ngay cả câu trả lời; từ judge nó thành viết lại (luật trích dẫn khi không tra được gì vẫn từ chối); ý bản nháp tự nói là chưa chắc không phải khẳng định | xong `9e9f2dc` |
+| 14 | `fix(backend): say why a reply is empty` | `LLMError` ghi `finish_reason`; gọi thử `gpt-5-mini` 1 câu để biết lý do rồi sửa profile | xong `60bff72`: `finish_reason=length`, hết 1280 token cho suy nghĩ dù `minimal`; `reasoning_headroom` 2048 |
+| 15 | `fix(backend): drop gemini-2.5-flash` | bỏ khỏi danh sách; `.env.production` bỏ key Gemini | xong `2829d5f` |
+| 16 | `fix(web): a refused answer is not shown as verified` | dòng dưới câu trả lời ghi "Verifier không cho qua" khi `outcome=refuse` | xong `4366c2c` |
+
+Chọn judge (chạy trong process như eval, `sv001`, "Điều kiện để được xét tốt nghiệp là gì?", 27/11): judge
+`azure/gpt-4.1-mini` sau các sửa trên cho `gpt-4.1-mini` qua (viết lại 1 lần) nhưng vẫn từ chối `gpt-5-mini` vì coi
+câu "có thể chưa đạt" về ngưỡng CGPA/TOEIC là khẳng định. Judge `foundry/gpt-oss-120b`: cả hai qua, lỗi nó bắt ở vòng
+1 là lỗi thật (quy chế không nêu mức TOEIC; đồ án không phải điều kiện tốt nghiệp), và rẻ nhất. Bản deploy:
+`VERIFIER_LLM_PROVIDER=foundry`, `VERIFIER_LLM_MODEL=gpt-oss-120b`. Các lần chạy thử khi sửa tốn khoảng 100 nghìn
+token (đoán theo số in ra, dưới $0.1).
 
 Sau đó deploy và hỏi lại 5 câu như lần trước (báo token).
