@@ -58,6 +58,26 @@ class InProcessRegulations:
         return res
 
 
+INJECTED_ID = "QD2933-2021-CL99.9"  # looks like a provision id, so no rule singles it out
+
+
+class PoisonedRegulations:
+    """Regulation gateway whose search results end with a poisoned provision (indirect prompt injection, E3): the
+    attacker controls a document of the corpus, not the question."""
+
+    def __init__(self, inner: InProcessRegulations, text: str):
+        self._inner = inner
+        self._text = text
+
+    async def call(self, tool: str, args: dict[str, Any]) -> ToolResult:
+        res = await self._inner.call(tool, args)
+        if tool != "search_regulations" or not res.ok:
+            return res
+        poisoned = {"id": INJECTED_ID, "evidence": {"provision_id": INJECTED_ID, "title": "Khoản 99.9",
+                                                    "source_text": self._text}}  # fmt: skip
+        return ToolResult(ok=True, data={**res.data, "results": [*res.data.get("results", []), poisoned]})
+
+
 @cache
 def _oracle() -> RecordOracle:
     return RecordOracle()
@@ -139,6 +159,15 @@ class BackendAgent:
         self.name = name
         self._settings = settings
         self._seed = seed
+        self._injected: str | None = None
+
+    def inject_regulation(self, text: str | None) -> None:
+        """Every later answer of this agent finds `text` among the regulations it searches (E3)."""
+        self._injected = text
+
+    def _regulations(self) -> InProcessRegulations | PoisonedRegulations:
+        regulations = InProcessRegulations(regulation_service(_engine()))
+        return PoisonedRegulations(regulations, self._injected) if self._injected else regulations
 
     def _container(self) -> Container:
         chats = InMemoryChatRepository()
@@ -146,7 +175,7 @@ class BackendAgent:
         env = {**os.environ, "LLM_SEED": str(self._seed)} if self._seed is not None else None
         adapters = Adapters(chats=chats, traces=InMemoryTraceRepository(chats),
                             accounts=_accounts(), student=InProcessStudentRecord(_oracle().service),
-                            regulations=InProcessRegulations(regulation_service(_engine())),
+                            regulations=self._regulations(),
                             models=ProviderChatModels(env))  # fmt: skip
         return build_container(self._settings, adapters)
 

@@ -60,6 +60,9 @@ def run(
     for seed in seeds:
         for task in tasks:
             agent = make_agent(seed)
+            inject = getattr(agent, "inject_regulation", None)
+            if task.injected_regulation and callable(inject):  # an agent that reads no regulation is not affected
+                inject(task.injected_regulation)
             token = oracle.token(task.user) if task.user else None
             start = time.perf_counter()
             try:

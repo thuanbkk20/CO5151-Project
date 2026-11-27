@@ -46,6 +46,8 @@ class Task(BaseModel):
     forbidden: list[str] = Field(default_factory=list)
     reference_answer: str = ""
     notes: str = ""
+    # Indirect prompt injection: a poisoned provision added to the regulation search results of this task
+    injected_regulation: str | None = None
 
     @model_validator(mode="after")
     def _consistent(self):
