@@ -32,8 +32,3 @@ output "foundry_base_url" {
   description = "AZURE_FOUNDRY_BASE_URL cho .env (key lấy bằng az, xem README)"
   value       = "https://${var.foundry_subdomain}.openai.azure.com/openai/v1/"
 }
-
-output "foundry_models" {
-  description = "AZURE_FOUNDRY_MODELS cho .env: các deployment, model đầu là mặc định"
-  value       = join(",", keys(azurerm_cognitive_deployment.foundry))
-}

@@ -152,10 +152,11 @@ class ChatModels(Protocol):
     def default_provider(self) -> str: ...
 
     def models(self, provider: str) -> list[str]:
-        """The only models users may pick for that provider; empty when any model name is accepted."""
+        """The models users may pick for that provider, the default first; empty for an unknown provider."""
 
     def create(self, provider: str | None, model: str | None) -> ChatModel | None:
-        """None when that provider has no key; raises InvalidRequest for an unknown provider or a model not allowed."""
+        """None when that provider has no key; raises InvalidRequest for an unknown provider. Any model name works:
+        the list only limits what users pick (server settings such as VERIFIER_LLM_MODEL are not limited)."""
 
 
 class ActionRouter(Protocol):

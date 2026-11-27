@@ -105,8 +105,8 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 | 4 | `feat(backend): foundry provider with a fixed model list` | `models_env`, provider `foundry`, `ChatModels.models`, API trả `models`, kiểm tra model; `.env.example`; test | xong `bf00571` |
 | 5 | `feat(web): pick the model from a list` | một ô `Select` gộp provider và model (form Chainlit không đổi ô này theo ô kia), ô chữ cho provider không có danh sách; test | xong `c8b1013` |
 | 6 | `docs: Foundry models` | README gốc, README infra (lấy key), `architecture.md` | xong `6ff7419` |
-| 7 | `docs(design): a prepared model list for every provider` | sửa plan theo yêu cầu của Kiên (27/11) | |
-| 8 | `feat(backend): a prepared model list for every provider` | `Provider.models`, bỏ `models_env`; hội thoại cũ về model mặc định; `.env.example`; test | |
+| 7 | `docs(design): a prepared model list for every provider` | sửa plan theo yêu cầu của Kiên (27/11) | xong `e942abd` |
+| 8 | `feat(backend): a prepared model list for every provider` | `Provider.models`, bỏ `models_env` và output `foundry_models`; hội thoại cũ về model mặc định; `.env.example`; test | |
 | 9 | `feat(web): no free-text model` | bỏ ô gõ tên model; test | |
 | 10 | `docs: model list` | README, README infra, `architecture.md`. Deploy lên VM (cần push nhánh), hỏi thử mỗi model một câu | |
 

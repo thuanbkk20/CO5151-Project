@@ -11,7 +11,8 @@ resource "azurerm_cognitive_account" "foundry" {
   tags                  = var.tags
 }
 
-# Tên deployment là tên model: backend gửi tên này làm `model`, và AZURE_FOUNDRY_MODELS liệt kê đúng các tên này.
+# Tên deployment là tên model: backend gửi tên này làm `model`. Danh sách model của provider `foundry` trong
+# backend (PROVIDERS, infrastructure/llm.py) phải khớp các tên này.
 resource "azurerm_cognitive_deployment" "foundry" {
   for_each             = var.foundry_models
   name                 = each.key

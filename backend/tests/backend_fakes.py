@@ -82,6 +82,7 @@ class Models:
     def __init__(self, model: Model | None, allowed: list[str] | None = None):
         self.model = model
         self.allowed = allowed or []
+        self.created: list[tuple[str | None, str | None]] = []
 
     def providers(self):
         return ["fake"] if self.model else []
@@ -93,6 +94,7 @@ class Models:
         return list(self.allowed)
 
     def create(self, provider, model):
+        self.created.append((provider, model))
         return self.model
 
 

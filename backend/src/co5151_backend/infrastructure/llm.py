@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True)
 class Provider:
     base_url: str
-    model: str
+    # What users can pick in the chat settings; the first one is the default
+    models: tuple[str, ...]
     key_env: str
     reasoning_effort: str | None = None
     # Accepts `response_format={"type": "json_schema", ...}` (structured output)
@@ -31,30 +32,39 @@ class Provider:
     max_tokens_param: str = "max_tokens"
     # Variable holding the base URL when it depends on the customer's resource (Azure); it then replaces `base_url`
     base_url_env: str | None = None
-    # Variable listing, comma-separated, the only models users may pick (deployments on the resource); the first one
-    # is the default. Unset: any model name, `model` by default.
-    models_env: str | None = None
+
+    @property
+    def model(self) -> str:
+        """The default model."""
+        return self.models[0]
 
 
+# Model lists are kept by hand: update them when a vendor adds or retires a model, or when a deployment changes
+# (Azure: infra/azure/openai.tf, foundry.tf). A model that needs other parameters also goes into MODEL_PROFILES.
 PROVIDERS: dict[str, Provider] = {
+    # Names from GET /v1beta/models (27/11)
     "gemini": Provider(
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-        model="gemini-3.5-flash-lite",
+        models=("gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"),
         key_env="GEMINI_API_KEY",
         json_schema=True,
     ),
     "openai": Provider(
         base_url="https://api.openai.com/v1",
-        model="gpt-4.1-mini",
+        models=("gpt-4.1-mini", "gpt-5-mini"),
         key_env="OPENAI_API_KEY",
         json_schema=True,
         max_tokens_param="max_completion_tokens",
     ),
-    "kimi": Provider(base_url="https://opencode.ai/inference/openai/v1", model="kimi-k3", key_env="OPENCODE_API_KEY"),
+    "kimi": Provider(
+        base_url="https://opencode.ai/inference/openai/v1",
+        models=("kimi-k3",),
+        key_env="OPENCODE_API_KEY",
+    ),
     # Azure OpenAI v1 endpoint (https://<resource>.openai.azure.com/openai/v1/); model = deployment name
     "azure": Provider(
         base_url="",
-        model="gpt-4.1-mini",
+        models=("gpt-4.1-mini",),
         key_env="AZURE_OPENAI_API_KEY",
         json_schema=True,
         max_tokens_param="max_completion_tokens",
@@ -63,11 +73,10 @@ PROVIDERS: dict[str, Provider] = {
     # Azure AI Foundry: several model families behind one v1 endpoint; MODEL_PROFILES adapts the parameters per model
     "foundry": Provider(
         base_url="",
-        model="gpt-5-mini",
+        models=("gpt-5-mini", "gpt-oss-120b", "Llama-3.3-70B-Instruct", "Phi-4"),
         key_env="AZURE_FOUNDRY_API_KEY",
         json_schema=True,
         base_url_env="AZURE_FOUNDRY_BASE_URL",
-        models_env="AZURE_FOUNDRY_MODELS",
     ),
 }
 
@@ -163,10 +172,11 @@ class OpenAICompatibleChatModel:
 
 
 class ProviderChatModels:
-    """The providers that have a key (and a base URL, for Azure) in the environment, and their allowed models.
+    """The providers that have a key (and a base URL, for Azure) in the environment, and the models to pick from.
 
     `LLM_PROVIDER` is the default. `LLM_MODEL`, `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_REASONING_EFFORT` override
-    the profile of that default provider only, e.g. to point it at a local OpenAI-compatible server.
+    the profile of that default provider only, e.g. to point it at a local OpenAI-compatible server; `LLM_MODEL` also
+    goes first in that provider's model list.
     """
 
     def __init__(self, env: Mapping[str, str] | None = None):
@@ -186,8 +196,6 @@ class ProviderChatModels:
             self._keys[self._default] = self._overrides["api_key"]
         if self._overrides["base_url"]:
             self._base_urls[self._default] = self._overrides["base_url"]
-        self._model_lists = {name: [m.strip() for m in (get(p.models_env) or "").split(",") if m.strip()]
-                             for name, p in PROVIDERS.items() if p.models_env}  # fmt: skip
         self._timeout = float(get("LLM_TIMEOUT") or DEFAULT_TIMEOUT_S)
 
     def providers(self) -> list[str]:
@@ -198,7 +206,11 @@ class ProviderChatModels:
         return self._default if self._default in available or not available else available[0]
 
     def models(self, provider: str) -> list[str]:
-        return list(self._model_lists.get(provider, []))
+        if provider not in PROVIDERS:
+            return []
+        listed = list(PROVIDERS[provider].models)
+        override = self._overrides["model"] if provider == self._default else None
+        return [override, *(m for m in listed if m != override)] if override else listed
 
     def create(self, provider: str | None, model: str | None) -> OpenAICompatibleChatModel | None:
         name = (provider or self.default_provider()).lower()
@@ -207,15 +219,11 @@ class ProviderChatModels:
         if name not in self.providers():
             return None
         overrides = self._overrides if name == self._default else {}
-        allowed = self.models(name)
-        model = model or overrides.get("model") or (allowed[0] if allowed else None)
-        if allowed and model not in allowed:
-            raise InvalidRequest(f"Model {model!r} is not deployed for {name}; choose one of {allowed}")
         return OpenAICompatibleChatModel(
             name,
             PROVIDERS[name],
             api_key=self._keys[name],
-            model=model,
+            model=model or self.models(name)[0],
             base_url=self._base_urls[name],
             reasoning_effort=overrides.get("reasoning_effort"),
             timeout=self._timeout,

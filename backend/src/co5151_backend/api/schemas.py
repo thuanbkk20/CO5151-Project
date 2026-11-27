@@ -46,7 +46,7 @@ class SessionOut(BaseModel):
 class LLMChoicesOut(BaseModel):
     providers: list[str]
     default: str
-    models: dict[str, list[str]] = Field(description="Models to pick from per provider; empty list: any model name")
+    models: dict[str, list[str]] = Field(description="Models to pick from per provider, the default first")
 
 
 class SettingsBody(BaseModel):

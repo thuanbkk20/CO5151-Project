@@ -19,7 +19,7 @@ class Conversations:
         self._models = models
 
     def llm_choices(self) -> tuple[list[str], str, dict[str, list[str]]]:
-        """Providers with a key on this server, the default one, and each provider's allowed models (empty: any)."""
+        """Providers with a key on this server, the default one, and the models to pick for each provider."""
         providers = self._models.providers()
         return providers, self._models.default_provider(), {p: self._models.models(p) for p in providers}
 

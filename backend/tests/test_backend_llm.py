@@ -90,19 +90,27 @@ async def test_model_profile_changes_parameters_per_model():
     assert "response_format" not in sent and sent["temperature"] == 0.0 and sent["max_completion_tokens"] == 10
 
 
-async def test_foundry_offers_only_its_deployments():
+def test_every_provider_has_a_model_list_and_its_default_comes_first():
+    for name, provider in PROVIDERS.items():
+        assert provider.models and provider.model == provider.models[0], name
+        assert len(set(provider.models)) == len(provider.models), name
+
+
+async def test_foundry_offers_its_deployments():
     url = "https://x.openai.azure.com/openai/v1/"
-    env = {"AZURE_FOUNDRY_API_KEY": "f", "AZURE_FOUNDRY_BASE_URL": url, "AZURE_FOUNDRY_MODELS": " Phi-4, gpt-5-mini ,"}
-    models = ProviderChatModels(env)
-    assert models.providers() == ["foundry"] and models.models("foundry") == ["Phi-4", "gpt-5-mini"]
-    assert models.models("gemini") == []
+    models = ProviderChatModels({"AZURE_FOUNDRY_API_KEY": "f", "AZURE_FOUNDRY_BASE_URL": url})
+    assert models.providers() == ["foundry"] and models.models("foundry") == list(PROVIDERS["foundry"].models)
+    assert models.models("typo") == []
     default = models.create("foundry", None)
-    assert (default.base_url, default.model) == (url, "Phi-4")
-    assert models.create("foundry", "gpt-5-mini").model == "gpt-5-mini"
-    with pytest.raises(InvalidRequest):
-        models.create("foundry", "gpt-4o")
-    unlisted = ProviderChatModels({k: v for k, v in env.items() if k != "AZURE_FOUNDRY_MODELS"})
-    assert unlisted.models("foundry") == [] and unlisted.create("foundry", None).model == PROVIDERS["foundry"].model
+    assert (default.base_url, default.model) == (url, PROVIDERS["foundry"].model)
+    assert models.create("foundry", "Phi-4").model == "Phi-4"
+
+
+def test_llm_model_goes_first_in_the_default_providers_list():
+    models = ProviderChatModels({"LLM_PROVIDER": "gemini", "LLM_MODEL": "gemini-2.5-flash", "GEMINI_API_KEY": "g"})
+    assert models.models("gemini")[0] == "gemini-2.5-flash"
+    assert models.models("gemini").count("gemini-2.5-flash") == 1
+    assert models.models("openai") == list(PROVIDERS["openai"].models)
 
 
 async def test_overrides_apply_to_the_default_provider_only():
