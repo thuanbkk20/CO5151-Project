@@ -45,6 +45,15 @@ echo "==> $HOST: .env (bỏ các dòng DEPLOY_*; tắt khách, dùng file tài k
   printf 'GUEST_LOGIN=off\nDEMO_ACCOUNTS_FILE=%s\n' "$ACCOUNTS"
 } | on_vm "sudo install -m 600 -o co5151 -g co5151 /dev/stdin $APP/.env"
 
+echo "==> Regulation MCP: engine $(get REGULATION_ENGINE)"
+# Cùng unit co5151-regulation, đổi lệnh chạy bằng drop-in: graph -> regulation-graph-mcp, còn lại -> regulation-mcp
+if [[ "$(get REGULATION_ENGINE)" == graph ]]; then
+  printf '[Service]\nExecStart=\nExecStart=%s/.venv/bin/regulation-graph-mcp\n' "$APP" |
+    on_vm "sudo install -D -m 644 /dev/stdin /etc/systemd/system/co5151-regulation.service.d/engine.conf"
+else
+  on_vm "sudo rm -f /etc/systemd/system/co5151-regulation.service.d/engine.conf"
+fi
+
 echo "==> Caddy: Caddyfile, tên miền"
 on_vm "sudo install -m 644 /dev/stdin /etc/caddy/Caddyfile" <"$TF_DIR/Caddyfile"
 printf 'APP_DOMAIN=%s\n' "$HOST" | on_vm "sudo install -m 640 -o root -g caddy /dev/stdin /etc/caddy/caddy.env"

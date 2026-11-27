@@ -71,8 +71,8 @@ Quan hệ sửa đổi: tìm bằng luật trên câu "Sửa đổi / Thay thế
 Kết quả giữ đúng hình dạng bản cũ (`results[].id`, `evidence{provision_id, title, source_text}`, `citation{file_name,
 pdf_pages}`) để `RegulationSearch` của backend và `ReadProvision` của Verifier dùng ngay, không sửa backend.
 
-**Chọn RAG:** backend chỉ cần `REGULATION_MCP_URL` trỏ sang server mới (cổng 8104). Eval: biến `REGULATION_ENGINE`
-(`bm25` mặc định / `graph`) trong `backend_agent.py`.
+**Chọn RAG:** biến `REGULATION_ENGINE` (`bm25` mặc định / `graph`). Hai server cùng tool, cùng host/cổng; deploy chạy
+server theo biến này, eval trong process (`backend_agent.py`) cũng vậy. Backend không đổi.
 
 **Đo (B1, không LLM):** `co5151-eval retrieval --engine bm25|graph`: các lượt có khoản ứng viên trong
 [test-conversations.md](test-conversations.md) (câu nối tiếp được viết lại thành câu đủ ngữ cảnh), in recall@3,
@@ -89,9 +89,9 @@ recall@8, MRR, tỉ lệ rỗng. Khoản ứng viên **chưa đối chiếu PDF*
 | 5 | `feat(regulation-graph): text of the scanned graduation rules` | chữ QĐ 2932 chép từ ảnh 12 trang (`data/vision`), hai trang biểu mẫu chỉ tóm mục | xong `cb09eda` |
 | 6 | `feat(regulation-graph): provisions and amendments` | `regulation-graph-build`: 244 khoản (Điều, Khoản, Phụ lục, nội dung sửa đổi, mục kết luận HĐHV), 135 cạnh (`CONTAINS`, `AMENDS` gồm 14 cạnh QĐ 1259 → 2931, `REPLACES`, `REPEALS`) | xong `cb8ca1f` |
 | 7 | `feat(regulation-graph): concepts` | `concepts.json`: 24 khái niệm, từ đồng nghĩa, 77 cạnh `ABOUT`, 5 cạnh `REQUIRES` | xong `b3725d8` |
-| 8 | `feat(regulation-graph): hybrid retrieval with versions` | truy xuất lai, service hai tool, `--engine graph` trong lệnh đo. Đo (tính Điều ↔ Khoản con): graph hit@3 1.00, recall@3 0.92, MRR 0.84, rỗng 0%; BM25 0.42 / 0.36 / 0.27 / 19% | xong |
-| 9 | `feat(regulation-graph): MCP server` | server HTTP, `.env.example`, README | |
-| 10 | `feat(eval): pick the regulation engine` | `REGULATION_ENGINE`, so hai RAG bằng B1 | |
+| 8 | `feat(regulation-graph): hybrid retrieval with versions` | truy xuất lai, service hai tool, `--engine graph` trong lệnh đo. Đo (tính Điều ↔ Khoản con): graph hit@3 1.00, recall@3 0.92, MRR 0.84, rỗng 0%; BM25 0.42 / 0.36 / 0.27 / 19% | xong `81a6d1d` |
+| 9 | `feat(regulation-graph): MCP server` | `regulation-graph-mcp` (khung server của regulation-server), `REGULATION_ENGINE` trong `.env.example`/README, deploy chạy server theo biến này (drop-in systemd), eval trong process cũng theo biến này | xong |
+| 10 | `feat(eval): pick the regulation engine` | gộp vào 8 (`--engine`) và 9 (`REGULATION_ENGINE`) | bỏ |
 | 11 | `docs: regulation graph results` | số đo, architecture, README | |
 
 Sau 11: hỏi thử vài câu với Verifier (tốn LLM, báo trước), rồi deploy server mới lên VM.

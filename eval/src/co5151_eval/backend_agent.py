@@ -73,6 +73,11 @@ def _regulations() -> RegulationServiceV2:
     return RegulationServiceV2(REGULATION_BASE, allow_draft=allow_draft)
 
 
+def _engine() -> str:
+    """`REGULATION_ENGINE` (bm25 / graph), as on the deployment."""
+    return os.environ.get("REGULATION_ENGINE", "bm25").strip().lower() or "bm25"
+
+
 def regulation_service(engine: str = "bm25"):
     """The regulation service the in-process agent searches: `bm25` is the Regulation MCP of `regulation-server`,
     `graph` the one of `regulation-graph`."""
@@ -118,11 +123,11 @@ class BackendAgent:
         chats = InMemoryChatRepository()
         adapters = Adapters(chats=chats, traces=InMemoryTraceRepository(chats),
                             accounts=_accounts(), student=InProcessStudentRecord(_oracle().service),
-                            regulations=InProcessRegulations(_regulations()))  # fmt: skip
+                            regulations=InProcessRegulations(regulation_service(_engine())))  # fmt: skip
         return build_container(self._settings, adapters)
 
     def describe(self) -> dict[str, Any]:
-        return {**self._container().describe(), "regulation_source": "regulation-service (in-process)"}
+        return {**self._container().describe(), "regulation_source": f"{_engine()} (in-process)"}
 
     @staticmethod
     def _principal(session_token: str | None) -> Principal:
@@ -165,5 +170,5 @@ def regulation_ids(question: str) -> list[str]:
     """Ids the Advisor's regulation search returns for a question (for `report --regulation-lookup`)."""
     from co5151_backend.application.agents.advisor.tools import RegulationSearch
 
-    search = RegulationSearch(InProcessRegulations(_regulations()))
+    search = RegulationSearch(InProcessRegulations(regulation_service(_engine())))
     return [r.id for r in asyncio.run(search.search(question))]

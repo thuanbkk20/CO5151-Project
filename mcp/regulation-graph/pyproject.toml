@@ -8,6 +8,7 @@ dependencies = [
     "co5151-contracts",
     "mcp>=1.30,<3",
     "pydantic>=2",
+    "uvicorn>=0.30",
 ]
 
 [project.optional-dependencies]
@@ -17,6 +18,7 @@ extract = ["pypdf>=5"]
 [project.scripts]
 regulation-graph-extract = "regulation_graph.extract:main"
 regulation-graph-build = "regulation_graph.build:main"
+regulation-graph-mcp = "regulation_graph.server:main"
 
 [tool.uv.sources]
 co5151-contracts = { workspace = true }
