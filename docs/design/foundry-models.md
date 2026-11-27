@@ -147,7 +147,7 @@ Kiên test trên bản deploy: gần như câu nào cũng ra câu từ chối. T
 | # | Commit | Nội dung | Trạng thái |
 |---|---|---|---|
 | 11 | `docs(design): fixes after the first test` | mục này | xong `c411494` |
-| 12 | `feat(backend): Verifier judge on its own provider` | `VERIFIER_LLM_PROVIDER` (+ `VERIFIER_LLM_MODEL` có sẵn): judge cố định, không theo model hội thoại; bản deploy dùng `azure/gpt-4.1-mini` | |
+| 12 | `feat(backend): Verifier judge on its own provider` | `VERIFIER_LLM_PROVIDER` (+ `VERIFIER_LLM_MODEL` có sẵn): judge cố định, không theo model hội thoại; bản deploy dùng `azure/gpt-4.1-mini` | xong `2371989` |
 | 13 | `fix(backend): judge flags only errors that make the answer wrong` | prompt judge: diễn đạt lại một trường hồ sơ không phải lỗi; một điều kiện không đạt đủ để kết luận chưa đủ điều kiện; thông tin bản nháp nói rõ là chưa có không phải lỗi; không liệt kê điều đúng | |
 | 14 | `fix(backend): say why a reply is empty` | `LLMError` ghi `finish_reason`; gọi thử `gpt-5-mini` 1 câu để biết lý do rồi sửa profile | |
 | 15 | `fix(backend): drop gemini-2.5-flash` | bỏ khỏi danh sách; `.env.production` bỏ key Gemini | |
