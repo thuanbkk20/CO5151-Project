@@ -32,6 +32,8 @@ class Provider:
     max_tokens_param: str = "max_tokens"
     # Variable holding the base URL when it depends on the customer's resource (Azure); it then replaces `base_url`
     base_url_env: str | None = None
+    # Accepts `seed` (best-effort reproducible sampling); documented by OpenAI and Azure OpenAI, not tried elsewhere
+    seed: bool = False
 
     @property
     def model(self) -> str:
@@ -56,6 +58,7 @@ PROVIDERS: dict[str, Provider] = {
         key_env="OPENAI_API_KEY",
         json_schema=True,
         max_tokens_param="max_completion_tokens",
+        seed=True,
     ),
     "kimi": Provider(
         base_url="https://opencode.ai/inference/openai/v1",
@@ -70,6 +73,7 @@ PROVIDERS: dict[str, Provider] = {
         json_schema=True,
         max_tokens_param="max_completion_tokens",
         base_url_env="AZURE_OPENAI_BASE_URL",
+        seed=True,
     ),
     # Azure AI Foundry: several model families behind one v1 endpoint; MODEL_PROFILES adapts the parameters per model
     "foundry": Provider(
@@ -93,6 +97,7 @@ class ModelProfile:
     reasoning_effort: str | None = None
     # Reasoning tokens count against the output limit: a 32-token router call would come back empty without room
     reasoning_headroom: int = 0
+    seed: bool | None = None
 
 
 # Keyed by model (deployment) name, whatever the provider. Values from one probe call per model on Azure AI Foundry
@@ -121,6 +126,7 @@ class OpenAICompatibleChatModel:
         base_url: str | None = None,
         reasoning_effort: str | None = None,
         timeout: float = DEFAULT_TIMEOUT_S,
+        seed: int | None = None,
     ):
         self.provider = provider
         self.model = model or profile.model
@@ -128,6 +134,9 @@ class OpenAICompatibleChatModel:
         self._profile = profile
         self._model_profile = MODEL_PROFILES.get(self.model, ModelProfile())
         self._reasoning_effort = reasoning_effort or self._model_profile.reasoning_effort or profile.reasoning_effort
+        supports_seed = profile.seed if self._model_profile.seed is None else self._model_profile.seed
+        # The seed actually sent (None: not asked for, or the model does not take one); traces record it
+        self.seed = seed if supports_seed else None
         self._client = AsyncOpenAI(base_url=self.base_url, api_key=api_key, timeout=timeout, max_retries=MAX_RETRIES)
 
     def options(self, max_output_tokens: int, json_schema: dict[str, Any] | None) -> dict[str, Any]:
@@ -141,6 +150,8 @@ class OpenAICompatibleChatModel:
         supports_schema = provider.json_schema if model.json_schema is None else model.json_schema
         if json_schema and supports_schema:
             options["response_format"] = json_schema
+        if self.seed is not None:
+            options["seed"] = self.seed
         return options
 
     async def complete(
@@ -203,6 +214,8 @@ class ProviderChatModels:
         if self._overrides["base_url"]:
             self._base_urls[self._default] = self._overrides["base_url"]
         self._timeout = float(get("LLM_TIMEOUT") or DEFAULT_TIMEOUT_S)
+        seed = get("LLM_SEED")
+        self._seed = int(seed) if seed else None
 
     def providers(self) -> list[str]:
         return [name for name in PROVIDERS if self._keys[name] and self._base_urls[name]]
@@ -233,4 +246,5 @@ class ProviderChatModels:
             base_url=self._base_urls[name],
             reasoning_effort=overrides.get("reasoning_effort"),
             timeout=self._timeout,
+            seed=self._seed,
         )

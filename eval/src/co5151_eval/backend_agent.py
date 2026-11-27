@@ -22,6 +22,7 @@ from co5151_backend.domain.principal import Principal, Role
 from co5151_backend.domain.trace import Trace
 from co5151_backend.infrastructure.config import Settings
 from co5151_backend.infrastructure.identity import DemoAccountDirectory
+from co5151_backend.infrastructure.llm import ProviderChatModels
 from co5151_backend.infrastructure.persistence.memory import InMemoryChatRepository, InMemoryTraceRepository
 from co5151_contracts import ToolResult
 from co5151_contracts.security import AuthError
@@ -115,15 +116,19 @@ def _response(trace: Trace, text: str) -> AgentResponse:
 class BackendAgent:
     """One evaluation session: a new conversation per answer, seeded with the task's history."""
 
-    def __init__(self, name: str, settings: Settings):
+    def __init__(self, name: str, settings: Settings, seed: int | None = None):
         self.name = name
         self._settings = settings
+        self._seed = seed
 
     def _container(self) -> Container:
         chats = InMemoryChatRepository()
+        # The run's seed goes with every LLM call of a provider that takes one (`LLM_SEED`)
+        env = {**os.environ, "LLM_SEED": str(self._seed)} if self._seed is not None else None
         adapters = Adapters(chats=chats, traces=InMemoryTraceRepository(chats),
                             accounts=_accounts(), student=InProcessStudentRecord(_oracle().service),
-                            regulations=InProcessRegulations(regulation_service(_engine())))  # fmt: skip
+                            regulations=InProcessRegulations(regulation_service(_engine())),
+                            models=ProviderChatModels(env))  # fmt: skip
         return build_container(self._settings, adapters)
 
     def describe(self) -> dict[str, Any]:
@@ -158,12 +163,12 @@ class BackendAgent:
 
 def make_agent(seed: int = 0) -> BackendAgent:
     """The Advisor with the Compliance Verifier configured by `ADVISOR_VERIFIER` (default `llm`)."""
-    return BackendAgent("advisor", _settings())
+    return BackendAgent("advisor", _settings(), seed)
 
 
 def make_agent_no_verifier(seed: int = 0) -> BackendAgent:
     """Baseline of the proposal: the same Advisor as a single agent, whatever `ADVISOR_VERIFIER` says."""
-    return BackendAgent("advisor-no-verifier", _settings(verifier_mode="off"))
+    return BackendAgent("advisor-no-verifier", _settings(verifier_mode="off"), seed)
 
 
 def regulation_ids(question: str) -> list[str]:

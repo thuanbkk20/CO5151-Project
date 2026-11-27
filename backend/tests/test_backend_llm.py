@@ -144,3 +144,14 @@ async def test_failures_and_empty_replies_raise():
 def test_timeout_and_retries_are_bounded():
     model = ProviderChatModels({"GEMINI_API_KEY": "g", "LLM_TIMEOUT": "5"}).create(None, None)
     assert (model._client.timeout, model._client.max_retries) == (5.0, 1)
+
+
+async def test_seed_is_sent_only_to_providers_that_take_it():
+    models = ProviderChatModels({"OPENAI_API_KEY": "o", "GEMINI_API_KEY": "g", "LLM_SEED": "2"})
+    openai, gemini = models.create("openai", None), models.create("gemini", None)
+    assert (openai.seed, gemini.seed) == (2, None)
+    for model, sent in ((openai, True), (gemini, False)):
+        create = _mocked(model)
+        await model.complete("q", system="s", max_output_tokens=10)
+        assert ("seed" in create.call_args.kwargs) is sent
+    assert ProviderChatModels({"OPENAI_API_KEY": "o"}).create("openai", None).seed is None
