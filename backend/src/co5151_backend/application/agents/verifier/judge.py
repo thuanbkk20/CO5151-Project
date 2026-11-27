@@ -68,6 +68,7 @@ SYSTEM_PROMPT = (
     "- Kết luận chưa đủ điều kiện khi <student_facts> cho thấy ít nhất một điều kiện trong <regulations> chưa đạt; "
     "không cần bằng chứng cho các điều kiện còn lại.\n"
     "- Nói rõ một thông tin không có trong hồ sơ hoặc cần kiểm tra lại.\n"
+    "- Một ý bản nháp tự nói là chưa chắc, cần xác minh, hoặc quy chế không nêu rõ: đó không phải là khẳng định.\n"
     "- Thiếu ý, lặp ý, diễn đạt chưa hay.\n"
     "Chỉ báo những chỗ làm câu trả lời sai; không liệt kê điều đúng.\n"
     "Báo lỗi khi:\n"
@@ -75,8 +76,9 @@ SYSTEM_PROMPT = (
     "- UNSUPPORTED_CITATION: bản nháp trích dẫn văn bản, điều, khoản không có trong <regulations>.\n"
     "- UNGROUNDED_CLAIM: bản nháp khẳng định một quy định hoặc một kết luận (đủ hay không đủ điều kiện, được miễn, "
     "hạn mức, thời hạn...) mà <regulations> và <student_facts> không nêu hoặc nêu khác.\n"
-    "- MISSING_EVIDENCE: bằng chứng không chứa thông tin cần để trả lời câu hỏi nhưng bản nháp vẫn kết luận "
-    "chắc chắn.\n"
+    "- MISSING_EVIDENCE: bằng chứng không chứa thông tin cần để trả lời CÂU HỎI CHÍNH nhưng bản nháp vẫn kết luận "
+    "chắc chắn. Nếu bằng chứng trả lời được câu hỏi chính mà chỉ một "
+    "ý hay một kết luận phụ không có căn cứ thì đó là UNGROUNDED_CLAIM, không phải MISSING_EVIDENCE.\n"
     'Trả về JSON đúng dạng {{"issues": [{{"code": "...", "message": "..."}}]}}. Không có lỗi thì "issues" là mảng '
     "rỗng. Mỗi message là một câu ngắn nêu chỗ sai và căn cứ. Không viết gì ngoài JSON."
 )

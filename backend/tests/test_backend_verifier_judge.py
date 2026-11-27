@@ -58,9 +58,9 @@ async def test_fixable_issue_from_the_judge_asks_for_a_revision():
     ]
 
 
-async def test_missing_evidence_from_the_judge_is_a_refusal():
+async def test_missing_evidence_from_the_judge_asks_for_a_rewrite():
     llm = FakeLLM(issues_json(("MISSING_EVIDENCE", "Không có đoạn nào nói về luận văn.")))
-    assert (await ComplianceVerifier(judge=LLMJudge(llm)).verify(REQUEST)).status is VerdictStatus.REFUSE
+    assert (await ComplianceVerifier(judge=LLMJudge(llm)).verify(REQUEST)).status is VerdictStatus.REVISE
 
 
 async def test_reply_wrapped_in_a_code_fence_is_still_read():
