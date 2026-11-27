@@ -75,8 +75,8 @@ chương trình), số tín chỉ còn thiếu, ĐTBTL thang 4 trong bản nháp
 | 8 | `feat(backend): the Verifier judges the standalone question` | D1 | xong `b182fef` |
 | 9 | `feat(backend): answers without regulations` | C3 phần truy xuất rỗng (câu hỏi lại cụ thể đã nằm trong 7 vì cùng lời gọi router) | xong `381c913` |
 | 10 | `feat(backend): search again before a rewrite` | D2 | xong `f67ede4` |
-| 11 | `feat(backend): rule check of the record numbers` | D3 | xong |
-| 12 | `docs: agent improvements in architecture and README` | chi phí LLM mỗi câu, luồng mới | |
+| 11 | `feat(backend): rule check of the record numbers` | D3 | xong `3307e52` |
+| 12 | `docs: agent improvements in architecture and README` | chi phí LLM mỗi câu, luồng mới | xong |
 
 ## Chưa quyết
 
