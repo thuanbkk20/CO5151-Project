@@ -87,8 +87,8 @@ recall@8, MRR, tỉ lệ rỗng. Khoản ứng viên **chưa đối chiếu PDF*
 | 3 | `feat(eval): retrieval benchmark` | `retrieval_cases.json` (36 lượt) + lệnh `retrieval`. RAG cũ: hit@3 0.36, recall@3 0.29, MRR 0.22, rỗng 19%, ~4.2k ký tự/câu | xong `5aca27b` |
 | 4 | `feat(regulation-graph): package and document registry` | package, `documents.json` (15 văn bản), trích chữ PDF/docx vào `data/text` | xong `34adcad` |
 | 5 | `feat(regulation-graph): text of the scanned graduation rules` | chữ QĐ 2932 chép từ ảnh 12 trang (`data/vision`), hai trang biểu mẫu chỉ tóm mục | xong `cb09eda` |
-| 6 | `feat(regulation-graph): provisions and amendments` | `regulation-graph-build`: 244 khoản (Điều, Khoản, Phụ lục, nội dung sửa đổi, mục kết luận HĐHV), 135 cạnh (`CONTAINS`, `AMENDS` gồm 14 cạnh QĐ 1259 → 2931, `REPLACES`, `REPEALS`) | xong |
-| 7 | `feat(regulation-graph): concepts` | `concepts.json`, cạnh `ABOUT`/`REQUIRES` | |
+| 6 | `feat(regulation-graph): provisions and amendments` | `regulation-graph-build`: 244 khoản (Điều, Khoản, Phụ lục, nội dung sửa đổi, mục kết luận HĐHV), 135 cạnh (`CONTAINS`, `AMENDS` gồm 14 cạnh QĐ 1259 → 2931, `REPLACES`, `REPEALS`) | xong `cb8ca1f` |
+| 7 | `feat(regulation-graph): concepts` | `concepts.json`: 24 khái niệm, từ đồng nghĩa, 77 cạnh `ABOUT`, 5 cạnh `REQUIRES` | xong |
 | 8 | `feat(regulation-graph): hybrid retrieval with versions` | truy xuất 6 bước, service hai tool | |
 | 9 | `feat(regulation-graph): MCP server` | server HTTP, `.env.example`, README | |
 | 10 | `feat(eval): pick the regulation engine` | `REGULATION_ENGINE`, so hai RAG bằng B1 | |

@@ -1,5 +1,8 @@
 """Build `data/graph.json` from the extracted texts: provisions, containment and amendment edges, concepts.
 
+Concepts (`data/concepts.json`) are curated by hand: academic topics with the words students use for them ("ra trường",
+"nhận bằng", "LVTN"), `ABOUT` edges to the provisions that rule them and `REQUIRES` edges between topics.
+
     uv run --package co5151-regulation-graph regulation-graph-build
 
 Deterministic and offline (no LLM): provisions are split with rules on the headings ("Điều 17.", "17.1", "PHỤ LỤC 3"),
@@ -258,11 +261,17 @@ def build() -> dict:
             article = re.sub(r"-CL(\d+)\.\d+$", r"-ART\1", e["target"])
             if article in ids:
                 e.update(target=article, partial=True)
-    dangling = [e for e in edges if e["source"] not in ids or e["target"] not in ids]
+    concepts = json.loads((DATA / "concepts.json").read_text("utf-8"))
+    concept_ids = {c["id"] for c in concepts}
+    for c in concepts:
+        edges += [{"source": pid, "relation": "ABOUT", "target": c["id"]} for pid in c["about"]]
+        edges += [{"source": c["id"], "relation": "REQUIRES", "target": t} for t in c.get("requires", [])]
+    nodes = ids | concept_ids
+    dangling = [e for e in edges if e["source"] not in nodes or e["target"] not in nodes]
     if dangling:
         raise ValueError(f"dangling edges: {dangling[:5]}")
     payload = {"documents": [d.model_dump(mode="json") for d in docs.values() if d.kind is not Kind.CONSOLIDATED],
-               "provisions": provisions, "edges": edges}  # fmt: skip
+               "provisions": provisions, "concepts": concepts, "edges": edges}  # fmt: skip
     payload["version"] = hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     return payload
 

@@ -36,3 +36,13 @@ def test_amendments_point_from_the_new_text_to_the_old_one():
 def test_letterhead_lines_are_not_part_of_the_text():
     provisions, _ = _graph()
     assert "Lý Thường Kiệt" not in provisions["QD2931-2021-ART24"]["text"]
+
+
+def test_concepts_link_words_to_provisions():
+    g = json.loads((DATA / "graph.json").read_text("utf-8"))
+    concepts = {c["id"]: c for c in g["concepts"]}
+    assert "nhận bằng" in concepts["tot_nghiep"]["synonyms"]
+    about = {(e["source"], e["target"]) for e in g["edges"] if e["relation"] == "ABOUT"}
+    assert ("QD2749-2026-APP1", "chuan_ngoai_ngu") in about
+    requires = {(e["source"], e["target"]) for e in g["edges"] if e["relation"] == "REQUIRES"}
+    assert ("tot_nghiep", "chuan_ngoai_ngu") in requires
