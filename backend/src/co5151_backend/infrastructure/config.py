@@ -34,6 +34,7 @@ class Settings:
     planner_mode: str = "llm"  # llm | rule | laya
     laya_url: str | None = None
     verifier_mode: str = "llm"  # llm | rules | off
+    verifier_provider: str | None = None  # None: the provider of the answer
     verifier_model: str | None = None
     history_messages: int = 10
     admin_token: str | None = None  # the operator console's token; None: no admin API
@@ -66,6 +67,7 @@ class Settings:
             planner_mode=env.get("ADVISOR_PLANNER_MODE", cls.planner_mode).strip().lower(),
             laya_url=env.get("LAYA_SERVER_URL", "").strip() or None,
             verifier_mode=env.get("ADVISOR_VERIFIER", cls.verifier_mode).strip().lower(),
+            verifier_provider=env.get("VERIFIER_LLM_PROVIDER", "").strip().lower() or None,
             verifier_model=env.get("VERIFIER_LLM_MODEL", "").strip() or None,
             history_messages=int(env.get("ADVISOR_HISTORY_MESSAGES", cls.history_messages)),
             admin_token=env.get("BACKEND_ADMIN_TOKEN", "").strip() or None,
