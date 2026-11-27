@@ -128,3 +128,29 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
      nhánh này (đoán); cần xem trace trong console.
    - `gpt-5-mini`: bước soạn câu trả lời trả rỗng (`answer LLM call failed, falling back: empty reply`), chưa rõ vì
      sao (log không ghi `finish_reason`).
+
+## Sửa sau khi test (27/11)
+
+Kiên test trên bản deploy: gần như câu nào cũng ra câu từ chối. Trace (bảng `traces`, `trace_spans` trên VM):
+
+- Verifier trả `revise` 2 vòng rồi từ chối vì những lỗi không có thật: "Bản nháp nêu rằng 'Đồ án chuyên ngành' chưa
+  đạt, nhưng hồ sơ chỉ nêu 'capstone_project_passed': false" (Phi-4); đòi bằng chứng cho mọi điều kiện dù bản nháp
+  đã kết luận "chưa đủ điều kiện" vì thiếu tín chỉ (gpt-5-mini làm judge); tự mâu thuẫn "FACT_MISMATCH: ... đúng với
+  dữ liệu" (gpt-4.1-mini).
+- Judge dùng chính model của hội thoại: model yếu chấm yếu, và so sánh model không công bằng (đổi cả người viết lẫn
+  người chấm).
+- `gpt-5-mini`: bước soạn trả rỗng, không biết lý do (lỗi không ghi `finish_reason`).
+- `gemini-2.5-flash`: 404 "no longer available to new users". Gemini lại không gọi được từ VM ở Hong Kong
+  ([azure-openai.md](azure-openai.md)), nên bản deploy không nên có Gemini.
+- Dòng "✓ Verifier đã kiểm" vẫn hiện khi Verifier đã từ chối.
+
+| # | Commit | Nội dung | Trạng thái |
+|---|---|---|---|
+| 11 | `docs(design): fixes after the first test` | mục này | |
+| 12 | `feat(backend): Verifier judge on its own provider` | `VERIFIER_LLM_PROVIDER` (+ `VERIFIER_LLM_MODEL` có sẵn): judge cố định, không theo model hội thoại; bản deploy dùng `azure/gpt-4.1-mini` | |
+| 13 | `fix(backend): judge flags only errors that make the answer wrong` | prompt judge: diễn đạt lại một trường hồ sơ không phải lỗi; một điều kiện không đạt đủ để kết luận chưa đủ điều kiện; thông tin bản nháp nói rõ là chưa có không phải lỗi; không liệt kê điều đúng | |
+| 14 | `fix(backend): say why a reply is empty` | `LLMError` ghi `finish_reason`; gọi thử `gpt-5-mini` 1 câu để biết lý do rồi sửa profile | |
+| 15 | `fix(backend): drop gemini-2.5-flash` | bỏ khỏi danh sách; `.env.production` bỏ key Gemini | |
+| 16 | `fix(web): a refused answer is not shown as verified` | dòng dưới câu trả lời ghi "Verifier từ chối" khi `outcome=refuse` | |
+
+Sau đó deploy và hỏi lại 5 câu như lần trước (báo token).
