@@ -16,7 +16,20 @@ def test_check_gold_passes(capsys):
 
 
 def test_run_record_template(tmp_path, capsys):
-    rc = main(["run", "--agent", "co5151_eval.baselines:record_template", "--seeds", "0", "1", "--out", str(tmp_path)])
+    rc = main(
+        [
+            "run",
+            "--suite",
+            "tasks",
+            "--agent",
+            "co5151_eval.baselines:record_template",
+            "--seeds",
+            "0",
+            "1",
+            "--out",
+            str(tmp_path),
+        ]
+    )
     assert rc == 0
     summary = json.loads((tmp_path / "summary.json").read_text())
     personal = summary["by_group"]["personal"]
@@ -26,7 +39,7 @@ def test_run_record_template(tmp_path, capsys):
 
 
 def test_run_refuse_all_subset(tmp_path):
-    assert main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--group", "out_of_scope",
+    assert main(["run", "--suite", "tasks", "--agent", "co5151_eval.baselines:refuse_all", "--group", "out_of_scope",
                  "--out", str(tmp_path)]) == 0  # fmt: skip
     oos = json.loads((tmp_path / "summary.json").read_text())["by_group"]["out_of_scope"]
     assert oos["strict_refusal_rate"] == 1.0
@@ -34,7 +47,19 @@ def test_run_refuse_all_subset(tmp_path):
 
 def test_unknown_task_id(tmp_path):
     with pytest.raises(SystemExit, match="unknown task ids"):
-        main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--only", "Z99", "--out", str(tmp_path)])
+        main(
+            [
+                "run",
+                "--suite",
+                "tasks",
+                "--agent",
+                "co5151_eval.baselines:refuse_all",
+                "--only",
+                "Z99",
+                "--out",
+                str(tmp_path),
+            ]
+        )
 
 
 def test_env_file_is_loaded_before_the_command(tmp_path, monkeypatch):
@@ -47,7 +72,7 @@ def test_env_file_is_loaded_before_the_command(tmp_path, monkeypatch):
 
 
 def test_run_writes_an_html_report_and_records_the_commit(tmp_path):
-    assert main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--group", "out_of_scope",
+    assert main(["run", "--suite", "tasks", "--agent", "co5151_eval.baselines:refuse_all", "--group", "out_of_scope",
                  "--out", str(tmp_path / "refuse_all")]) == 0  # fmt: skip
     assert (tmp_path / "refuse_all" / "report.html").exists()
     assert "commit" in json.loads((tmp_path / "refuse_all" / "summary.json").read_text())
@@ -55,7 +80,7 @@ def test_run_writes_an_html_report_and_records_the_commit(tmp_path):
 
 def test_report_command_compares_runs(tmp_path, capsys):
     for agent in ("refuse_all", "record_template"):
-        main(["run", "--agent", f"co5151_eval.baselines:{agent}", "--group", "out_of_scope",
+        main(["run", "--suite", "tasks", "--agent", f"co5151_eval.baselines:{agent}", "--group", "out_of_scope",
               "--out", str(tmp_path / agent)])  # fmt: skip
     capsys.readouterr()
     assert main(["report", str(tmp_path / "refuse_all"), str(tmp_path / "record_template")]) == 0
@@ -69,10 +94,21 @@ def lookup_for_test(question):
 
 def test_report_command_accepts_a_regulation_lookup(tmp_path):
     out = tmp_path / "advisor"
-    main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--only", "P01", "--out", str(out)])
+    main(["run", "--suite", "tasks", "--agent", "co5151_eval.baselines:refuse_all", "--only", "P01", "--out", str(out)])
     summary = json.loads((out / "summary.json").read_text())
     summary["agent_config"] = {"regulation_source": "ToolRegulationSource"}
     (out / "summary.json").write_text(json.dumps(summary))
     assert main(["report", str(out), "-o", str(tmp_path / "r.html"),
                  "--regulation-lookup", "test_eval_cli:lookup_for_test"]) == 0  # fmt: skip
     assert "QD-TEST-1" in (tmp_path / "r.html").read_text("utf-8")
+
+
+def test_run_defaults_to_the_conversations(tmp_path):
+    assert (
+        main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--only", "H14,H16", "--out", str(tmp_path)]) == 0
+    )
+    summary = json.loads((tmp_path / "summary.json").read_text("utf-8"))
+    assert summary["suite"] == "conversations" and summary["turns"]["turns"] == 6
+    assert summary["by_conversation"] == {"H14": [True], "H16": [True]}
+    with pytest.raises(SystemExit, match="H99"):
+        main(["run", "--agent", "co5151_eval.baselines:refuse_all", "--only", "H99", "--out", str(tmp_path)])

@@ -5,6 +5,8 @@ import pytest
 from co5151_backend.infrastructure.llm import PROVIDERS
 from co5151_eval.agent import Agent
 from co5151_eval.backend_agent import make_agent, make_agent_no_verifier, regulation_ids
+from co5151_eval.conversation_runner import run_conversations
+from co5151_eval.conversations import load_conversations
 from co5151_eval.gold import RecordOracle
 from co5151_eval.runner import run
 from co5151_eval.tasks import Outcome, load_tasks
@@ -15,7 +17,8 @@ QUESTION = "Với bảng điểm hiện tại em có đủ điều kiện làm l
 @pytest.fixture(autouse=True)
 def offline(monkeypatch):
     for name in ["LLM_PROVIDER", "LLM_MODEL", "LLM_API_KEY", "LLM_BASE_URL", "STUDENT_MCP_TOKEN_SECRET",
-                 "ADVISOR_VERIFIER", "ADVISOR_PLANNER_MODE"] + [p.key_env for p in PROVIDERS.values()]:  # fmt: skip
+                 "ADVISOR_VERIFIER", "ADVISOR_PLANNER_MODE", "MAX_QUESTIONS_PER_CONVERSATION", "LLM_SEED",
+                 "REGULATION_ENGINE"] + [p.key_env for p in PROVIDERS.values()]:  # fmt: skip
         monkeypatch.delenv(name, raising=False)
 
 
@@ -51,3 +54,11 @@ def test_regulation_lookup_returns_provision_ids():
 def test_every_task_runs_without_error(suite):
     records = run(make_agent, load_tasks(suite=suite))
     assert [r.task_id for r in records if r.error] == []
+
+
+def test_every_conversation_runs_and_the_question_limit_costs_no_llm_call():
+    records = {r.turn_id: r for r in run_conversations(make_agent, load_conversations())}
+    assert len(records) == 62 and [t for t, r in records.items() if r.error] == []
+    limited = records["H18-11"]
+    assert (limited.outcome, limited.passed, limited.tokens, limited.tool_calls) == ("limit", True, 0, [])
+    assert records["H18-12"].outcome == "answer"  # a new conversation answers again

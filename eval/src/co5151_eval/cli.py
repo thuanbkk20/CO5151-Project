@@ -8,6 +8,7 @@ from pathlib import Path
 
 from co5151_contracts.env import find_env_file, load_env_file
 
+from .conversation_runner import run_conversations, write_conversation_report
 from .conversations import load_conversations
 from .gold import check_gold, check_gold_conversations
 from .html_report import write_html_report
@@ -45,11 +46,41 @@ def _select(tasks, only: str | None, groups: list[str] | None):
     return tasks
 
 
+def _select_conversations(conversations, only: str | None):
+    if not only:
+        return conversations
+    wanted = set(only.split(","))
+    unknown = wanted - {c.id for c in conversations}
+    if unknown:
+        raise SystemExit(f"unknown conversation ids: {sorted(unknown)}")
+    return [c for c in conversations if c.id in wanted]
+
+
+def cmd_run_conversations(a, factory, name: str, out: Path) -> int:
+    conversations = _select_conversations(load_conversations(a.conversations), a.only)
+
+    def progress(r):
+        mark = "ERR " if r.error else {True: "PASS", False: "fail", None: "hand"}[r.passed]
+        print(f"  [seed {r.seed}] {r.turn_id} {mark} {r.outcome:<7} {r.latency_s:.2f}s", file=sys.stderr)
+
+    probe = factory(a.seeds[0])
+    config = probe.describe() if callable(getattr(probe, "describe", None)) else None
+    records = run_conversations(factory, conversations, a.seeds, on_record=progress if a.verbose else None)
+    meta = {"agent": a.agent, "agent_config": config, "conversations_run": len(conversations), "commit": git_commit(),
+            "started": time.strftime("%Y-%m-%d %H:%M:%S")}  # fmt: skip
+    summary = write_conversation_report(records, out, f"Kết quả: {name}", meta)
+    print((out / "summary.md").read_text("utf-8"))
+    print(f"Chi tiết: {out}/results.jsonl", file=sys.stderr)
+    return 0 if summary["turns"]["errors"] == 0 else 1
+
+
 def cmd_run(a) -> int:
     factory = load_factory(a.agent)
-    tasks = _select(load_tasks(a.tasks, a.suite), a.only, a.group)
     name = a.agent.rpartition(":")[2]
     out = a.out or DEFAULT_OUT / f"{time.strftime('%Y%m%d-%H%M%S')}-{name}"
+    if a.suite == "conversations" and not a.tasks:
+        return cmd_run_conversations(a, factory, name, out)
+    tasks = _select(load_tasks(a.tasks, a.suite), a.only, a.group)
 
     def progress(r):
         mark = "ERR " if r.error else {True: "PASS", False: "fail", None: "hand"}[r.passed]
@@ -115,13 +146,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--env-file", type=Path, help="mặc định: file .env gần nhất, tìm ngược lên tới gốc repo")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    r = sub.add_parser("run", help="chạy một hệ thống trên tập task và ghi báo cáo")
+    r = sub.add_parser("run", help="chạy một hệ thống trên bộ hội thoại (mặc định) hoặc bộ câu đơn, ghi báo cáo")
     r.add_argument("--agent", required=True, help="package.module:factory, factory(seed) -> Agent")
-    r.add_argument("--suite", choices=["tasks", "injection"], default="tasks",
-                   help="bộ đi kèm: 24 câu đánh giá hoặc 12 ca prompt injection")  # fmt: skip
-    r.add_argument("--tasks", help="file JSON task riêng (thay cho --suite)")
+    r.add_argument("--suite", choices=["conversations", "tasks", "injection"], default="conversations",
+                   help="bộ đi kèm: 20 hội thoại test, 24 câu đơn cũ, hoặc các ca prompt injection")  # fmt: skip
+    r.add_argument("--conversations", help="file hội thoại riêng (với --suite conversations)")
+    r.add_argument("--tasks", help="file JSON câu đơn riêng (thay cho --suite)")
     r.add_argument("--seeds", type=int, nargs="+", default=[0])
-    r.add_argument("--only", help="danh sách id, ví dụ P01,O02")
+    r.add_argument("--only", help="danh sách id: hội thoại (H01,H18) hoặc câu đơn (P01,O02)")
     r.add_argument("--group", nargs="+", choices=["basic", "personal", "missing_info", "out_of_scope"])
     r.add_argument("--out", type=Path, help=f"thư mục kết quả (mặc định {DEFAULT_OUT}/<thời gian>-<agent>)")
     r.add_argument("-v", "--verbose", action="store_true")
