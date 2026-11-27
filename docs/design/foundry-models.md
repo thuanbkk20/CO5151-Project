@@ -153,6 +153,7 @@ Kiên test trên bản deploy: gần như câu nào cũng ra câu từ chối. T
 | 14 | `fix(backend): say why a reply is empty` | `LLMError` ghi `finish_reason`; gọi thử `gpt-5-mini` 1 câu để biết lý do rồi sửa profile | xong `60bff72`: `finish_reason=length`, hết 1280 token cho suy nghĩ dù `minimal`; `reasoning_headroom` 2048 |
 | 15 | `fix(backend): drop gemini-2.5-flash` | bỏ khỏi danh sách; `.env.production` bỏ key Gemini | xong `2829d5f` |
 | 16 | `fix(web): a refused answer is not shown as verified` | dòng dưới câu trả lời ghi "Verifier không cho qua" khi `outcome=refuse` | xong `4366c2c` |
+| 17 | `fix(backend): the Advisor does not invent conditions or thresholds` | sau khi đổi judge, lỗi còn lại là thật: model coi Đồ án chuyên ngành là điều kiện, tự đặt ngưỡng CGPA 2.0 / TOEIC 450, ghi sai GDQP. Prompt: chỉ nêu điều kiện, ngưỡng có trong quy chế; quy chế không nêu ngưỡng thì nói rõ; viết lại thì bỏ hẳn ý không có căn cứ. Chạy thử 3 model (24.0k + 4.4k token): cả 3 qua | |
 
 Chọn judge (chạy trong process như eval, `sv001`, "Điều kiện để được xét tốt nghiệp là gì?", 27/11): judge
 `azure/gpt-4.1-mini` sau các sửa trên cho `gpt-4.1-mini` qua (viết lại 1 lần) nhưng vẫn từ chối `gpt-5-mini` vì coi
