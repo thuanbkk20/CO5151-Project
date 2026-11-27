@@ -60,8 +60,8 @@ lời không có fact vẫn được chấm khi có mẫu cấm (đạt = kết 
 | 7 | `feat(eval): rescore a run without calling the agent` | A5 | xong `16a71a9` |
 | 8 | `feat(eval): zero-shot and naive RAG baselines` | E1 | xong `11c1ff5` |
 | 9 | `feat(eval): ablation factories` | E2 | xong `b5fadeb` |
-| 10 | `feat(eval): indirect prompt injection fixtures` | E3 | xong |
-| 11 | `docs: threat model v2` | F1 | |
+| 10 | `feat(eval): indirect prompt injection fixtures` | E3 | xong `275088b` |
+| 11 | `docs: threat model v2` | F1 | xong |
 | 12 | `docs: eval conversations in README` | README eval, remaining-work | |
 
 ## Chưa quyết
