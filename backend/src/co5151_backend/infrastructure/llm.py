@@ -97,8 +97,9 @@ class ModelProfile:
 # Keyed by model (deployment) name, whatever the provider. Values from one probe call per model on Azure AI Foundry
 # (docs/design/foundry-models.md).
 MODEL_PROFILES: dict[str, ModelProfile] = {
+    # Even at `minimal` it spent all of 1024 + 256 tokens reasoning on an answer prompt (finish_reason=length, 27/11)
     "gpt-5-mini": ModelProfile(temperature=False, max_tokens_param="max_completion_tokens",
-                               reasoning_effort="minimal", reasoning_headroom=256),
+                               reasoning_effort="minimal", reasoning_headroom=2048),
     "gpt-oss-120b": ModelProfile(max_tokens_param="max_completion_tokens", reasoning_effort="low",
                                  reasoning_headroom=512),
     "Phi-4": ModelProfile(json_schema=False),
@@ -160,9 +161,13 @@ class OpenAICompatibleChatModel:
         except Exception as e:
             logger.warning("LLM call to %s/%s failed: %s", self.provider, self.model, e)
             raise LLMError(f"{type(e).__name__}: {e}") from e
-        text = (response.choices[0].message.content or "").strip() if response.choices else ""
+        choice = response.choices[0] if response.choices else None
+        text = (choice.message.content or "").strip() if choice else ""
         if not text:
-            raise LLMError("empty reply")
+            # "length": the output limit was used up (reasoning tokens count too); "content_filter": blocked
+            reason = getattr(choice, "finish_reason", None) if choice else "no choices"
+            used = getattr(response.usage, "completion_tokens", None)
+            raise LLMError(f"empty reply (finish_reason={reason}, output_tokens={used})")
         usage = response.usage
         return Completion(
             text=text,

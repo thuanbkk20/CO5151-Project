@@ -134,6 +134,11 @@ async def test_failures_and_empty_replies_raise():
     _mocked(model, reply=_reply(text="  "))
     with pytest.raises(LLMError, match="empty"):
         await model.complete("q", system="s", max_output_tokens=10)
+    cut = _reply(text=None, completion_tokens=10)
+    cut.choices[0].finish_reason = "length"
+    _mocked(model, reply=cut)
+    with pytest.raises(LLMError, match=r"finish_reason=length, output_tokens=10"):
+        await model.complete("q", system="s", max_output_tokens=10)
 
 
 def test_timeout_and_retries_are_bounded():
