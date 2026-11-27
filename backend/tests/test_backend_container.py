@@ -14,7 +14,7 @@ SETTINGS = Settings(token_secret=b"t", student_token_secret=b"s", database_url=N
 def test_verifier_modes():
     model = Model()
     llm = verifier_factory(SETTINGS, Models(model))
-    assert llm(model).describe() == {"rule_checks": 2, "judge": {"provider": "fake", "model": "fake-1"}}
+    assert llm(model).describe() == {"rule_checks": 3, "judge": {"provider": "fake", "model": "fake-1"}}
     assert llm(None).describe()["judge"] is None  # no LLM key: rule checks only
     assert verifier_factory(replace(SETTINGS, verifier_mode="rules"), Models(model))(model).describe()["judge"] is None
     assert verifier_factory(replace(SETTINGS, verifier_mode="off"), Models(model))(model) is None

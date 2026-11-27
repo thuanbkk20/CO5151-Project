@@ -114,5 +114,5 @@ async def test_canary_is_in_the_system_prompt_but_never_in_an_issue_message():
 
 def test_describe_names_the_judge_model():
     verifier = ComplianceVerifier(rule_checks(), judge=LLMJudge(FakeLLM()))
-    assert verifier.describe() == {"rule_checks": 2, "judge": {"provider": "fake", "model": "fake-1"}}
-    assert ComplianceVerifier(rule_checks()).describe() == {"rule_checks": 2, "judge": None}
+    assert verifier.describe() == {"rule_checks": 3, "judge": {"provider": "fake", "model": "fake-1"}}
+    assert ComplianceVerifier(rule_checks()).describe() == {"rule_checks": 3, "judge": None}
