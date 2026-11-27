@@ -13,11 +13,11 @@ STUDENT_TOOLS = {Action.SUMMARY: "get_my_academic_summary", Action.WARNINGS: "ge
 REGULATION_TOOL = "search_regulations"
 
 SAFE_ERROR_MESSAGES: dict[ErrorCode, str] = {
-    ErrorCode.UNAUTHENTICATED: "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.",
+    ErrorCode.UNAUTHENTICATED: "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Bạn vui lòng đăng nhập lại.",
     ErrorCode.FORBIDDEN: "Bạn không có quyền truy cập thông tin học vụ này.",
     ErrorCode.INVALID_ARGUMENT: "Thông tin yêu cầu không hợp lệ hoặc bị thiếu thông tin cần thiết.",
     ErrorCode.NOT_FOUND: "Không tìm thấy dữ liệu học vụ phù hợp.",
-    ErrorCode.INTERNAL: "Hệ thống gặp sự cố tạm thời khi xử lý hồ sơ. Vui lòng thử lại sau.",
+    ErrorCode.INTERNAL: "Hệ thống gặp sự cố tạm thời khi xử lý hồ sơ. Bạn vui lòng thử lại sau.",
 }
 
 

@@ -298,3 +298,10 @@ def test_english_certificate_is_said_once():
     assert prompts.english_status(Evidence(toeic=500, english_cert="TOEIC 500")) == "TOEIC 500"
     assert prompts.english_status(Evidence(toeic=500, english_cert="IELTS 6.0")) == "TOEIC 500, IELTS 6.0"
     assert prompts.english_status(Evidence()) == "chưa nộp chứng chỉ"
+
+
+def test_fixed_replies_r1_r2_follow_the_use_cases():
+    doc = (Path(__file__).parents[2] / "docs/design/use-cases.md").read_text("utf-8")
+    assert f'"{prompts.LIMIT_REACHED}"' in doc and f'"{prompts.REFUSAL_UNGROUNDED}"' in doc
+    for text in (prompts.CLARIFY, prompts.INCOMPLETE, prompts.REFUSAL_OTHER_STUDENT, prompts.REFUSAL_UNVERIFIED):
+        assert "Tôi" not in text and "bạn" in text.lower()
