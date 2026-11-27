@@ -85,7 +85,7 @@ trả lời đã có dòng "LLM" (`present.py`), người test biết câu nào 
 ### Gửi cho người test
 
 - Kiên gửi qua kênh riêng (Zalo/Messenger), không đưa vào git: link app, tài khoản (`sv001`…`sv008`, `cvht01`),
-  mật khẩu `DEPLOY_DEMO_PASSWORD`, và cách thử: nút cài đặt cạnh ô nhập → chọn nhà cung cấp `foundry` và model →
+  mật khẩu `DEPLOY_DEMO_PASSWORD`, và cách thử: nút cài đặt cạnh ô nhập → ô "Model" chọn ví dụ `foundry · gpt-5-mini` →
   hỏi → bấm 👍/👎, ghi nhận xét.
 - Kiên so sánh trong console (trace ghi `provider/model` của từng câu, cùng feedback).
 - Chặn tiêu tiền: `capacity` từng deployment (tốc độ token), budget $20 gửi email cảnh báo (`budget.tf`).
@@ -100,8 +100,8 @@ Mỗi bước: `ruff`, `pytest`; bước Terraform thêm `terraform fmt -check`,
 | 2 | `feat(infra): Foundry account and model deployments` | `foundry.tf`, biến, output. Apply; gọi thử mỗi model một câu ngắn có `json_schema` (báo token) | xong `70f4705` |
 | 3 | `feat(backend): per-model parameters` | `ModelProfile`, profile cho các model ở bảng trên; test (không gọi LLM thật) | xong `da51f09` |
 | 4 | `feat(backend): foundry provider with a fixed model list` | `models_env`, provider `foundry`, `ChatModels.models`, API trả `models`, kiểm tra model; `.env.example`; test | xong `bf00571` |
-| 5 | `feat(web): pick the model from a list` | một ô `Select` gộp provider và model (form Chainlit không đổi ô này theo ô kia), ô chữ cho provider không có danh sách; test | |
-| 6 | `docs: Foundry models` | README gốc, README infra (lấy key), `architecture.md`. Deploy lên VM, hỏi thử mỗi model một câu | |
+| 5 | `feat(web): pick the model from a list` | một ô `Select` gộp provider và model (form Chainlit không đổi ô này theo ô kia), ô chữ cho provider không có danh sách; test | xong `c8b1013` |
+| 6 | `docs: Foundry models` | README gốc, README infra (lấy key), `architecture.md`. Deploy lên VM (cần push nhánh), hỏi thử mỗi model một câu | |
 
 ## Chưa quyết
 
