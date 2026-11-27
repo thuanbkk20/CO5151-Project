@@ -117,6 +117,16 @@ def cmd_check_gold(a) -> int:
     return 1 if problems else 0
 
 
+def cmd_rescore(a) -> int:
+    from .rescore import rescore
+
+    out = a.out or a.results.parent / "rescored"
+    rescore(a.results, out, conversations=a.conversations, tasks=a.tasks)
+    print((out / "summary.md").read_text("utf-8"))
+    print(f"Chi tiết: {out}/results.jsonl", file=sys.stderr)
+    return 0
+
+
 def cmd_retrieval(a) -> int:
     from . import retrieval
     from .backend_agent import regulation_service
@@ -171,6 +181,13 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--conversations", help="file hội thoại riêng (mặc định: data/conversations.json)")
     g.add_argument("--tasks", help="đối chiếu file câu đơn (định dạng tasks.json) thay cho bộ hội thoại")
     g.set_defaults(fn=cmd_check_gold)
+
+    rs = sub.add_parser("rescore", help="chấm lại results.jsonl bằng bộ chấm hiện tại, không gọi agent hay LLM")
+    rs.add_argument("results", type=Path, help="results.jsonl của một lần chạy")
+    rs.add_argument("--out", type=Path, help="thư mục kết quả (mặc định: <thư mục của results>/rescored)")
+    rs.add_argument("--conversations", help="file hội thoại riêng (nếu lần chạy dùng file khác mặc định)")
+    rs.add_argument("--tasks", help="file câu đơn riêng (nếu lần chạy dùng file khác mặc định)")
+    rs.set_defaults(fn=cmd_rescore)
 
     rt = sub.add_parser("retrieval", help="đo truy xuất quy chế (recall, MRR) trên các lượt cần quy chế, không gọi LLM")
     rt.add_argument("--engine", choices=["bm25", "graph"], default="bm25", help="RAG quy chế cần đo")

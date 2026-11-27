@@ -48,6 +48,7 @@ class TurnRecord:
     output_tokens: int = 0
     usage_by_role: list[dict] = field(default_factory=list)
     cost_usd: float | None = None
+    declared_outcome: str | None = None  # what the agent said; None: classified from the text (rescore needs it)
 
 
 def turn_record(conv: Conversation, turn: Turn, seed: int, latency: float, resp: AgentResponse,
@@ -58,7 +59,7 @@ def turn_record(conv: Conversation, turn: Turn, seed: int, latency: float, resp:
                       s.citations_total, s.forbidden_hits, False if error else s.passed, resp.tool_calls, resp.text,
                       error, resp.citations, resp.verifier_rounds, resp.usage.input_tokens,
                       resp.usage.output_tokens, [u.model_dump() for u in resp.usage_by_role],
-                      cost_usd(resp.usage_by_role)[0])  # fmt: skip
+                      cost_usd(resp.usage_by_role)[0], resp.outcome.value if resp.outcome else None)  # fmt: skip
 
 
 def _history(conv: Conversation) -> list[dict[str, str]]:

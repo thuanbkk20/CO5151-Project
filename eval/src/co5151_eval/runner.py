@@ -36,6 +36,7 @@ class Record:
     verifier_rounds: int | None = None
     usage_by_role: list[dict] = field(default_factory=list)
     cost_usd: float | None = None
+    declared_outcome: str | None = None  # what the agent said; None: classified from the text (rescore needs it)
 
 
 def _record(task: Task, seed: int, latency: float, resp: AgentResponse, s: Score, error: str | None) -> Record:
@@ -43,7 +44,7 @@ def _record(task: Task, seed: int, latency: float, resp: AgentResponse, s: Score
                   s.outcome_ok, s.facts_hit, s.facts_total, s.citations_hit, s.citations_total, s.forbidden_hits,
                   False if error else s.passed, resp.tool_calls, resp.text, error, resp.citations,
                   resp.verifier_rounds, [u.model_dump() for u in resp.usage_by_role],
-                  cost_usd(resp.usage_by_role)[0])  # fmt: skip
+                  cost_usd(resp.usage_by_role)[0], resp.outcome.value if resp.outcome else None)  # fmt: skip
 
 
 def run(
