@@ -154,7 +154,7 @@ Kiên test trên bản deploy: gần như câu nào cũng ra câu từ chối. T
 | 15 | `fix(backend): drop gemini-2.5-flash` | bỏ khỏi danh sách; `.env.production` bỏ key Gemini | xong `2829d5f` |
 | 16 | `fix(web): a refused answer is not shown as verified` | dòng dưới câu trả lời ghi "Verifier không cho qua" khi `outcome=refuse` | xong `4366c2c` |
 | 17 | `fix(backend): the Advisor does not invent conditions or thresholds` | sau khi đổi judge, lỗi còn lại là thật: model coi Đồ án chuyên ngành là điều kiện, tự đặt ngưỡng CGPA 2.0 / TOEIC 450, ghi sai GDQP. Prompt: chỉ nêu điều kiện, ngưỡng có trong quy chế; quy chế không nêu ngưỡng thì nói rõ; viết lại thì bỏ hẳn ý không có căn cứ. Chạy thử 3 model (24.0k + 4.4k token): cả 3 qua | xong `3b5ff39` |
-| 18 | `fix(backend): the English certificate is said once` | hồ sơ in "TOEIC 500, TOEIC 500" (`toeic` và `english_cert`), model chép lặp và judge báo `FACT_MISMATCH` | |
+| 18 | `fix(backend): the English certificate is said once` | hồ sơ in "TOEIC 500, TOEIC 500" (`toeic` và `english_cert`), model chép lặp và judge báo `FACT_MISMATCH` | xong `bf41bae` |
 
 Chọn judge (chạy trong process như eval, `sv001`, "Điều kiện để được xét tốt nghiệp là gì?", 27/11): judge
 `azure/gpt-4.1-mini` sau các sửa trên cho `gpt-4.1-mini` qua (viết lại 1 lần) nhưng vẫn từ chối `gpt-5-mini` vì coi
