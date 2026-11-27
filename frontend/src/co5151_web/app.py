@@ -11,8 +11,10 @@ from chainlit.input_widget import Select
 from co5151_web.client import BackendClient, BackendError, SessionExpired
 from co5151_web.history import TOKEN_KEY, BackendDataLayer
 from co5151_web.present import (
+    CONVERSATION_FULL,
     STEP_NAME,
     chat_settings_body,
+    conversation_full,
     llm_options,
     pick_llm,
     progress_line,
@@ -92,13 +94,17 @@ async def _settings_form(saved: dict | None) -> dict:
 async def start() -> None:
     cl.user_session.set("settings", await _settings_form(None))
     cl.user_session.set("started", False)
+    cl.user_session.set("questions_left", None)
 
 
 @cl.on_chat_resume
 async def resume(thread: dict) -> None:
-    saved = (thread.get("metadata") or {}).get("chat_settings")
-    cl.user_session.set("settings", await _settings_form(saved))
+    metadata = thread.get("metadata") or {}
+    cl.user_session.set("settings", await _settings_form(metadata.get("chat_settings")))
     cl.user_session.set("started", True)
+    cl.user_session.set("questions_left", metadata.get("questions_left"))
+    if conversation_full(metadata.get("questions_left")):
+        await _notice(CONVERSATION_FULL)
 
 
 @cl.on_settings_update
@@ -167,6 +173,9 @@ async def reply(message: cl.Message) -> None:
     if token is None:
         await _notice(SIGN_IN_AGAIN)
         return
+    if conversation_full(cl.user_session.get("questions_left")):  # UC9: Chainlit cannot lock the input box
+        await _notice(CONVERSATION_FULL)
+        return
     conversation_id = cl.context.session.thread_id
     try:
         await _ensure_conversation(token, conversation_id)
@@ -184,6 +193,7 @@ async def reply(message: cl.Message) -> None:
                     shown = f"{data['message']['content']}\n\n{verification_line(data['trace'])}"
                     await cl.Message(id=data["message"]["id"], content=shown, actions=sources,
                                      metadata={"trace_id": data["trace"]["trace_id"]}).send()  # fmt: skip
+                    cl.user_session.set("questions_left", data.get("questions_left"))
                 elif event == "error":
                     trace = f" Mã trace: `{data['trace_id']}`" if data.get("trace_id") else ""
                     step.output = step_markdown([*lines, f"Lỗi: {data.get('detail')}"])

@@ -35,3 +35,5 @@ Tài khoản: `sv001` … `sv008` mật khẩu `demo` (sinh viên mô phỏng), 
   (1 ngày); hết hạn thì giao diện báo đăng nhập lại.
 - Token Student Record và key LLM chỉ nằm ở backend. Backend kiểm tra chủ hội thoại ở mọi API.
 - Tin nhắn do backend lưu khi trả lời; data layer không ghi step. Tắt tải file lên.
+- Hội thoại hết lượt (`questions_left = 0` từ backend, UC9): `on_message` không gửi câu mới lên backend, nhắc mở
+  hội thoại mới (Chainlit không có API khóa ô nhập). Backend vẫn tự chặn nếu client bỏ qua.

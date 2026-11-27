@@ -189,6 +189,16 @@ def provision_markdown(provision: dict[str, Any]) -> str:
     return "\n\n".join(parts)
 
 
+CONVERSATION_FULL = (
+    "Hội thoại này đã đủ số câu hỏi cho phép nên câu vừa gõ chưa được gửi. Bạn bấm **Hội thoại mới** để hỏi tiếp."
+)
+
+
+def conversation_full(questions_left: Any) -> bool:
+    """Whether the backend said this conversation takes no more questions (unknown: let the backend decide)."""
+    return questions_left == 0
+
+
 def thread_dict(conversation: dict[str, Any], identifier: str) -> dict[str, Any]:
     """A backend conversation as a Chainlit ThreadDict; messages keep their backend ids (feedback targets them)."""
     steps = []
@@ -215,6 +225,9 @@ def thread_dict(conversation: dict[str, Any], identifier: str) -> dict[str, Any]
             }
         )
     settings = conversation.get("settings") or {}
+    metadata: dict[str, Any] = {"chat_settings": {k: v for k, v in settings.items() if v}}
+    if "questions_left" in conversation:
+        metadata["questions_left"] = conversation["questions_left"]
     return {
         "id": conversation["id"],
         "createdAt": conversation["created_at"],
@@ -222,7 +235,7 @@ def thread_dict(conversation: dict[str, Any], identifier: str) -> dict[str, Any]
         "userId": identifier,
         "userIdentifier": identifier,
         "tags": [],
-        "metadata": {"chat_settings": {k: v for k, v in settings.items() if v}},
+        "metadata": metadata,
         "steps": steps,
         "elements": [],
     }
