@@ -55,3 +55,11 @@ def test_invalid_conversations_are_rejected(tmp_path):
     p.write_text(json.dumps([_conv().model_dump(mode="json")] * 2))
     with pytest.raises(ValueError, match="duplicate"):
         load_conversations(p)
+
+
+def test_forbidden_patterns_compile(conversations):
+    import re
+
+    for t in (t for c in conversations for t in c.turns):
+        for p in t.forbidden:
+            re.compile(p)
