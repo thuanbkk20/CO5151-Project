@@ -50,6 +50,7 @@ frontend/.files/
 # Personal Claude Code settings and agents
 .claude/settings.local.json
 .claude/agents/researcher.md
+.claude/.memory/
 
 # Terraform (infra/): provider downloads, state (holds resource details), local variable values
 .terraform/
