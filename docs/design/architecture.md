@@ -12,12 +12,12 @@ frontend/  (Chainlit)  --HTTP/SSE-->  backend/ (FastAPI)  --MCP Streamable HTTP-
 ```
 
 - **frontend** chỉ hiển thị: đăng nhập, chat, sidebar lịch sử, nguyên văn điều khoản được trích dẫn (qua
-  `GET /provisions/{id}` của backend). Không biết Advisor, MCP, LLM hay database. Chi tiết: [chat-ui.md](chat-ui.md).
+  `GET /provisions/{id}` của backend). Không biết Advisor, MCP, LLM hay database. Chi tiết: [frontend/README.md](../../frontend/README.md).
 - **backend** là nơi duy nhất ráp mọi thứ (`container.py`). Hai MCP server vẫn là hệ thống riêng.
 - **eval** gọi use case của backend trong cùng process (`co5151_eval.backend_agent`), không qua HTTP.
 - **console** (cho nhóm, không cho sinh viên; đăng nhập bằng tài khoản vận hành trong `.env`) đọc trace qua API admin của backend (`/admin/*`, token
   `BACKEND_ADMIN_TOKEN`) và chạy đánh giá qua API người dùng như app chat. Chi tiết:
-  [eval-console.md](eval-console.md).
+  [console/README.md](../../console/README.md).
 
 ## Tầng trong backend (`backend/src/co5151_backend/`)
 
@@ -33,14 +33,13 @@ frontend/  (Chainlit)  --HTTP/SSE-->  backend/ (FastAPI)  --MCP Streamable HTTP-
 Database, MCP và LLM đều là adapter sau một port; đổi adapter không phải sửa use case. Một endpoint có thể phục vụ
 nhiều họ model (Azure AI Foundry): tham số khác nhau theo model nằm trong `MODEL_PROFILES` của
 `infrastructure/llm.py`. Mỗi provider có danh sách model sửa tay trong `PROVIDERS`; người dùng chỉ chọn trong danh
-sách đó ([foundry-models.md](foundry-models.md)).
+sách đó (mục "Model LLM" bên dưới).
 
 ## Quyết định chính
 
 1. **Agent ≠ use case.** Advisor và Verifier là hai vai trò, chỉ dùng port. `AskQuestion` điều phối: kiểm giới hạn
    câu hỏi → lưu câu hỏi → Advisor thu bằng chứng → Advisor viết nháp → Verifier kiểm, viết lại tối đa 1 lần (tra
-   thêm quy chế trước nếu thiếu căn cứ) → lưu câu trả lời + trace. Chi tiết C1–C6, D1–D3:
-   [agent-improvements.md](agent-improvements.md).
+   thêm quy chế trước nếu thiếu căn cứ) → lưu câu trả lời + trace.
 2. **Stream không phát bản nháp.** SSE phát sự kiện tiến trình (`step`) ngay khi chạy; câu trả lời (`answer`) chỉ
    gửi sau khi Verifier cho qua, vì bản nháp có thể bị từ chối.
 3. **Lịch sử do backend đọc từ repository**; client chỉ gửi câu mới. Mọi truy vấn lọc theo chủ hội thoại, hội
@@ -56,12 +55,12 @@ sách đó ([foundry-models.md](foundry-models.md)).
    Student Record.
 8. **Database mới**, không migrate dữ liệu chat cũ (dữ liệu demo). Bảng mới không theo format của Chainlit.
 9. **Hai RAG quy chế cùng contract**: `regulation-server` (BM25, của Đức) và `regulation-graph` (graph phiên bản +
-   khái niệm, [regulation-graph.md](regulation-graph.md)) phục vụ cùng hai tool trên cùng cổng; `REGULATION_ENGINE`
+   khái niệm, [README](../../mcp/regulation-graph/README.md), có kết quả đo) phục vụ cùng hai tool trên cùng cổng; `REGULATION_ENGINE`
    chọn bản chạy. Backend không biết đang dùng bản nào.
 10. **eval dùng gateway trong process** (gọi thẳng service của MCP server) để chạy nhanh; app luôn đi qua MCP.
 11. **Span từng node** (planner, MCP, writer, Verifier) lưu cùng trace trong bảng `trace_spans`, đọc qua
-    `GET /traces/{id}/spans`, không stream: nháp bị Verifier loại chỉ thấy sau khi có câu trả lời cuối. Chi tiết:
-    [agent-flow.md](agent-flow.md).
+    `GET /traces/{id}/spans`, không stream: nháp bị Verifier loại chỉ thấy sau khi có câu trả lời cuối. Không lưu system prompt, token;
+    canary được thay bằng `[đã ẩn]`.
 
 ## Verifier và chi phí LLM
 
@@ -82,13 +81,31 @@ Lời gọi LLM mỗi câu (27/11, sau C1–D3):
 | Verifier `rules` / `off` | 0 (+1 nếu viết lại) / 0 |
 
 Đo một lần trên câu P02 (`gemini-3.1-flash-lite`, có viết lại, code cũ ngày
-2026-11-10): 7 lời gọi, 12.264 + 1.675 token, 12,6 s. Chưa có số liệu cả bộ 24 câu với Verifier.
+2026-11-10): 7 lời gọi, 12.264 + 1.675 token, 12,6 s. Chưa có số liệu cả bộ hội thoại với Verifier.
+
+## Model LLM
+
+Provider: Gemini (local), Azure OpenAI và Azure AI Foundry ở `koreacentral` (bản deploy, vì Gemini chặn VM ở Hong
+Kong; xem [infra/azure/README.md](../../infra/azure/README.md)). Giá dùng cho eval: `eval/src/co5151_eval/data/prices.json`.
+
+| Model | Giá vào / ra mỗi 1M token | Ghi chú (gọi thử 27/11) |
+|---|---|---|
+| `gpt-4.1-mini` | $0.40 / $1.60 | Model chính trên bản deploy |
+| `gpt-5-mini` | $0.25 / $2.00 | Reasoning; không nhận `temperature=0`; cần chừa token cho suy nghĩ (`reasoning_headroom`) |
+| `gpt-oss-120b` | $0.15 / $0.60 | Reasoning, rẻ nhất; **judge của Verifier** trên bản deploy |
+| `Llama-3.3-70B-Instruct` | $0.71 / $0.71 | Nhận `json_schema` |
+| `Phi-4` | $0.125 / $0.50 | Không nhận `json_schema` (tắt structured output) |
+
+Giá lấy từ Azure Retail Prices API ngày 27/11. Mistral không deploy được (bán qua Marketplace, subscription miễn phí
+không mua được); DeepSeek, Qwen... có quota bằng 0.
+
+**Judge riêng** (`VERIFIER_LLM_PROVIDER`, `VERIFIER_LLM_MODEL`): judge dùng chính model của hội thoại thì model yếu
+chấm yếu (từ chối vì lỗi không có thật) và so sánh model không công bằng. Thử 27/11: judge `gpt-4.1-mini` vẫn từ chối
+câu "có thể chưa đạt" của `gpt-5-mini`; judge `gpt-oss-120b` cho cả hai qua, lỗi nó bắt là lỗi thật, và rẻ nhất.
 
 ## Còn mở
 
-1. **Dữ liệu điểm trong lịch sử chat** mâu thuẫn với cam kết D1 (threat model A6): giữ, thêm hạn tự xóa, hay chỉ
-   lưu câu hỏi + trace? Span (`trace_spans`) cũng lưu kết quả Student Record và nháp, nên cùng quyết định này.
-2. **Đổi cấu trúc bảng**: hiện chỉ tạo bảng còn thiếu; khi deploy thật thì thêm Alembic. PostgreSQL chưa chạy với
-   server thật.
-3. **Khách**: mỗi lần đăng nhập `khach` là một danh tính mới, đăng xuất là mất lịch sử.
-4. Đăng nhập qua endpoint của student-server (quyết định 5) chưa làm.
+1. **Dữ liệu điểm trong lịch sử chat** lệch cam kết D1 (threat model A6): `messages` và `trace_spans` lưu nguyên văn
+   số liệu học vụ, chưa có hạn tự xóa.
+2. Ngoài phạm vi final: migration (Alembic, hiện chỉ tạo bảng còn thiếu), PostgreSQL với server thật, đăng nhập qua
+   endpoint của student-server, lịch sử của `khach` (mỗi lần đăng nhập là một danh tính mới).

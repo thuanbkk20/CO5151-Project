@@ -1,5 +1,5 @@
 # Nhiều model trên một resource Azure AI Foundry (một endpoint, một key) để nhóm thử app với từng model
-# (docs/design/foundry-models.md). Resource loại AIServices deploy được cả model không phải của OpenAI.
+# (docs/design/architecture.md, "Model LLM"). Resource loại AIServices deploy được cả model không phải của OpenAI.
 
 resource "azurerm_cognitive_account" "foundry" {
   name                  = "${var.name}-foundry"

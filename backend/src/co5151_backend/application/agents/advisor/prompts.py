@@ -37,7 +37,7 @@ def questions_left_note(left: int) -> str:
 
 
 REFUSAL_UNGROUNDED = (  # R2
-    "Tôi chưa đủ căn cứ từ quy chế và hồ sơ đã tra cứu để trả lời chắc chắn câu hỏi này. Bạn vui lòng liên hệ Phòng "
+    "Mình chưa đủ căn cứ từ quy chế và hồ sơ đã tra cứu để trả lời chắc chắn câu hỏi này. Bạn vui lòng liên hệ Phòng "
     "Đào tạo hoặc bộ phận học vụ của khoa để được hướng dẫn."
 )
 NO_REGULATION = REFUSAL_UNGROUNDED  # nothing retrieved and no record to answer from (UC7)

@@ -9,11 +9,13 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 |---|---|---|
 | `packages/contracts` | Hợp đồng dùng chung: envelope kết quả tool, mã lỗi, claims phiên đăng nhập, schema input/output của tool, ký token | 2. Student Data & MCP |
 | `mcp/student-server` | **Student Record MCP**: mock DB điểm/tín chỉ/hồ sơ, scoped read-only, xác thực bằng Bearer token | 2. Student Data & MCP |
-| `mcp/regulation-server` | **Regulation MCP**: Knowledge Graph + GraphRAG tra cứu quy chế | 1. Data & GraphRAG & MCP |
-| `mcp/regulation-graph` | RAG quy chế thứ hai: graph văn bản – khoản – phiên bản – khái niệm, truy xuất lai; cùng tool, chọn bằng `REGULATION_ENGINE` ([thiết kế](docs/design/regulation-graph.md)) | Kiên |
+| `mcp/regulation-server` | **Regulation MCP**: tra cứu quy chế, truy xuất lexical + graph (`REGULATION_ENGINE=bm25`, mặc định) | 1. Data & GraphRAG & MCP |
+| `mcp/regulation-graph` | RAG quy chế thứ hai: graph văn bản – khoản – phiên bản – khái niệm, truy xuất lai; cùng tool, chọn bằng `REGULATION_ENGINE` ([thiết kế, kết quả](mcp/regulation-graph/README.md)) | Kiên |
 | `backend` | **Backend API** (FastAPI, clean architecture): đăng nhập, chat (thường và SSE), lịch sử hội thoại; Advisor Agent (planner, memory) và Compliance Verifier | 3. Advisor Agent & Memory, 4. Verifier & Security |
 | `frontend` | **Giao diện chat** Chainlit, chỉ gọi backend API | 5. Kiểm thử & đánh giá |
-| `eval` | **Evaluation**: bộ 24 task, metric, baseline, kiểm thử bảo mật & prompt injection | 5. Kiểm thử & đánh giá |
+| `eval` | **Evaluation**: 20 hội thoại test, metric, chi phí, baseline, ablation, đo truy xuất, kiểm thử bảo mật & prompt injection ([eval/README.md](eval/README.md)) | 5. Kiểm thử & đánh giá |
+| `console` | **Console vận hành**: xem trace, chạy đánh giá qua backend, sửa bộ câu hỏi ([console/README.md](console/README.md)) | 5. Kiểm thử & đánh giá |
+| `infra/azure` | Terraform và script deploy lên Azure VM; LLM trên Azure OpenAI và AI Foundry ([infra/azure/README.md](infra/azure/README.md)) | — |
 | `docs` | Tài liệu thiết kế và báo cáo đánh giá, mục lục ở [docs/README.md](docs/README.md) | — |
 
 ## Bắt đầu
@@ -26,7 +28,7 @@ uv run ruff check .     # lint
 ```
 
 Cấu hình của cả app nằm trong một file `.env` ở gốc repo (hai MCP server, backend, LLM, frontend). Mọi lệnh
-(`co5151-api`, `co5151-web`, `student-mcp`, `regulation-mcp`, `co5151-eval`) tìm `.env` từ thư mục hiện tại ngược
+(`co5151-api`, `co5151-web`, `co5151-console`, `student-mcp`, `regulation-mcp`, `regulation-graph-mcp`, `co5151-eval`) tìm `.env` từ thư mục hiện tại ngược
 lên tới gốc repo; biến đã `export` trong shell được ưu tiên. Muốn dùng file khác thì truyền `--env-file <đường dẫn>`. Thành phần mới đọc cấu hình bằng
 `co5151_contracts.env.load_env_file(find_env_file())` khi khởi động.
 
@@ -35,25 +37,25 @@ Yêu cầu: Python ≥ 3.10, [uv](https://docs.astral.sh/uv/) ≥ 0.5.
 ## Chạy ứng dụng
 
 ```
-frontend (Chainlit :8000) --HTTP/SSE--> backend (co5151-api :8100) --MCP HTTP--> student-mcp :8102, regulation-mcp :8103
+frontend (Chainlit :8000) --HTTP/SSE--> backend (co5151-api :8100) --MCP HTTP--> student-mcp :8102, regulation-mcp hoặc regulation-graph-mcp :8103
 ```
 
 Điền trong `.env`: key của provider LLM đang chọn (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`; Azure
 OpenAI của nhóm: `LLM_PROVIDER=azure`, xem [infra/azure/README.md](infra/azure/README.md#azure-openai); nhiều model
 trên Azure AI Foundry: provider `foundry`, xem [mục Foundry](infra/azure/README.md#azure-ai-foundry)),
 `BACKEND_TOKEN_SECRET`, `STUDENT_MCP_TOKEN_SECRET`, `CHAINLIT_AUTH_SECRET`; các biến khác có mặc định chạy được
-([.env.example](.env.example)). Chạy cả 4 process bằng [Procfile](Procfile):
+([.env.example](.env.example)). Chạy mọi process bằng [Procfile](Procfile):
 
 ```bash
-uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation-mcp (hoặc regulation-graph-mcp), co5151-api, co5151-web
+uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation-mcp (hoặc regulation-graph-mcp), co5151-api, co5151-web, co5151-console
 ```
 
 Mở http://localhost:8000 (giao diện tiếng Việt), đăng nhập `sv001` … `sv008` (mật khẩu `demo`) hoặc `khach` (chỉ
 hỏi quy chế; `GUEST_LOGIN=off` tắt tài khoản này); trang đăng nhập và mục "Hướng dẫn" ghi tình huống của từng tài khoản. Hội thoại mới có câu gợi ý theo
 tài khoản. Nút cài đặt cạnh ô nhập chọn provider (chỉ bên đã có key) và model. Mỗi câu trả lời có mục "Đã xử lý câu
 hỏi" (các bước; mở ra xem tool, trích dẫn, Verifier, token, thời gian, trace id, conversation id để tra trong
-console, xem [docs/design/eval-console.md](docs/design/eval-console.md)), một dòng kiểm chứng, và nút cho từng điều
-khoản trích dẫn: bấm để xem nguyên văn ở panel bên phải. Thiết kế: [docs/design/chat-ui.md](docs/design/chat-ui.md). Lịch sử chat theo tài khoản do backend lưu
+console, xem [console/README.md](console/README.md)), một dòng kiểm chứng, và nút cho từng điều
+khoản trích dẫn: bấm để xem nguyên văn ở panel bên phải. Chi tiết: [frontend/README.md](frontend/README.md). Lịch sử chat theo tài khoản do backend lưu
 (`CHAT_DATABASE_URL`, mặc định SQLite `backend/.data/chat.db`). API: [backend/README.md](backend/README.md).
 
 Console vận hành cho nhóm (http://127.0.0.1:8200, process `console` trong Procfile): xem trace theo session id,
@@ -81,14 +83,15 @@ thì thêm vào `PROVIDERS` trong `backend/src/co5151_backend/infrastructure/llm
 eval gọi use case `AskQuestion` của backend trong cùng process (không cần chạy server), cấu hình đọc từ cùng `.env`:
 
 ```bash
-uv run co5151-eval run --agent co5151_eval.backend_agent:make_agent --only P01 -v          # 1 câu
-uv run co5151-eval run --agent co5151_eval.backend_agent:make_agent --seeds 0 1 2          # 24 câu × 3 seed
+uv run co5151-eval run --agent co5151_eval.backend_agent:make_agent --only H01 -v          # 1 hội thoại
+uv run co5151-eval run --agent co5151_eval.backend_agent:make_agent --seeds 0 1 2          # 20 hội thoại × 3 seed
 uv run co5151-eval run --agent co5151_eval.backend_agent:make_agent_no_verifier --seeds 0 1 2  # baseline agent đơn
 uv run co5151-eval run --agent co5151_eval.baselines:record_template --seeds 0 1 2         # không dùng LLM
+uv run co5151-eval retrieval --engine graph                                                # đo truy xuất quy chế, không gọi LLM
 uv run co5151-eval security                                                                # bảo mật Student Record MCP
 ```
 
-Kết quả ở `eval/results/<thời gian>-<agent>/` (`report.html`, `summary.md`, `results.jsonl`); provider, model,
+Lệnh `run` gọi LLM thì tốn tiền key. Kết quả ở `eval/results/<thời gian>-<agent>/` (`report.html`, `summary.md`, `results.jsonl`); provider, model,
 planner, Verifier của lần chạy ghi trong `agent_config`. Nếu terminal in `answer LLM call failed, falling back` thì
 câu đó **không** do LLM viết (key sai, hết tiền, model không nhận tham số) mà là template; `tokens` = 0 nghĩa là không
 gọi LLM lần nào. Xem [eval/README.md](eval/README.md).
@@ -100,6 +103,11 @@ uv run student-mcp issue-token sv001     # token cho tài khoản demo (mật kh
 uv run regulation-mcp --stdio            # Regulation MCP qua stdio thay vì HTTP
 uv run regulation-graph-mcp              # RAG quy chế bằng graph, cùng tool và cổng (thay regulation-mcp)
 ```
+
+### Deploy
+
+Bản demo chạy trên Azure VM, deploy bằng `infra/azure/deploy.sh [git-ref]` (đọc `.env.production`, gồm
+`REGULATION_ENGINE`). Thiết kế, chi phí, cách tạo hạ tầng: [infra/azure/README.md](infra/azure/README.md).
 
 Quy ước khi thêm code (biến môi trường, package, tool mới) nằm trong [CLAUDE.md](CLAUDE.md).
 

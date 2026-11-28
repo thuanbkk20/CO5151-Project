@@ -1,5 +1,5 @@
 # Caddy trên VM: HTTPS tự động (Let's Encrypt) cho tên miền của IP public, chuyển tiếp vào Chainlit (kể cả
-# websocket). Không có basic auth: người dùng đăng nhập bằng tài khoản của app (docs/design/deploy.md).
+# websocket). Không có basic auth: người dùng đăng nhập bằng tài khoản của app (infra/azure/README.md, "Thiết kế").
 # Giá trị {$...} lấy từ /etc/caddy/caddy.env do deploy.sh ghi.
 
 {$APP_DOMAIN} {

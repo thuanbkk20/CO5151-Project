@@ -1,7 +1,8 @@
 # Console vận hành (`co5151-console`)
 
 Web app cho nhóm (không phải cho sinh viên): xem trace, chạy đánh giá, sửa bộ câu hỏi và prompt. FastAPI + Jinja2,
-HTML render phía server. Thiết kế và tiến độ: [docs/design/eval-console.md](../docs/design/eval-console.md).
+HTML render phía server. Đánh giá chạy end-to-end qua API backend như người dùng thật (đăng nhập bằng tài khoản demo
+của câu hỏi, hỏi, nhận câu trả lời + trace) rồi chấm bằng `co5151_eval.scoring`.
 
 ## Chạy
 

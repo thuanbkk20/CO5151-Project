@@ -45,7 +45,6 @@ Viết sẵn, không qua LLM, không kèm thông tin liên hệ cụ thể (Kiê
 | # | Khi nào | Câu |
 |---|---|---|
 | R1 | Câu thứ 11 trở đi trong một hội thoại (UC9) | "Hội thoại này đã đủ 10 câu hỏi. Để được giải đáp chi tiết, bạn vui lòng liên hệ Phòng Đào tạo hoặc bộ phận học vụ của khoa. Nếu cần hỏi nội dung khác, bạn có thể mở hội thoại mới." |
-| R2 | Ngoài phạm vi / không đủ căn cứ (UC7) | "Tôi chưa đủ căn cứ từ quy chế và hồ sơ đã tra cứu để trả lời chắc chắn câu hỏi này. Bạn vui lòng liên hệ Phòng Đào tạo hoặc bộ phận học vụ của khoa để được hướng dẫn." |
+| R2 | Ngoài phạm vi / không đủ căn cứ (UC7) | "Mình chưa đủ căn cứ từ quy chế và hồ sơ đã tra cứu để trả lời chắc chắn câu hỏi này. Bạn vui lòng liên hệ Phòng Đào tạo hoặc bộ phận học vụ của khoa để được hướng dẫn." |
 
-R2 sửa từ `REFUSAL_UNGROUNDED` đang có (`advisor/prompts.py`), chỉ đổi "cố vấn học tập" thành "bộ phận học vụ của khoa".
-Các câu cố định hiện xưng hô chưa thống nhất ("Tôi", "mình", "Bạn"); thống nhất khi sửa code.
+Mọi câu cố định xưng "mình", gọi "bạn" (`advisor/prompts.py`).
