@@ -1,0 +1,31 @@
+[project]
+name = "co5151-regulation-graph"
+version = "0.1.0"
+description = "Regulation MCP, graph edition: concepts, versions and scope over HCMUT academic regulations"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "co5151-contracts",
+    "mcp>=1.30,<3",
+    "pydantic>=2",
+    "uvicorn>=0.30",
+]
+
+[project.optional-dependencies]
+# Only to extract text from the source PDFs (`regulation-graph-extract`); serving needs none of it
+extract = ["pypdf>=5"]
+
+[project.scripts]
+regulation-graph-extract = "regulation_graph.extract:main"
+regulation-graph-build = "regulation_graph.build:main"
+regulation-graph-mcp = "regulation_graph.server:main"
+
+[tool.uv.sources]
+co5151-contracts = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/regulation_graph"]

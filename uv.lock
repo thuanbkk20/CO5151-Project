@@ -16,6 +16,7 @@ members = [
     "co5151-console",
     "co5151-contracts",
     "co5151-eval",
+    "co5151-regulation-graph",
     "co5151-regulation-server",
     "co5151-student-server",
     "co5151-web",
@@ -845,6 +846,7 @@ source = { editable = "eval" }
 dependencies = [
     { name = "co5151-backend" },
     { name = "co5151-contracts" },
+    { name = "co5151-regulation-graph" },
     { name = "co5151-regulation-server" },
     { name = "co5151-student-server" },
 ]
@@ -853,9 +855,36 @@ dependencies = [
 requires-dist = [
     { name = "co5151-backend", editable = "backend" },
     { name = "co5151-contracts", editable = "packages/contracts" },
+    { name = "co5151-regulation-graph", editable = "mcp/regulation-graph" },
     { name = "co5151-regulation-server", editable = "mcp/regulation-server" },
     { name = "co5151-student-server", editable = "mcp/student-server" },
 ]
+
+[[package]]
+name = "co5151-regulation-graph"
+version = "0.1.0"
+source = { editable = "mcp/regulation-graph" }
+dependencies = [
+    { name = "co5151-contracts" },
+    { name = "mcp" },
+    { name = "pydantic" },
+    { name = "uvicorn" },
+]
+
+[package.optional-dependencies]
+extract = [
+    { name = "pypdf" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "co5151-contracts", editable = "packages/contracts" },
+    { name = "mcp", specifier = ">=1.30,<3" },
+    { name = "pydantic", specifier = ">=2" },
+    { name = "pypdf", marker = "extra == 'extract'", specifier = ">=5" },
+    { name = "uvicorn", specifier = ">=0.30" },
+]
+provides-extras = ["extract"]
 
 [[package]]
 name = "co5151-regulation-server"
@@ -3427,6 +3456,18 @@ wheels = [
 [package.optional-dependencies]
 crypto = [
     { name = "cryptography" },
+]
+
+[[package]]
+name = "pypdf"
+version = "7.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/89/7b/5dff016bef001c3556c5fdd7645ec80251b78bb496b049d2ab9ec497b087/pypdf-7.2.0.tar.gz", hash = "sha256:b2c637b6f0be3def1f762fd8be20118736bafdffc75badab80db003d7a9ed110", size = 7253070, upload-time = "2026-11-26T15:38:53.825Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9d/b5/36b52010264f40f35fcd469f62586c0d88753c16682f2e156c42347f884b/pypdf-7.2.0-py3-none-any.whl", hash = "sha256:5edb9b033dd55cecead9303370e6854c1a3b979669bde1c46024cde0228405b1", size = 428449, upload-time = "2026-11-26T15:38:52.262Z" },
 ]
 
 [[package]]

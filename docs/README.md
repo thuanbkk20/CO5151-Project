@@ -14,6 +14,9 @@ Tài liệu dùng chung cho cả hệ thống. Tài liệu của riêng từng t
 | [deploy.md](design/deploy.md) | Triển khai lên Azure for Students bằng Terraform: lý do chọn, hạ tầng, bảo mật, chi phí; kế hoạch commit |
 | [azure-openai.md](design/azure-openai.md) | LLM trên Azure OpenAI (`gpt-4.1-mini`, `koreacentral`) vì Gemini chặn VM ở Hong Kong; kế hoạch commit |
 | [foundry-models.md](design/foundry-models.md) | Nhiều model (GPT-5 mini, gpt-oss, Llama, Phi-4) trên Azure AI Foundry, danh sách model chọn sẵn cho mọi provider; kế hoạch commit |
+| [regulation-graph.md](design/regulation-graph.md) | RAG quy chế thứ hai bằng graph (khái niệm, phiên bản, phạm vi) để so với BM25; văn bản nạp; kế hoạch commit |
+| [use-cases.md](design/use-cases.md) | Use case, vai người dùng, câu trả lời cố định |
+| [test-conversations.md](design/test-conversations.md) | Bộ 20 hội thoại test |
 | [threat-model.md](design/threat-model.md) | Threat model v1 (D2, mục 6): tài sản, điểm vào, kẻ tấn công, biện pháp và trạng thái từng biện pháp |
 
 ## `eval/` — kết quả đánh giá
