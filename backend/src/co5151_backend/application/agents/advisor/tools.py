@@ -5,19 +5,20 @@ from typing import Any
 
 from co5151_contracts import ErrorCode
 
-from ....domain.evidence import Action, Regulation
+from ....domain.evidence import Action, Decision, Regulation
 from ...ports import RegulationGateway, StudentRecordGateway
 from ...tracing import DISCARD, SpanRecorder
 
 STUDENT_TOOLS = {Action.SUMMARY: "get_my_academic_summary", Action.WARNINGS: "get_my_academic_decisions"}
 REGULATION_TOOL = "search_regulations"
+MAX_TOP_K = 5  # both regulation servers reject a larger top_k (INVALID_ARGUMENT)
 
 SAFE_ERROR_MESSAGES: dict[ErrorCode, str] = {
-    ErrorCode.UNAUTHENTICATED: "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.",
+    ErrorCode.UNAUTHENTICATED: "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Bạn vui lòng đăng nhập lại.",
     ErrorCode.FORBIDDEN: "Bạn không có quyền truy cập thông tin học vụ này.",
     ErrorCode.INVALID_ARGUMENT: "Thông tin yêu cầu không hợp lệ hoặc bị thiếu thông tin cần thiết.",
     ErrorCode.NOT_FOUND: "Không tìm thấy dữ liệu học vụ phù hợp.",
-    ErrorCode.INTERNAL: "Hệ thống gặp sự cố tạm thời khi xử lý hồ sơ. Vui lòng thử lại sau.",
+    ErrorCode.INTERNAL: "Hệ thống gặp sự cố tạm thời khi xử lý hồ sơ. Bạn vui lòng thử lại sau.",
 }
 
 
@@ -49,6 +50,7 @@ class StudentTools:
         if action is Action.SUMMARY:
             return StudentFacts(
                 {
+                    "cohort": data.cohort,
                     "ctdt": data.ctdt,
                     "program_credits": data.program_credits,
                     "credits_earned": data.credits_earned,
@@ -59,6 +61,7 @@ class StudentTools:
                     "english_cert": data.english_cert,
                     "gdtc_completed": data.gdtc_completed,
                     "gdqp_completed": data.gdqp_completed,
+                    "retake_credits": data.retake_credits,
                 }
             )
         return StudentFacts(
@@ -66,6 +69,16 @@ class StudentTools:
                 "warnings_checked": True,
                 "currently_warned": data.currently_warned,
                 "consecutive_warnings": data.consecutive_warnings,
+                "decisions": [
+                    Decision(
+                        semester=d.semester_label,
+                        type=d.type,
+                        content=d.content,
+                        decision_no=d.decision_no,
+                        is_warning=d.is_warning,
+                    )  # fmt: skip
+                    for d in data.decisions
+                ],
             }
         )
 
@@ -83,8 +96,16 @@ class RegulationSearch:
         self._hops = hops
         self._max_chars = max_chars
 
-    async def search(self, query: str, *, spans: SpanRecorder = DISCARD) -> list[Regulation]:
-        args = {"query": query, "top_k": self._top_k, "hops": self._hops}
+    @property
+    def top_k(self) -> int:
+        return self._top_k
+
+    async def search(
+        self, query: str, *, context: dict | None = None, top_k: int | None = None, spans: SpanRecorder = DISCARD
+    ) -> list[Regulation]:
+        args: dict = {"query": query, "top_k": min(top_k or self._top_k, MAX_TOP_K), "hops": self._hops}
+        if context:
+            args["context"] = context
         with spans.span("regulation", REGULATION_TOOL, {"tool": REGULATION_TOOL, "args": args}) as span:
             res = await self._gateway.call(REGULATION_TOOL, args)
             span.output = res.model_dump(mode="json", exclude_none=True)

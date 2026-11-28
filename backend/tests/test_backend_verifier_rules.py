@@ -4,6 +4,7 @@ from co5151_backend.application.agents.verifier import (
     ComplianceVerifier,
     cited_provisions_are_retrieved,
     no_secrets,
+    record_figures_match,
     rule_checks,
 )
 from co5151_contracts import IssueCode, RegulationExcerpt, VerdictStatus, VerificationRequest
@@ -97,3 +98,44 @@ async def test_rule_checks_fold_into_a_verdict():
     ).status is VerdictStatus.PASS
     assert (await verifier.verify(request("Theo Điều 99, bạn đủ điều kiện.", CL55))).status is VerdictStatus.REVISE
     assert (await verifier.verify(request("Theo Điều 99, bạn đủ điều kiện."))).status is VerdictStatus.REFUSE
+
+
+FACTS = {"credits_earned": 92, "program_credits": 128, "remaining_credits": 36, "cgpa": 2.28}
+
+
+@pytest.mark.parametrize(
+    "draft",
+    [
+        "Bạn đã tích lũy 92/128 tín chỉ, ĐTBTL của bạn là 2.28.",
+        "Em đã tích lũy được 92 tín chỉ; bạn còn thiếu 36 tín chỉ để hoàn thành chương trình.",
+        "Theo quy chế, sinh viên cần tích lũy 120 tín chỉ và ĐTBTL từ 2.0 trở lên; sinh viên đã tích lũy 90 tín chỉ "
+        "được đăng ký luận văn.",
+        "ĐTBTL tối thiểu là 2.00. Bạn còn thiếu 5 tín chỉ để đủ điều kiện làm luận văn.",
+        "ĐTBTL (thang 10): 7.20/10.",
+    ],
+)
+def test_record_figures_that_match_or_are_not_about_the_student_pass(draft):
+    req = VerificationRequest(question="q", draft=draft, student_facts=FACTS)
+    assert record_figures_match(req) == []
+
+
+def test_record_figures_that_differ_are_a_fact_mismatch():
+    draft = (
+        "Bạn đã tích lũy 95 tín chỉ (95/128 TC), ĐTBTL hiện tại: 2,82; bạn còn thiếu 30 TC để hoàn thành chương trình."
+    )
+    issues = record_figures_match(VerificationRequest(question="q", draft=draft, student_facts=FACTS))
+    assert codes(issues) == [IssueCode.FACT_MISMATCH] * 3
+    assert issues[0].message == "Bản nháp ghi số tín chỉ tích lũy là 95 nhưng hồ sơ ghi 92."
+    assert "ĐTBTL là 2.82 nhưng hồ sơ ghi 2.28" in issues[2].message
+    assert record_figures_match(VerificationRequest(question="q", draft=draft)) == []  # no record read
+
+
+@pytest.mark.anyio
+async def test_a_record_mismatch_is_revised_without_the_judge():
+    class Judge:
+        async def review(self, request):
+            raise AssertionError("the judge must not be called")
+
+    req = VerificationRequest(question="q", draft="Bạn đã tích lũy 95 tín chỉ.", student_facts=FACTS)
+    verdict = await ComplianceVerifier(rule_checks(), judge=Judge()).verify(req)
+    assert verdict.status is VerdictStatus.REVISE and codes(verdict.issues) == [IssueCode.FACT_MISMATCH]

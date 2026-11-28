@@ -4,6 +4,7 @@ from co5151_web.present import (
     DRAFT_NOTE,
     SECURITY_STARTER,
     chat_settings_body,
+    conversation_full,
     details_markdown,
     llm_options,
     pick_llm,
@@ -29,6 +30,7 @@ def test_progress_lines_are_plain_words():
     assert progress_line({"name": "plan", "action": "MOI"}) == "Hiểu câu hỏi: MOI"
     assert progress_line({"name": "tool", "tool": "get_x"}) == "Gọi tool `get_x`"
     assert progress_line({"name": "khac"}) == "khac"
+    assert progress_line({"name": "tool", "tool": "search_regulations", "again": True}).startswith("Tra thêm")
 
 
 def test_step_lists_the_steps_then_the_technical_details():
@@ -53,6 +55,9 @@ def test_thread_keeps_backend_message_ids_and_feedback():
     user, answer = thread["steps"]
     assert (user["type"], user["name"]) == ("user_message", "sv002")
     assert answer["id"] == "m2" and answer["feedback"]["forId"] == "m2" and answer["feedback"]["value"] == 1
+    full = thread_dict({**CONVERSATION, "questions_left": 0}, "sv002")
+    assert full["metadata"]["questions_left"] == 0 and conversation_full(full["metadata"]["questions_left"])
+    assert not conversation_full(None) and not conversation_full(3)
 
 
 CHOICES = {"providers": ["azure", "foundry"], "default": "azure",

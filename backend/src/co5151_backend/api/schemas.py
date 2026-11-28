@@ -103,10 +103,12 @@ class ConversationOut(BaseModel):
 
 class ConversationDetailOut(ConversationOut):
     messages: list[MessageOut]
+    questions_left: int = Field(description="Questions this conversation still accepts; 0: open a new one")
 
     @classmethod
-    def of(cls, c: Conversation) -> "ConversationDetailOut":
-        return cls(**ConversationOut.of(c).model_dump(), messages=[MessageOut.of(m) for m in c.messages])
+    def of(cls, c: Conversation, questions_left: int) -> "ConversationDetailOut":
+        return cls(**ConversationOut.of(c).model_dump(), messages=[MessageOut.of(m) for m in c.messages],
+                   questions_left=questions_left)  # fmt: skip
 
 
 class ConversationPageOut(BaseModel):
@@ -230,10 +232,11 @@ class AdminSessionListOut(BaseModel):
 class AnswerOut(BaseModel):
     message: MessageOut
     trace: TraceOut
+    questions_left: int = Field(description="Questions this conversation still accepts after this one")
 
     @classmethod
     def of(cls, a: Answer) -> "AnswerOut":
-        return cls(message=MessageOut.of(a.message), trace=TraceOut.of(a.trace))
+        return cls(message=MessageOut.of(a.message), trace=TraceOut.of(a.trace), questions_left=a.questions_left)
 
 
 class FeedbackIn(_In):

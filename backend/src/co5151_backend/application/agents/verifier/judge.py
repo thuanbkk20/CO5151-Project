@@ -68,6 +68,8 @@ SYSTEM_PROMPT = (
     "- Kết luận chưa đủ điều kiện khi <student_facts> cho thấy ít nhất một điều kiện trong <regulations> chưa đạt; "
     "không cần bằng chứng cho các điều kiện còn lại.\n"
     "- Nói rõ một thông tin không có trong hồ sơ hoặc cần kiểm tra lại.\n"
+    "- Trả lời một câu hỏi chung về quy chế (không hỏi về hồ sơ của chính sinh viên) chỉ bằng <regulations>, không "
+    "dùng <student_facts>. Câu hỏi chung không cần hồ sơ.\n"
     "- Một ý bản nháp tự nói là chưa chắc, cần xác minh, hoặc quy chế không nêu rõ: đó không phải là khẳng định.\n"
     "- Thiếu ý, lặp ý, diễn đạt chưa hay.\n"
     "Chỉ báo những chỗ làm câu trả lời sai; không liệt kê điều đúng.\n"

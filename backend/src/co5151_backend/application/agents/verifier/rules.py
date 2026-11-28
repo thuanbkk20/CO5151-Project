@@ -75,6 +75,58 @@ def cited_provisions_are_retrieved(request: VerificationRequest) -> list[Verific
     ]
 
 
+# Record figures the draft states about the student. Only phrasings tied to the student ("bạn đã tích lũy 92",
+# "92/128 tín chỉ", "ĐTBTL của bạn là 2.28") are read, never a figure of a regulation ("cần tích lũy 120 tín chỉ",
+# "ĐTBTL từ 2.0 trở lên").
+_EARNED = re.compile(r"\b(?:bạn|em)\s+(?:hiện\s+)?(?:đã\s+)?tích\s+lũy(?:\s+được)?\s*(?:là|:)?\s*(\d+)(?![\d.,])")
+_OF_PROGRAM = re.compile(r"(?<![\d.,])(\d+)\s*/\s*(\d+)\s*(?:tín\s+chỉ|tc)\b")
+_REMAINING = re.compile(
+    r"\b(?:bạn|em)\s+(?:hiện\s+)?còn\s+thiếu\s+(\d+)\s*(?:tín\s+chỉ|tc)\s+(?:để|so\s+với)\s+(?:hoàn\s+thành|đủ)\s+"
+    r"(?:chương\s+trình|ctđt)"
+)
+_CGPA = re.compile(
+    r"(?:đtbtl|điểm\s+trung\s+bình\s+tích\s+lũy|cgpa|gpa)(?:\s*\([^)]{0,30}\))?"
+    r"(?:\s+(?:của\s+bạn|của\s+em|hiện\s+tại|hiện\s+nay|hiện))*\s*(?:là|:|=)\s*(\d+[.,]\d+)(?!\s*/\s*10)"
+)
+CGPA_TOLERANCE = 0.005
+
+
+def _stated(draft: str, facts: dict) -> list[tuple[str, float]]:
+    """(fact name, value) for each record figure the draft states."""
+    text = _norm(draft)
+    out = [("credits_earned", float(m.group(1))) for m in _EARNED.finditer(text)]
+    program = facts.get("program_credits")
+    out += [("credits_earned", float(m.group(1))) for m in _OF_PROGRAM.finditer(text) if int(m.group(2)) == program]
+    out += [("remaining_credits", float(m.group(1))) for m in _REMAINING.finditer(text)]
+    for m in _CGPA.finditer(text):
+        value = float(m.group(1).replace(",", "."))
+        if value <= 4:  # a figure on the 10-point scale is not the CGPA of the record
+            out.append(("cgpa", value))
+    return out
+
+
+LABELS = {"credits_earned": "số tín chỉ tích lũy", "remaining_credits": "số tín chỉ còn thiếu", "cgpa": "ĐTBTL"}
+
+
+def record_figures_match(request: VerificationRequest) -> list[VerificationIssue]:
+    """The record figures in the draft (credits earned, credits remaining, CGPA) equal `student_facts`."""
+    facts = request.student_facts
+    wrong = {}
+    for name, value in _stated(request.draft, facts):
+        actual = facts.get(name)
+        if isinstance(actual, bool) or not isinstance(actual, int | float):
+            continue  # not in the record: the judge decides (FACT_MISMATCH "không có trong đó")
+        if abs(value - actual) > (CGPA_TOLERANCE if name == "cgpa" else 0):
+            wrong.setdefault(name, (value, actual))
+    return [
+        VerificationIssue(
+            code=IssueCode.FACT_MISMATCH,
+            message=f"Bản nháp ghi {LABELS[name]} là {value:g} nhưng hồ sơ ghi {actual:g}.",
+        )
+        for name, (value, actual) in wrong.items()
+    ]
+
+
 def no_secrets(secrets: Iterable[str] = ()) -> Check:
     """A check that fails when the draft contains a session token or one of `secrets` (e.g. the prompt canary)."""
     forbidden = tuple(s for s in secrets if s)
@@ -88,4 +140,4 @@ def no_secrets(secrets: Iterable[str] = ()) -> Check:
 
 
 def rule_checks(secrets: Iterable[str] = ()) -> tuple[Check, ...]:
-    return (no_secrets(secrets), cited_provisions_are_retrieved)
+    return (no_secrets(secrets), cited_provisions_are_retrieved, record_figures_match)

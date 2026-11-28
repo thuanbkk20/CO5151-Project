@@ -82,7 +82,8 @@ async def start_conversation(body: s.ConversationIn, c: Deps, caller: Caller) ->
 
 @router.get("/conversations/{conversation_id}", tags=["conversations"])
 async def get_conversation(conversation_id: str, c: Deps, caller: Caller) -> s.ConversationDetailOut:
-    return s.ConversationDetailOut.of(await c.conversations.get(caller, conversation_id))
+    conversation = await c.conversations.get(caller, conversation_id)
+    return s.ConversationDetailOut.of(conversation, c.ask.questions_left(conversation))
 
 
 @router.patch("/conversations/{conversation_id}", tags=["conversations"])

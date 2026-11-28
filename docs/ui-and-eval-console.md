@@ -61,3 +61,5 @@ Thiết kế và kế hoạch commit: [design/agent-flow.md](design/agent-flow.m
 - 2026-11-15: console xong P0–P5 (traces, bộ câu hỏi, đánh giá); còn P6 prompt.
 - 2026-11-18: console có đăng nhập (P5c): tài khoản `CONSOLE_USERNAME`/`CONSOLE_PASSWORD` trong `.env`.
 - 2026-11-18: thiết kế lại giao diện chat cho thầy dùng (nhánh `feat/chat-ui`, [design/chat-ui.md](design/chat-ui.md)).
+- 2026-11-27: RAG graph thứ hai (`feat/regulation-graph`, `design/regulation-graph.md`); C1–C6, D1–D3 (nhánh
+  `feat/agent-improvements`, `design/agent-improvements.md`). Chưa chạy eval, chưa thử bằng key thật.

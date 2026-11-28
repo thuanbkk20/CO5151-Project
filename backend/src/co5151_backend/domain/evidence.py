@@ -40,7 +40,20 @@ class Provision(BaseModel):
     note: str | None = None  # the corpus's warning about this provision
 
 
+class Decision(BaseModel):
+    """One academic decision of the student (warning, suspension, thesis assignment...)."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    semester: str  # e.g. "Học kỳ 1 (2026 - 2027)"
+    type: str
+    content: str
+    decision_no: str
+    is_warning: bool = False
+
+
 SUMMARY_FACTS = (
+    "cohort",
     "ctdt",
     "program_credits",
     "credits_earned",
@@ -51,13 +64,15 @@ SUMMARY_FACTS = (
     "english_cert",
     "gdtc_completed",
     "gdqp_completed",
+    "retake_credits",
 )
-WARNING_FACTS = ("currently_warned", "consecutive_warnings")
+WARNING_FACTS = ("currently_warned", "consecutive_warnings", "warning_semesters", "decisions")
 
 
 class Evidence(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    cohort: int | None = None
     ctdt: str | None = None
     program_credits: int | None = None
     credits_earned: int | None = None
@@ -68,8 +83,10 @@ class Evidence(BaseModel):
     english_cert: str | None = None
     gdtc_completed: bool | None = None
     gdqp_completed: bool | None = None
+    retake_credits: int | None = None
     currently_warned: bool | None = None
     consecutive_warnings: int | None = None
+    decisions: list[Decision] = Field(default_factory=list)
     warnings_checked: bool = False
     regulations_checked: bool = False
     regulations: list[Regulation] = Field(default_factory=list)
@@ -86,6 +103,11 @@ class Evidence(BaseModel):
     def has_regulations(self) -> bool:
         return self.regulations_checked
 
+    @property
+    def warning_semesters(self) -> list[str]:
+        """Semesters with a warning decision, newest first (as the record lists them)."""
+        return [d.semester for d in self.decisions if d.is_warning]
+
     def collected(self, action: Action) -> bool:
         """Whether the evidence `action` collects is already here."""
         return {
@@ -97,4 +119,9 @@ class Evidence(BaseModel):
     def student_facts(self) -> dict:
         """The record facts collected so far, by name (what the Verifier checks the draft against)."""
         names = (SUMMARY_FACTS if self.has_academic_summary else ()) + (WARNING_FACTS if self.has_warnings else ())
-        return self.model_dump(include=set(names)) if names else {}
+        facts = self.model_dump(include=set(names) - {"warning_semesters", "decisions"})
+        if self.has_warnings:  # facts are scalars (`FactValue`): lists go as one line each
+            facts["warning_semesters"] = "; ".join(self.warning_semesters)
+            facts["decisions"] = "; ".join(f"{d.semester}: {d.type}: {d.content} ({d.decision_no})"
+                                           for d in self.decisions)  # fmt: skip
+        return facts

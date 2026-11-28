@@ -19,6 +19,7 @@ class Outcome(str, Enum):
     ANSWER = "answer"
     CLARIFY = "clarify"
     REFUSE = "refuse"
+    LIMIT = "limit"  # the backend's question limit per conversation (UC9)
 
 
 class Fact(BaseModel):

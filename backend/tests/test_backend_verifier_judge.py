@@ -3,7 +3,7 @@ import json
 import pytest
 
 from co5151_backend.application.agents.verifier import ComplianceVerifier, LLMJudge, rule_checks
-from co5151_backend.application.agents.verifier.judge import RESPONSE_FORMAT, build_prompt
+from co5151_backend.application.agents.verifier.judge import RESPONSE_FORMAT, SYSTEM_PROMPT, build_prompt
 from co5151_backend.application.ports import Completion
 from co5151_backend.domain.errors import LLMError
 from co5151_contracts import IssueCode, RegulationExcerpt, VerdictStatus, VerificationRequest
@@ -114,5 +114,9 @@ async def test_canary_is_in_the_system_prompt_but_never_in_an_issue_message():
 
 def test_describe_names_the_judge_model():
     verifier = ComplianceVerifier(rule_checks(), judge=LLMJudge(FakeLLM()))
-    assert verifier.describe() == {"rule_checks": 2, "judge": {"provider": "fake", "model": "fake-1"}}
-    assert ComplianceVerifier(rule_checks()).describe() == {"rule_checks": 2, "judge": None}
+    assert verifier.describe() == {"rule_checks": 3, "judge": {"provider": "fake", "model": "fake-1"}}
+    assert ComplianceVerifier(rule_checks()).describe() == {"rule_checks": 3, "judge": None}
+
+
+def test_a_general_question_needs_no_student_record():
+    assert "Câu hỏi chung không cần hồ sơ" in SYSTEM_PROMPT

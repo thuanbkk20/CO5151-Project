@@ -37,6 +37,7 @@ class Settings:
     verifier_provider: str | None = None  # None: the provider of the answer
     verifier_model: str | None = None
     history_messages: int = 10
+    max_questions: int = 10  # per conversation (UC9)
     admin_token: str | None = None  # the operator console's token; None: no admin API
     guest_login: bool = True  # `khach` signs in without a password
 
@@ -70,6 +71,7 @@ class Settings:
             verifier_provider=env.get("VERIFIER_LLM_PROVIDER", "").strip().lower() or None,
             verifier_model=env.get("VERIFIER_LLM_MODEL", "").strip() or None,
             history_messages=int(env.get("ADVISOR_HISTORY_MESSAGES", cls.history_messages)),
+            max_questions=int(env.get("MAX_QUESTIONS_PER_CONVERSATION", cls.max_questions)),
             admin_token=env.get("BACKEND_ADMIN_TOKEN", "").strip() or None,
             guest_login=env.get("GUEST_LOGIN", "on").strip().lower() not in OFF_VALUES,
         )

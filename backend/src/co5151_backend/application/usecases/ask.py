@@ -11,9 +11,9 @@ import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from co5151_contracts import RegulationExcerpt, VerdictStatus, VerificationRequest
+from co5151_contracts import IssueCode, RegulationExcerpt, Verdict, VerdictStatus, VerificationRequest
 
-from ...domain.conversation import ChatSettings, Message, MessageRole, title_from, utcnow
+from ...domain.conversation import ChatSettings, Conversation, Message, MessageRole, title_from, utcnow
 from ...domain.errors import AnswerFailed, InvalidRequest, NotFound
 from ...domain.evidence import Evidence
 from ...domain.principal import Principal, Role
@@ -22,6 +22,7 @@ from .. import events
 from ..agents.advisor import prompts
 from ..agents.advisor.advisor import Advisor, Draft
 from ..agents.advisor.planner import Planner
+from ..agents.advisor.tools import REGULATION_TOOL
 from ..agents.verifier import ComplianceVerifier
 from ..ports import (
     AccountDirectory,
@@ -40,13 +41,18 @@ logger = logging.getLogger(__name__)
 
 # The Verifier checks a draft at most this many times, so the Advisor rewrites at most once before refusing.
 MAX_VERIFIER_ROUNDS = 2
+# Issues a wider regulation search may fix before the rewrite (D2); FACT_MISMATCH is about the record
+SEARCH_AGAIN_CODES = frozenset({IssueCode.MISSING_EVIDENCE, IssueCode.UNGROUNDED_CLAIM})
 MAX_QUESTION_CHARS = 4000
+# From this many questions left, the answer says how many remain (questions 8, 9, 10 of 10).
+WARN_QUESTIONS_LEFT = 2
 
 
 @dataclass(frozen=True)
 class Answer:
     message: Message
     trace: Trace
+    questions_left: int
 
 
 async def _no_events(_event) -> None:
@@ -66,6 +72,7 @@ class AskQuestion:
         router_for: Callable[[ChatModel | None], ActionRouter | None],
         verifier_for: Callable[[ChatModel | None], ComplianceVerifier | None],
         history_messages: int = 10,
+        max_questions: int = 10,
     ):
         self._chats = chats
         self._traces = traces
@@ -76,6 +83,11 @@ class AskQuestion:
         self._router_for = router_for
         self._verifier_for = verifier_for
         self._history_messages = history_messages
+        self._max_questions = max_questions
+
+    def questions_left(self, conversation: Conversation) -> int:
+        asked = sum(m.role is MessageRole.USER for m in conversation.messages)
+        return max(0, self._max_questions - asked)
 
     def _offered(self, settings: ChatSettings) -> tuple[str | None, str | None]:
         """The conversation's provider and model; a model no longer offered falls back to the provider's default."""
@@ -102,12 +114,16 @@ class AskQuestion:
             ChatTurn(m.role.value, m.content)
             for m in await self._chats.recent_messages(conversation_id, self._history_messages)
         ]
+        left = self.questions_left(conversation)  # before this question
         asked = Message(str(uuid.uuid4()), conversation_id, MessageRole.USER, question, utcnow())
         await self._chats.add_message(asked)
         if conversation.title is None:
             await self._chats.update(conversation_id, principal.user_id, title=title_from(question))
 
         trace_id, start = new_trace_id(), time.perf_counter()
+        if left == 0:  # UC9: the fixed reply R1, no planner and no LLM call
+            return await self._limit_reached(conversation_id, asked, trace_id, start)
+        left -= 1
         spans = SpanRecorder(secrets=[prompts.CANARY])
         model = self._models.create(*self._offered(conversation.settings))
         llm = f"{model.provider}/{model.model}" if model else None
@@ -121,7 +137,10 @@ class AskQuestion:
             await self._traces.save(failed, spans.spans)
             raise AnswerFailed(trace_id) from e
 
-        answer = Message(str(uuid.uuid4()), conversation_id, MessageRole.ASSISTANT, turn.text, utcnow(), trace_id)
+        text = turn.text
+        if left <= WARN_QUESTIONS_LEFT:  # a fixed line after the Verifier, not written by the LLM
+            text = f"{text}\n\n{prompts.questions_left_note(left)}"
+        answer = Message(str(uuid.uuid4()), conversation_id, MessageRole.ASSISTANT, text, utcnow(), trace_id)
         await self._chats.add_message(answer)
         trace = Trace(
             trace_id=trace_id,
@@ -143,7 +162,18 @@ class AskQuestion:
         logger.info("trace=%s outcome=%s tools=%s verifier_rounds=%s tokens=%s ms=%s", trace_id,
                     trace.outcome.value if trace.outcome else "llm", ",".join(trace.tool_calls) or "-",
                     trace.verifier_rounds, trace.usage.total, trace.latency_ms)  # fmt: skip
-        return Answer(answer, trace)
+        return Answer(answer, trace, left)
+
+    async def _limit_reached(self, conversation_id: str, asked: Message, trace_id: str, start: float) -> Answer:
+        text = prompts.limit_reached(self._max_questions)
+        answer = Message(str(uuid.uuid4()), conversation_id, MessageRole.ASSISTANT, text, utcnow(), trace_id)
+        await self._chats.add_message(answer)
+        trace = Trace(trace_id=trace_id, conversation_id=conversation_id, user_message_id=asked.id,
+                      answer_message_id=answer.id, outcome=Outcome.LIMIT, steps=["LIMIT"], latency_ms=_ms(start),
+                      created_at=answer.created_at)  # fmt: skip
+        await self._traces.save(trace, [])
+        logger.info("trace=%s outcome=limit", trace_id)
+        return Answer(answer, trace, 0)
 
     async def _answer(
         self,
@@ -154,7 +184,9 @@ class AskQuestion:
         emit: EventSink,
         spans: SpanRecorder,
     ) -> "_Turn":
+        verifier = self._verifier_for(model)
         gathered = await self._advisor.gather(question, token=token, planner=Planner(self._router_for(model)),
+                                              history=history, need_standalone=bool(getattr(verifier, "judges", False)),
                                               emit=emit, spans=spans)  # fmt: skip
         turn = _Turn(gathered.steps, gathered.tool_calls, gathered.citations, gathered.usage, list(gathered.llm_errors))
         if gathered.final_text is not None:  # refusal or clarification of the planner: nothing to verify
@@ -163,15 +195,17 @@ class AskQuestion:
 
         evidence = gathered.evidence
         await emit(events.step("write"))
-        draft = await self._advisor.write(question, evidence, model=model, history=history, token=token, spans=spans)
+        standalone = gathered.standalone_question
+        draft = await self._advisor.write(question, evidence, model=model, history=history, token=token,
+                                          standalone=standalone, spans=spans)  # fmt: skip
         turn.add_draft(draft)
-        verifier = self._verifier_for(model)
         if verifier is None:
             return turn
 
         turn.verifier_rounds = 0
         while True:
-            request = _verification_request(question, turn.text, evidence)
+            # The judge never sees the conversation, so it checks the follow-up made standalone (D1)
+            request = _verification_request(standalone or question, turn.text, evidence)
             with spans.span(
                 "verifier", f"round {turn.verifier_rounds + 1}", _verifier_input(verifier, request)
             ) as span:
@@ -186,13 +220,29 @@ class AskQuestion:
                 return turn
             rewrite = None
             if verdict.status is VerdictStatus.REVISE and turn.verifier_rounds < MAX_VERIFIER_ROUNDS:
+                evidence = await self._search_again(standalone or question, evidence, verdict, turn, emit, spans)
                 await emit(events.step("write", revision=True))
                 rewrite = await self._advisor.write(question, evidence, model=model, history=history, token=token,
-                                                    revise=(turn.text, verdict), spans=spans)  # fmt: skip
+                                                    revise=(turn.text, verdict), standalone=standalone,
+                                                    spans=spans)  # fmt: skip
             if rewrite is None:
                 turn.text, turn.outcome = prompts.refusal(verdict), Outcome.REFUSE
                 return turn
             turn.add_draft(rewrite)
+
+    async def _search_again(
+        self, query: str, evidence: Evidence, verdict: Verdict, turn: "_Turn", emit: EventSink, spans: SpanRecorder
+    ) -> Evidence:
+        if not any(issue.code in SEARCH_AGAIN_CODES for issue in verdict.issues):
+            return evidence
+        turn.tool_calls.append(REGULATION_TOOL)
+        turn.steps.append("SEARCH_AGAIN")
+        await emit(events.step("tool", tool=REGULATION_TOOL, again=True))
+        found = await self._advisor.search_more(query, evidence, spans=spans)
+        if not found:
+            return evidence
+        turn.citations.extend(d.id for d in found)
+        return evidence.model_copy(update={"regulations_checked": True, "regulations": [*evidence.regulations, *found]})
 
 
 @dataclass
