@@ -45,7 +45,7 @@ trên Azure AI Foundry: provider `foundry`, xem [mục Foundry](infra/azure/READ
 ([.env.example](.env.example)). Chạy cả 4 process bằng [Procfile](Procfile):
 
 ```bash
-uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation-mcp, co5151-api, co5151-web
+uvx honcho start           # hoặc từng lệnh: student-mcp serve, regulation-mcp (hoặc regulation-graph-mcp), co5151-api, co5151-web
 ```
 
 Mở http://localhost:8000 (giao diện tiếng Việt), đăng nhập `sv001` … `sv008` (mật khẩu `demo`) hoặc `khach` (chỉ
@@ -68,7 +68,7 @@ Biến làm đổi cách chạy:
 | `ADVISOR_PLANNER_MODE` | `llm` (mặc định) / `laya` / `rule` | Planner kiểm luật trước; khi luật không quyết được thì hỏi LLM (1 lời gọi ngắn), Laya (`LAYA_SERVER_URL`), hoặc dùng bước mặc định |
 | `ADVISOR_VERIFIER` | `llm` (mặc định) / `rules` / `off` | Lời gọi LLM thêm mỗi câu: `llm` 1 (3 nếu viết lại), `rules` 0 (1 nếu viết lại), `off` 0 (agent đơn) |
 | `VERIFIER_LLM_PROVIDER`, `VERIFIER_LLM_MODEL` | tên provider, tên model | Judge riêng cho Verifier, cố định cho mọi model trả lời (trống: dùng model của câu trả lời) |
-| `REGULATION_ENGINE` | `bm25` (mặc định), `graph` | RAG quy chế: `regulation-mcp` hay `regulation-graph-mcp` (cùng tool, cùng cổng); deploy và eval trong process theo biến này |
+| `REGULATION_ENGINE` | `bm25` (mặc định), `graph` | RAG quy chế: `regulation-mcp` hay `regulation-graph-mcp` (cùng tool, cùng cổng); Procfile (honcho đọc `.env`), deploy và eval trong process theo biến này |
 | `CHAT_DATABASE_URL` | trống / `off` / `postgresql+asyncpg://...` | SQLite mặc định / chỉ trong bộ nhớ / PostgreSQL (`uv sync --extra postgres`) |
 
 Provider OpenAI-compatible khác dùng được ngay bằng `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`; muốn có tên riêng
