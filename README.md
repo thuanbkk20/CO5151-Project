@@ -10,7 +10,7 @@ Monorepo của nhóm G3 (Application Track · Theme 09). Mỗi thành phần là
 | `packages/contracts` | Hợp đồng dùng chung: envelope kết quả tool, mã lỗi, claims phiên đăng nhập, schema input/output của tool, ký token | 2. Student Data & MCP |
 | `mcp/student-server` | **Student Record MCP**: mock DB điểm/tín chỉ/hồ sơ, scoped read-only, xác thực bằng Bearer token | 2. Student Data & MCP |
 | `mcp/regulation-server` | **Regulation MCP**: Knowledge Graph + GraphRAG tra cứu quy chế | 1. Data & GraphRAG & MCP |
-| `mcp/regulation-graph` | RAG quy chế thứ hai: graph văn bản – khoản – phiên bản – khái niệm, truy xuất lai; cùng tool, chọn bằng `REGULATION_ENGINE` ([thiết kế](docs/design/regulation-graph.md)) | Kiên |
+| `mcp/regulation-graph` | RAG quy chế thứ hai: graph văn bản – khoản – phiên bản – khái niệm, truy xuất lai; cùng tool, chọn bằng `REGULATION_ENGINE` ([thiết kế, kết quả](mcp/regulation-graph/README.md)) | Kiên |
 | `backend` | **Backend API** (FastAPI, clean architecture): đăng nhập, chat (thường và SSE), lịch sử hội thoại; Advisor Agent (planner, memory) và Compliance Verifier | 3. Advisor Agent & Memory, 4. Verifier & Security |
 | `frontend` | **Giao diện chat** Chainlit, chỉ gọi backend API | 5. Kiểm thử & đánh giá |
 | `eval` | **Evaluation**: bộ 24 task, metric, baseline, kiểm thử bảo mật & prompt injection | 5. Kiểm thử & đánh giá |
@@ -52,8 +52,8 @@ Mở http://localhost:8000 (giao diện tiếng Việt), đăng nhập `sv001` �
 hỏi quy chế; `GUEST_LOGIN=off` tắt tài khoản này); trang đăng nhập và mục "Hướng dẫn" ghi tình huống của từng tài khoản. Hội thoại mới có câu gợi ý theo
 tài khoản. Nút cài đặt cạnh ô nhập chọn provider (chỉ bên đã có key) và model. Mỗi câu trả lời có mục "Đã xử lý câu
 hỏi" (các bước; mở ra xem tool, trích dẫn, Verifier, token, thời gian, trace id, conversation id để tra trong
-console, xem [docs/design/eval-console.md](docs/design/eval-console.md)), một dòng kiểm chứng, và nút cho từng điều
-khoản trích dẫn: bấm để xem nguyên văn ở panel bên phải. Thiết kế: [docs/design/chat-ui.md](docs/design/chat-ui.md). Lịch sử chat theo tài khoản do backend lưu
+console, xem [console/README.md](console/README.md)), một dòng kiểm chứng, và nút cho từng điều
+khoản trích dẫn: bấm để xem nguyên văn ở panel bên phải. Chi tiết: [frontend/README.md](frontend/README.md). Lịch sử chat theo tài khoản do backend lưu
 (`CHAT_DATABASE_URL`, mặc định SQLite `backend/.data/chat.db`). API: [backend/README.md](backend/README.md).
 
 Console vận hành cho nhóm (http://127.0.0.1:8200, process `console` trong Procfile): xem trace theo session id,

@@ -1,5 +1,5 @@
 # LLM của app: Azure OpenAI ở region khác VM. Gemini từ chối request từ VM ở Hong Kong, còn eastasia không có quota
-# Azure OpenAI cho Azure for Students (docs/design/azure-openai.md). Tài khoản không tốn tiền; token trừ vào credit.
+# Azure OpenAI cho Azure for Students (infra/azure/README.md, "Thiết kế"). Tài khoản không tốn tiền; token trừ vào credit.
 
 resource "azurerm_cognitive_account" "openai" {
   name                  = "${var.name}-openai"

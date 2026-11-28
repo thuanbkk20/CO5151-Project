@@ -16,7 +16,7 @@ Cập nhật: 2026-11-27. Người viết: Kiên. Bản nháp để duyệt. K�
   chỉ, điểm…) chưa ghi vào đây, sẽ điền khi đối chiếu (việc B1).
 
 Ước tính chi phí một lần chạy (đoán): 62 câu × 3 seed ≈ 190 lượt; với `gpt-4.1-mini` khoảng $0.008/lượt
-([foundry-models.md](foundry-models.md), câu P02) → khoảng $1.5 cho một cấu hình.
+([architecture.md](architecture.md), giá ở mục "Model LLM", câu P02) → khoảng $1.5 cho một cấu hình.
 
 ## H01 · sv006 (khóa 2024) · Thời gian đào tạo theo khóa (UC1, UC6)
 

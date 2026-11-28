@@ -108,7 +108,7 @@ gồm cả đoạn độc. Câu trả lời mẫu chỉ dùng khi LLM lỗi; xem
   xứng, kiểm `aud`, có thu hồi token.
 - Biện pháp tầng agent **chưa có số liệu với LLM thật** (E4).
 - Verifier chỉ đối chiếu với các đoạn Advisor đã tra, không bắt được lỗi do tra sai đoạn. Graph RAG giảm lỗi này
-  trên bộ hội thoại (hit@3 1.00 so với 0.417 của BM25, [regulation-graph.md](regulation-graph.md)) nhưng concept được
+  trên bộ hội thoại (hit@3 1.00 so với 0.417 của BM25, [mcp/regulation-graph](../../mcp/regulation-graph/README.md)) nhưng concept được
   viết khi đã thấy câu hỏi thử.
 - Router viết lại câu hỏi cho judge (E2'): kẻ tấn công dàn dựng lịch sử có thể khiến câu viết lại lệch câu gốc, judge
   chấm câu dễ hơn. Luật số liệu và trích dẫn không bị ảnh hưởng.

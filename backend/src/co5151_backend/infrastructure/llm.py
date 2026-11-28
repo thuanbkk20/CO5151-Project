@@ -101,7 +101,7 @@ class ModelProfile:
 
 
 # Keyed by model (deployment) name, whatever the provider. Values from one probe call per model on Azure AI Foundry
-# (docs/design/foundry-models.md).
+# (docs/design/architecture.md, "Model LLM").
 MODEL_PROFILES: dict[str, ModelProfile] = {
     # Even at `minimal` it spent all of 1024 + 256 tokens reasoning on an answer prompt (finish_reason=length, 27/11)
     "gpt-5-mini": ModelProfile(temperature=False, max_tokens_param="max_completion_tokens",

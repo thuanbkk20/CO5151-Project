@@ -1,42 +1,17 @@
 # Tài liệu của nhóm G3
 
 Tài liệu dùng chung cho cả hệ thống. Tài liệu của riêng từng thành phần nằm trong README của thành phần đó
-(ví dụ [frontend](../frontend/README.md), [eval](../eval/README.md)).
-
-## `design/` — thiết kế
-
-| File | Nội dung |
-|---|---|
-| [architecture.md](design/architecture.md) | Kiến trúc frontend/backend, các tầng của backend, quyết định chính, Verifier, việc còn mở |
-| [eval-console.md](design/eval-console.md) | Console vận hành (trace, đánh giá, bộ câu hỏi, prompt): thiết kế và kế hoạch commit |
-| [chat-ui.md](design/chat-ui.md) | Thiết kế lại giao diện chat Chainlit: tiếng Việt, câu gợi ý theo tài khoản, nguồn trích dẫn; kế hoạch commit |
-| [agent-flow.md](design/agent-flow.md) | Luồng agent trên UI: span từng node, lưu, API, sidebar; kế hoạch commit |
-| [deploy.md](design/deploy.md) | Triển khai lên Azure for Students bằng Terraform: lý do chọn, hạ tầng, bảo mật, chi phí; kế hoạch commit |
-| [azure-openai.md](design/azure-openai.md) | LLM trên Azure OpenAI (`gpt-4.1-mini`, `koreacentral`) vì Gemini chặn VM ở Hong Kong; kế hoạch commit |
-| [foundry-models.md](design/foundry-models.md) | Nhiều model (GPT-5 mini, gpt-oss, Llama, Phi-4) trên Azure AI Foundry, danh sách model chọn sẵn cho mọi provider; kế hoạch commit |
-| [regulation-graph.md](design/regulation-graph.md) | RAG quy chế thứ hai bằng graph (khái niệm, phiên bản, phạm vi) để so với BM25; văn bản nạp; kế hoạch commit |
-| [agent-improvements.md](design/agent-improvements.md) | Cải thiện Advisor/Verifier (C1–C6, D1–D3): router thấy ngữ cảnh, evidence đủ, giới hạn 10 câu, tra thêm khi thiếu căn cứ; kế hoạch commit |
-| [eval-conversations.md](design/eval-conversations.md) | Đánh giá theo hội thoại (20 hội thoại), chấm lại, chi phí USD, seed, baseline, ablation, injection gián tiếp; kế hoạch commit |
-| [use-cases.md](design/use-cases.md) | Use case, vai người dùng, câu trả lời cố định |
-| [test-conversations.md](design/test-conversations.md) | Bộ 20 hội thoại test |
-| [threat-model.md](design/threat-model.md) | Threat model v1 (D2, mục 6): tài sản, điểm vào, kẻ tấn công, biện pháp và trạng thái từng biện pháp |
-
-## `eval/` — kết quả đánh giá
+([frontend](../frontend/README.md), [backend](../backend/README.md), [console](../console/README.md),
+[eval](../eval/README.md), [regulation-graph](../mcp/regulation-graph/README.md), [infra](../infra/azure/README.md)).
 
 | File | Nội dung |
 |---|---|
-| [d2-notes.md](eval/d2-notes.md) | Ghi chú lần chạy đánh giá D2 (25/10/2026): cấu hình, số liệu máy chấm, chấm tay, phân tích thất bại |
-| [d2-report.html](eval/d2-report.html) | Report HTML từng câu của lần chạy D2; tải về rồi mở bằng trình duyệt |
+| [design/architecture.md](design/architecture.md) | Kiến trúc, các tầng của backend, quyết định chính, Verifier và chi phí LLM, model, việc còn mở |
+| [design/use-cases.md](design/use-cases.md) | Use case, vai người dùng, câu trả lời cố định |
+| [design/test-conversations.md](design/test-conversations.md) | Bộ 20 hội thoại test (dữ liệu chạy: `eval/.../data/conversations.json`) |
+| [design/threat-model.md](design/threat-model.md) | Threat model v2: tài sản, điểm vào, kẻ tấn công, biện pháp và trạng thái |
+| [eval/d2-notes.md](eval/d2-notes.md), [eval/d2-report.html](eval/d2-report.html) | Lần chạy đánh giá D2 (25/10/2026): cấu hình, số liệu, chấm tay, phân tích thất bại |
+| [remaining-work.md](remaining-work.md) | Việc còn lại đến bảo vệ final |
 
-## Tiến độ
-
-| File | Nội dung |
-|---|---|
-| [remaining-work.md](remaining-work.md) | Việc còn lại đến bảo vệ final, chia theo task |
-| [ui-and-eval-console.md](ui-and-eval-console.md) | Ý tưởng và các bước: UI hiển thị agent, trang đánh giá/chỉnh prompt |
-
-## Quy ước
-
-- Tài liệu thiết kế đặt trong `design/`; kết quả của một lần chạy đánh giá đặt trong `eval/`, tên file bắt đầu bằng
-  mốc nộp (`d2-`, `d3-`...).
-- Kết quả thô của `co5151-eval run` (`eval/results/`) không commit; chỉ commit ghi chú và report đã chốt.
+Quy ước: không viết file plan; kết quả một lần chạy đánh giá đặt trong `eval/`, tên bắt đầu bằng mốc nộp (`d2-`,
+`final-`); kết quả thô (`eval/results/`) không commit.
