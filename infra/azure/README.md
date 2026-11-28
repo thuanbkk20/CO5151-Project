@@ -1,6 +1,29 @@
 # Hạ tầng Azure (Terraform)
 
-Dựng máy chạy app trên subscription **Azure for Students**. Thiết kế và lý do: [docs/design/deploy.md](../../docs/design/deploy.md).
+Dựng máy chạy app trên subscription **Azure for Students** ($100 credit, không cắm thẻ; hết credit thì subscription bị
+tắt chứ không trừ tiền), để nhóm và thầy dùng thử và demo bảo vệ.
+
+## Thiết kế
+
+```
+Internet ──443──> Caddy (HTTPS) ──> Chainlit 127.0.0.1:8000 ──> backend :8100 ──> MCP :8102, :8103
+                   VM Ubuntu B2ats v2 ở eastasia, NSG chỉ mở 80/443 (+22 từ IP của Kiên)
+```
+
+- **Vì sao Azure for Students:** Cloudflare Workers không chạy được Chainlit (WebAssembly, không thread, không giữ
+  file); Cloudflare Containers cần gói trả phí; Cloudflare Tunnel cần domain riêng; GCP phải cắm thẻ. B2ats v2 (2
+  vCPU, 1 GB, thêm swap 2 GB) miễn phí 750 giờ, nhưng chỉ có ở `eastasia`. 5 process đo được khoảng 425 MB RAM.
+- **Hạ tầng tách khỏi cập nhật app:** cloud-init chỉ dựng máy một lần (đổi `custom_data` là Terraform tạo lại VM và
+  mất SQLite); cập nhật code bằng `deploy.sh`. State Terraform để local (một người apply).
+- **Bảo mật:** mọi service nghe `127.0.0.1`, chỉ Caddy nghe 80/443. Secret (`.env`, mật khẩu) không nằm trong git hay
+  biến Terraform (state ghi giá trị rõ); `deploy.sh` chép `.env` bằng `scp`, `chmod 600`. Bản deploy tắt `khach`
+  (`GUEST_LOGIN=off`) và thay mật khẩu `demo` bằng `DEPLOY_DEMO_PASSWORD` (`accounts.py`, file chỉ lưu hash), vì mỗi
+  câu hỏi tốn tiền key LLM. Console tắt mặc định.
+- **LLM:** Gemini từ chối request từ VM ở Hong Kong (`400 User location is not supported`, 26/11), nên bản deploy dùng
+  Azure OpenAI / AI Foundry ở `koreacentral` (có quota, token trừ vào credit). Model và judge: xem
+  [architecture.md](../../docs/design/architecture.md), mục "Model LLM".
+- **Chi phí:** VM $0 (trong mức miễn phí); public IP Standard khoảng $3.6/tháng (chưa kiểm chứng); budget $20 có
+  email cảnh báo 50%, 100% (`budget.tf`).
 
 ## Cài công cụ (một lần)
 
@@ -47,8 +70,7 @@ Ref phải có `GUEST_LOGIN` (từ `ffae96f`), nếu không bước kiểm tra `
 
 ## Azure OpenAI
 
-`openai.tf` tạo resource Azure OpenAI ở `koreacentral` và deployment `gpt-4.1-mini` (lý do:
-[docs/design/azure-openai.md](../../docs/design/azure-openai.md)). Để app (local hoặc bản deploy) dùng nó, ghi vào
+`openai.tf` tạo resource Azure OpenAI ở `koreacentral` và deployment `gpt-4.1-mini` (lý do: mục "Thiết kế" ở trên). Để app (local hoặc bản deploy) dùng nó, ghi vào
 `.env` / `.env.production`, key đi thẳng vào file, không in ra màn hình:
 
 ```bash
@@ -65,7 +87,7 @@ lại vào `.env` và chạy `deploy.sh`.
 ## Azure AI Foundry
 
 `foundry.tf` tạo resource `AIServices` ở `koreacentral` và một deployment cho mỗi model trong `foundry_models`
-(`variables.tf`; lý do và kết quả gọi thử: [docs/design/foundry-models.md](../../docs/design/foundry-models.md)).
+(`variables.tf`; model nào, vì sao: [architecture.md](../../docs/design/architecture.md), mục "Model LLM").
 Thêm model: thêm một dòng vào `foundry_models` (tên, format, phiên bản, capacity), `terraform apply`, thêm tên vào
 danh sách của provider `foundry` trong `PROVIDERS` (`backend/src/co5151_backend/infrastructure/llm.py`); model gửi
 tham số khác mặc định thì thêm vào `MODEL_PROFILES` cùng file. Model bán qua Marketplace (Mistral...) không deploy
