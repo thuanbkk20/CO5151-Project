@@ -134,7 +134,7 @@ def build_container(settings: Settings, adapters: Adapters | None = None) -> Con
     advisor = Advisor(a.student or McpStudentRecordGateway(settings.student_mcp_url), regulations)
     return Container(
         settings=settings,
-        sign_in=SignIn(accounts, access_tokens),
+        sign_in=SignIn(accounts, access_tokens, settings.guest_login),
         authenticate=Authenticate(access_tokens),
         authenticate_operator=AuthenticateOperator(settings.admin_token),
         conversations=Conversations(chats, traces, models),

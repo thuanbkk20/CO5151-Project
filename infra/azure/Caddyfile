@@ -1,0 +1,18 @@
+# Caddy trên VM: HTTPS tự động (Let's Encrypt) cho tên miền của IP public, chuyển tiếp vào Chainlit (kể cả
+# websocket). Không có basic auth: người dùng đăng nhập bằng tài khoản của app (docs/design/deploy.md).
+# Giá trị {$...} lấy từ /etc/caddy/caddy.env do deploy.sh ghi.
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+
+	reverse_proxy 127.0.0.1:8000
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log
+}

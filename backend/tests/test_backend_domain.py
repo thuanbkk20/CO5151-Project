@@ -29,3 +29,4 @@ def test_settings_from_env():
     assert s.student_mcp_url == "http://127.0.0.1:8102/mcp" and s.token_secret == b"a"
     assert s.admin_token is None
     assert Settings.from_env({"BACKEND_ADMIN_TOKEN": " t0k "}).admin_token == "t0k"
+    assert Settings.from_env({}).guest_login and not Settings.from_env({"GUEST_LOGIN": "Off"}).guest_login

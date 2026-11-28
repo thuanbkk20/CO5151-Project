@@ -1,0 +1,13 @@
+# Copy thành terraform.tfvars (đã gitignore) rồi điền. Biến không ghi ở đây dùng giá trị mặc định trong
+# variables.tf. Không ghi secret vào file này: Terraform lưu giá trị biến vào state ở dạng rõ.
+
+# Bắt buộc. IP public hiện tại của máy bạn (xem bằng: curl -s https://api.ipify.org), thêm /32. IP nhà mạng đổi
+# thì sửa lại và chạy terraform apply.
+admin_cidr = "203.0.113.7/32"
+
+# location  = "eastasia"
+# dns_label = "co5151-g3"
+
+# Bắt buộc. Email nhận cảnh báo chi tiêu (budget mặc định $20/tháng, đổi bằng budget_amount).
+alert_emails = ["you@example.com"]
+# budget_amount = 20
