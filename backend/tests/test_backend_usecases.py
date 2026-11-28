@@ -160,7 +160,7 @@ async def test_ungrounded_claim_searches_the_regulations_again_before_the_rewrit
     app = App("Nháp", "Bản sửa.", verifier=ScriptedVerifier(REVISE, PASS), regulations=regs)
     principal, conv = await started(app)
     answer = await app.ask.execute(principal, conv.id, GRADUATION)
-    assert [s["top_k"] for s in regs.searches] == [3, 6] and regs.searches[1]["context"] == {"cohort": 2023}
+    assert [s["top_k"] for s in regs.searches] == [3, 5] and regs.searches[1]["context"] == {"cohort": 2023}
     assert answer.trace.steps == ["SUMMARY", "REGULATIONS", "RESPOND", "VERIFY_REVISE", "SEARCH_AGAIN", "VERIFY_PASS"]
     assert answer.trace.citations == ["QD2933-2021-CL5.5", "QD2933-2021-CL10.1", "QD2933-2021-CL10.2"]
     assert "[QD2933-2021-CL10.2]" in app.model.calls[1]["prompt"]  # the rewrite reads the new provisions

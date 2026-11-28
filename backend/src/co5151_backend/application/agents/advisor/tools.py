@@ -11,6 +11,7 @@ from ...tracing import DISCARD, SpanRecorder
 
 STUDENT_TOOLS = {Action.SUMMARY: "get_my_academic_summary", Action.WARNINGS: "get_my_academic_decisions"}
 REGULATION_TOOL = "search_regulations"
+MAX_TOP_K = 5  # both regulation servers reject a larger top_k (INVALID_ARGUMENT)
 
 SAFE_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.UNAUTHENTICATED: "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Bạn vui lòng đăng nhập lại.",
@@ -102,7 +103,7 @@ class RegulationSearch:
     async def search(
         self, query: str, *, context: dict | None = None, top_k: int | None = None, spans: SpanRecorder = DISCARD
     ) -> list[Regulation]:
-        args: dict = {"query": query, "top_k": top_k or self._top_k, "hops": self._hops}
+        args: dict = {"query": query, "top_k": min(top_k or self._top_k, MAX_TOP_K), "hops": self._hops}
         if context:
             args["context"] = context
         with spans.span("regulation", REGULATION_TOOL, {"tool": REGULATION_TOOL, "args": args}) as span:

@@ -2,6 +2,7 @@
 
 import pytest
 
+from co5151_backend.application.agents.advisor.tools import RegulationSearch
 from co5151_backend.application.usecases.provisions import ReadProvision
 from co5151_backend.domain.errors import NotFound
 from co5151_backend.infrastructure.mcp.gateways import McpRegulationGateway, McpStudentRecordGateway
@@ -35,6 +36,11 @@ async def test_regulation_search_over_http(regulation_mcp_url):
         "search_regulations", {"query": "Điều kiện làm luận văn tốt nghiệp", "top_k": 2, "hops": 1}
     )
     assert res.ok and res.data["results"]
+
+
+async def test_a_wider_search_stays_within_what_the_server_accepts(regulation_mcp_url):
+    search = RegulationSearch(McpRegulationGateway(regulation_mcp_url))
+    assert await search.search("Điều kiện làm luận văn tốt nghiệp", top_k=2 * search.top_k)  # the search-again size
 
 
 async def test_unreachable_server_is_an_internal_error():
