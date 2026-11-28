@@ -92,3 +92,57 @@ variable "alert_emails" {
     error_message = "Cần ít nhất một email nhận cảnh báo budget."
   }
 }
+
+variable "openai_location" {
+  description = "Region của Azure OpenAI. Azure for Students có quota GPT ở koreacentral, không có ở eastasia"
+  type        = string
+  default     = "koreacentral"
+}
+
+variable "openai_subdomain" {
+  description = "Subdomain của endpoint: https://<openai_subdomain>.openai.azure.com (duy nhất toàn cầu)"
+  type        = string
+  default     = "co5151-g3-openai"
+}
+
+variable "openai_model" {
+  description = "Model GPT deploy cho app; cũng là tên deployment"
+  type        = string
+  default     = "gpt-4.1-mini"
+}
+
+variable "openai_model_version" {
+  description = "Phiên bản model (az cognitiveservices model list -l <region>)"
+  type        = string
+  default     = "2025-04-14"
+}
+
+variable "openai_capacity" {
+  description = "Giới hạn tốc độ của deployment, đơn vị nghìn token mỗi phút (quota gpt-4.1-mini ở koreacentral: 200)"
+  type        = number
+  default     = 50
+}
+
+variable "foundry_subdomain" {
+  description = "Subdomain của resource Foundry: https://<foundry_subdomain>.openai.azure.com (duy nhất toàn cầu)"
+  type        = string
+  default     = "co5151-g3-foundry"
+}
+
+variable "foundry_models" {
+  description = <<-EOT
+    Model deploy trên Foundry, tên model -> format, phiên bản, capacity (nghìn token mỗi phút, không vượt quota).
+    Xem model và phiên bản: az cognitiveservices model list -l koreacentral; quota: az cognitiveservices usage list.
+  EOT
+  type = map(object({
+    format   = string
+    version  = string
+    capacity = number
+  }))
+  default = {
+    "gpt-5-mini"             = { format = "OpenAI", version = "2025-08-07", capacity = 50 }
+    "gpt-oss-120b"           = { format = "OpenAI-OSS", version = "1", capacity = 50 }
+    "Llama-3.3-70B-Instruct" = { format = "Meta", version = "9", capacity = 10 }
+    "Phi-4"                  = { format = "Microsoft", version = "7", capacity = 10 }
+  }
+}

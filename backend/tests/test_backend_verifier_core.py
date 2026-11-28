@@ -25,7 +25,7 @@ async def test_fixable_issues_ask_for_a_revision_and_keep_every_issue():
     assert [issue.code for issue in verdict.issues] == [IssueCode.UNSUPPORTED_CITATION, IssueCode.FACT_MISMATCH]
 
 
-async def test_missing_evidence_is_a_refusal_even_next_to_fixable_issues():
+async def test_missing_evidence_from_a_rule_is_a_refusal_even_next_to_fixable_issues():
     verifier = ComplianceVerifier([reports(IssueCode.FACT_MISMATCH), reports(IssueCode.MISSING_EVIDENCE)])
     verdict = await verifier.verify(REQUEST)
     assert verdict.status is VerdictStatus.REFUSE

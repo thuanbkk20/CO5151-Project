@@ -37,7 +37,8 @@ def english_status(evidence: Evidence) -> str:
     if evidence.toeic is None and not evidence.english_cert:
         return "chưa nộp chứng chỉ"
     parts = [f"TOEIC {evidence.toeic}" if evidence.toeic is not None else None, evidence.english_cert]
-    return ", ".join(p for p in parts if p)
+    # The record often has both toeic=500 and english_cert="TOEIC 500": say it once
+    return ", ".join(dict.fromkeys(p.strip() for p in parts if p))
 
 
 def answer_prompt(question: str, evidence: Evidence, *, logged_in: bool, preferences: list[str]) -> str:
@@ -69,7 +70,11 @@ def answer_prompt(question: str, evidence: Evidence, *, logged_in: bool, prefere
         parts.append(f"\nNguyện vọng cá nhân của sinh viên: {', '.join(preferences)}")
     parts.append(
         "\nHãy trả lời câu hỏi của sinh viên một cách rõ ràng, chính xác, nêu cụ thể các số liệu facts "
-        "và trích dẫn điều khoản quy chế tương ứng."
+        "và trích dẫn điều khoản quy chế tương ứng.\n"
+        "Chỉ nêu điều kiện, ngưỡng và con số có trong <regulations>. Mục hồ sơ mà quy chế trên không nhắc tới (ví dụ "
+        "Đồ án chuyên ngành) chỉ nêu như thông tin hồ sơ, không coi là điều kiện. Quy chế trên không nêu ngưỡng cụ "
+        "thể (điểm trung bình, chuẩn ngoại ngữ...) thì nói rõ là quy chế đã tra cứu không nêu và đề nghị sinh viên "
+        "xác nhận với Phòng Đào tạo; không tự đưa ra ngưỡng. Trạng thái từng mục hồ sơ lấy đúng như danh sách trên."
     )
     return "\n".join(parts)
 
@@ -79,8 +84,8 @@ def revision_request(draft: str, verdict: Verdict) -> str:
     return (
         f"\n\nBản nháp trước của bạn:\n<draft>\n{_data(draft)}\n</draft>\n"
         f"Bộ kiểm chứng trả lại bản nháp này vì:\n{issues}\n"
-        "Hãy viết lại câu trả lời và sửa các lỗi trên. Chỉ dùng bằng chứng đã cho; điều gì bằng chứng không nêu "
-        "thì nói rõ là chưa đủ căn cứ, không suy đoán."
+        "Hãy viết lại câu trả lời và sửa các lỗi trên; ý nào không có căn cứ thì bỏ hẳn. Chỉ dùng bằng chứng đã "
+        "cho; điều gì bằng chứng không nêu thì nói rõ là chưa đủ căn cứ, không suy đoán."
     )
 
 

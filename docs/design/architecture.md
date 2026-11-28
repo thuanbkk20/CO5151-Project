@@ -29,7 +29,10 @@ frontend/  (Chainlit)  --HTTP/SSE-->  backend/ (FastAPI)  --MCP Streamable HTTP-
 | `infrastructure/` | SQLAlchemy, MCP client, LLM, SSO giả lập, JWT | mọi tầng trên |
 | `api/` | FastAPI router, DTO, SSE | usecases (qua container) |
 
-Database, MCP và LLM đều là adapter sau một port; đổi adapter không phải sửa use case.
+Database, MCP và LLM đều là adapter sau một port; đổi adapter không phải sửa use case. Một endpoint có thể phục vụ
+nhiều họ model (Azure AI Foundry): tham số khác nhau theo model nằm trong `MODEL_PROFILES` của
+`infrastructure/llm.py`. Mỗi provider có danh sách model sửa tay trong `PROVIDERS`; người dùng chỉ chọn trong danh
+sách đó ([foundry-models.md](foundry-models.md)).
 
 ## Quyết định chính
 

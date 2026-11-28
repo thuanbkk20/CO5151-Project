@@ -107,6 +107,8 @@ def verification_line(trace: dict[str, Any]) -> str:
     rounds = trace.get("verifier_rounds")
     if rounds is None:  # not drafted: refused or asked back by rule, or the Verifier is off
         parts = [RULED.get(trace.get("outcome") or "", "Không qua Verifier")]
+    elif trace.get("outcome") == "refuse":  # the drafts did not pass: the reply is the refusal, not a draft
+        parts = [f"✗ Verifier không cho qua sau {rounds} lượt kiểm, nên trợ lý từ chối"]
     else:
         parts = ["✓ Verifier đã kiểm" + (f", viết lại {rounds - 1} lần" if rounds > 1 else "")]
     if not trace.get("llm"):
@@ -226,14 +228,35 @@ def thread_dict(conversation: dict[str, Any], identifier: str) -> dict[str, Any]
     }
 
 
+def llm_options(choices: dict[str, Any]) -> dict[str, str]:
+    """One entry per model the backend offers, label -> value `provider/model` (a provider without a list: `provider`).
+
+    Chainlit settings cannot change one field when another changes, so provider and model are a single choice.
+    """
+    options: dict[str, str] = {}
+    for provider in choices.get("providers", []):
+        models = (choices.get("models") or {}).get(provider) or []
+        for model in models:
+            options[f"{provider} · {model}"] = f"{provider}/{model}"
+        if not models:  # an older backend without model lists
+            options[f"{provider} · model mặc định"] = provider
+    return options
+
+
+def pick_llm(saved: dict[str, Any] | None, options: dict[str, str], default_provider: str) -> str:
+    """The conversation's choice if the backend still offers it, else the backend default, else the first option."""
+    saved = saved or {}
+    values = list(options.values())
+    provider, model = saved.get("provider"), saved.get("model")
+    for wanted in (f"{provider}/{model}", provider, default_provider):
+        if wanted in values:
+            return wanted
+    listed = [v for v in values if v.startswith(f"{default_provider}/")]
+    return listed[0] if listed else values[0]
+
+
 def chat_settings_body(settings: dict[str, Any] | None) -> dict[str, Any]:
-    """The Chainlit settings form as backend conversation settings (empty model = provider default)."""
+    """The Chainlit settings form (`llm` = `provider/model` or a bare provider) as backend conversation settings."""
     settings = settings or {}
-    return {"provider": settings.get("provider") or None, "model": (settings.get("model") or "").strip() or None}
-
-
-def pick_provider(saved: str | None, providers: list[str], default: str) -> str:
-    """The conversation's provider if it still has a key on the backend, else the backend default, else the first."""
-    if saved in providers:
-        return saved
-    return default if default in providers else providers[0]
+    provider, _, model = (settings.get("llm") or "").partition("/")
+    return {"provider": provider or None, "model": model or None}

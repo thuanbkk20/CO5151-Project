@@ -18,9 +18,10 @@ class Conversations:
         self._traces = traces
         self._models = models
 
-    def llm_choices(self) -> tuple[list[str], str]:
-        """Providers with a key on this server, and the default one."""
-        return self._models.providers(), self._models.default_provider()
+    def llm_choices(self) -> tuple[list[str], str, dict[str, list[str]]]:
+        """Providers with a key on this server, the default one, and the models to pick for each provider."""
+        providers = self._models.providers()
+        return providers, self._models.default_provider(), {p: self._models.models(p) for p in providers}
 
     def _checked(self, settings: ChatSettings) -> ChatSettings:
         if settings.provider is not None and settings.provider not in self._models.providers():
@@ -28,6 +29,9 @@ class Conversations:
         model = (settings.model or "").strip() or None
         if model is not None and len(model) > MAX_MODEL_NAME:
             raise InvalidRequest("model name too long")
+        allowed = self._models.models(settings.provider or self._models.default_provider())
+        if model is not None and allowed and model not in allowed:
+            raise InvalidRequest(f"model {model!r} is not available; choose one of {allowed}")
         return ChatSettings(settings.provider, model)
 
     async def start(

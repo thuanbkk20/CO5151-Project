@@ -223,7 +223,7 @@ def test_operator_token_is_checked_and_the_admin_api_is_off_without_one():
 
 
 async def test_conversation_settings_feedback_and_ids_are_checked():
-    app = App("x")
+    app = App("x", "x")
     principal, conv = await started(app)
     with pytest.raises(InvalidRequest):
         await app.conversations.start(principal, settings=ChatSettings("openai"))
@@ -241,6 +241,16 @@ async def test_conversation_settings_feedback_and_ids_are_checked():
         await app.conversations.set_feedback(principal, "missing", Feedback(1))
     page = await app.conversations.list_page(principal, limit=500)
     assert [c.id for c in page.items] == [conv.id]
+    app.models.allowed = ["a", "b"]
+    assert app.conversations.llm_choices() == (["fake"], "fake", {"fake": ["a", "b"]})
+    with pytest.raises(InvalidRequest):
+        await app.conversations.update(principal, conv.id, settings=ChatSettings("fake", "c"))
+    with pytest.raises(InvalidRequest):
+        await app.conversations.update(principal, conv.id, settings=ChatSettings(None, "c"))
+    assert (await app.conversations.update(principal, conv.id, settings=ChatSettings(None, "b"))).settings.model == "b"
+    app.models.allowed = ["a"]  # "b" retired: the conversation answers with the default model
+    await app.ask.execute(principal, conv.id, GRADUATION)
+    assert app.models.created[-1] == (None, None)
     await app.conversations.delete(principal, conv.id)
     with pytest.raises(NotFound):
         await app.conversations.delete(principal, conv.id)

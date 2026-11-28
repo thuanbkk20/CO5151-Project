@@ -58,8 +58,8 @@ def me(caller: Caller) -> s.UserOut:
 
 @router.get("/llm/providers", tags=["chat"])
 def llm_providers(c: Deps, _caller: Caller) -> s.LLMChoicesOut:
-    providers, default = c.conversations.llm_choices()
-    return s.LLMChoicesOut(providers=providers, default=default)
+    providers, default, models = c.conversations.llm_choices()
+    return s.LLMChoicesOut(providers=providers, default=default, models=models)
 
 
 @router.get("/conversations", tags=["conversations"])

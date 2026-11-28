@@ -99,10 +99,14 @@ def router_factory(settings: Settings):
 
 
 def verifier_factory(settings: Settings, models: ChatModels):
-    """`llm`: rule checks, then one judge call (on VERIFIER_LLM_MODEL of the same provider if set). `rules`: rule
-    checks only. `off`: no Verifier (the single-agent baseline)."""
+    """`llm`: rule checks, then one judge call. `rules`: rule checks only. `off`: no Verifier (the single-agent
+    baseline). The judge runs on VERIFIER_LLM_PROVIDER / VERIFIER_LLM_MODEL when set, so every answer model is checked
+    by the same judge; unset, on the model that wrote the answer."""
     if settings.verifier_mode not in VERIFIER_MODES:
         raise ValueError(f"ADVISOR_VERIFIER must be one of {VERIFIER_MODES}, got {settings.verifier_mode!r}")
+    fixed_judge = settings.verifier_provider is not None or settings.verifier_model is not None
+    if settings.verifier_mode == "llm" and settings.verifier_provider not in (None, *models.providers()):
+        raise ValueError(f"VERIFIER_LLM_PROVIDER {settings.verifier_provider!r} has no key on this server")
     checks = rule_checks(secrets=[CANARY])
 
     def verifier_for(model: ChatModel | None) -> ComplianceVerifier | None:
@@ -110,7 +114,9 @@ def verifier_factory(settings: Settings, models: ChatModels):
             return None
         if settings.verifier_mode == "rules" or model is None:
             return ComplianceVerifier(checks)
-        judge_model = models.create(model.provider, settings.verifier_model) if settings.verifier_model else model
+        judge_model = model
+        if fixed_judge:
+            judge_model = models.create(settings.verifier_provider or model.provider, settings.verifier_model)
         return ComplianceVerifier(checks, judge=LLMJudge(judge_model or model, canary=CANARY))
 
     return verifier_for

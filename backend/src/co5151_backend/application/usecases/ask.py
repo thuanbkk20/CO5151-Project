@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 from co5151_contracts import RegulationExcerpt, VerdictStatus, VerificationRequest
 
-from ...domain.conversation import Message, MessageRole, title_from, utcnow
+from ...domain.conversation import ChatSettings, Message, MessageRole, title_from, utcnow
 from ...domain.errors import AnswerFailed, InvalidRequest, NotFound
 from ...domain.evidence import Evidence
 from ...domain.principal import Principal, Role
@@ -77,6 +77,11 @@ class AskQuestion:
         self._verifier_for = verifier_for
         self._history_messages = history_messages
 
+    def _offered(self, settings: ChatSettings) -> tuple[str | None, str | None]:
+        """The conversation's provider and model; a model no longer offered falls back to the provider's default."""
+        offered = self._models.models(settings.provider or self._models.default_provider())
+        return settings.provider, settings.model if settings.model in offered else None
+
     def _student_token(self, principal: Principal) -> str | None:
         """A fresh short-lived Student Record token, or None for a guest (no record to read)."""
         if principal.role is Role.GUEST:
@@ -104,7 +109,7 @@ class AskQuestion:
 
         trace_id, start = new_trace_id(), time.perf_counter()
         spans = SpanRecorder(secrets=[prompts.CANARY])
-        model = self._models.create(conversation.settings.provider, conversation.settings.model)
+        model = self._models.create(*self._offered(conversation.settings))
         llm = f"{model.provider}/{model.model}" if model else None
         try:
             turn = await self._answer(question, history, model, self._student_token(principal), emit, spans)

@@ -5,7 +5,8 @@ from co5151_web.present import (
     SECURITY_STARTER,
     chat_settings_body,
     details_markdown,
-    pick_provider,
+    llm_options,
+    pick_llm,
     plain_markdown,
     progress_line,
     provision_markdown,
@@ -54,15 +55,29 @@ def test_thread_keeps_backend_message_ids_and_feedback():
     assert answer["id"] == "m2" and answer["feedback"]["forId"] == "m2" and answer["feedback"]["value"] == 1
 
 
-def test_settings_body_maps_an_empty_model_to_the_default():
-    assert chat_settings_body({"provider": "gemini", "model": "  "}) == {"provider": "gemini", "model": None}
+CHOICES = {"providers": ["azure", "foundry"], "default": "azure",
+           "models": {"azure": ["gpt-4.1-mini"], "foundry": ["a", "b"]}}  # fmt: skip
+
+
+def test_settings_body_splits_provider_and_model():
+    assert chat_settings_body({"llm": "foundry/b"}) == {"provider": "foundry", "model": "b"}
+    assert chat_settings_body({"llm": "gemini"}) == {"provider": "gemini", "model": None}
     assert chat_settings_body(None) == {"provider": None, "model": None}
 
 
-def test_provider_falls_back_when_its_key_is_gone():
-    assert pick_provider("openai", ["gemini", "openai"], "gemini") == "openai"
-    assert pick_provider("kimi", ["gemini", "openai"], "openai") == "openai"
-    assert pick_provider(None, ["openai"], "gemini") == "openai"
+def test_one_option_per_offered_model():
+    assert llm_options(CHOICES) == {"azure · gpt-4.1-mini": "azure/gpt-4.1-mini", "foundry · a": "foundry/a",
+                                    "foundry · b": "foundry/b"}  # fmt: skip
+    assert llm_options({"providers": ["gemini"], "default": "gemini"}) == {"gemini · model mặc định": "gemini"}
+
+
+def test_choice_falls_back_when_the_backend_no_longer_offers_it():
+    options = llm_options(CHOICES)
+    assert pick_llm({"provider": "foundry", "model": "b"}, options, "azure") == "foundry/b"
+    assert pick_llm({"provider": "foundry", "model": "gone"}, options, "azure") == "azure/gpt-4.1-mini"
+    assert pick_llm({"provider": "foundry"}, options, "azure") == "azure/gpt-4.1-mini"
+    assert pick_llm(None, options, "foundry") == "foundry/a"
+    assert pick_llm({"provider": "kimi"}, llm_options({**CHOICES, "providers": ["foundry"]}), "kimi") == "foundry/a"
 
 
 def test_starters_by_role():
@@ -111,3 +126,5 @@ def test_verification_line_under_an_answer():
     refused = verification_line({**TRACE, "verifier_rounds": None, "outcome": "refuse", "llm": None})
     assert refused.startswith("_Từ chối theo quy tắc") and "Verifier" not in refused
     assert "LLM lỗi một phần" in verification_line({**TRACE, "llm_error": "hết quota"})
+    rejected = verification_line({**TRACE, "verifier_rounds": 2, "outcome": "refuse"})
+    assert rejected.startswith("_✗ Verifier không cho qua sau 2 lượt kiểm") and "✓" not in rejected

@@ -37,7 +37,9 @@ Yêu cầu: Python ≥ 3.10, [uv](https://docs.astral.sh/uv/) ≥ 0.5.
 frontend (Chainlit :8000) --HTTP/SSE--> backend (co5151-api :8100) --MCP HTTP--> student-mcp :8102, regulation-mcp :8103
 ```
 
-Điền trong `.env`: key của provider LLM đang chọn (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`),
+Điền trong `.env`: key của provider LLM đang chọn (mặc định `LLM_PROVIDER=gemini`, điền `GEMINI_API_KEY`; Azure
+OpenAI của nhóm: `LLM_PROVIDER=azure`, xem [infra/azure/README.md](infra/azure/README.md#azure-openai); nhiều model
+trên Azure AI Foundry: provider `foundry`, xem [mục Foundry](infra/azure/README.md#azure-ai-foundry)),
 `BACKEND_TOKEN_SECRET`, `STUDENT_MCP_TOKEN_SECRET`, `CHAINLIT_AUTH_SECRET`; các biến khác có mặc định chạy được
 ([.env.example](.env.example)). Chạy cả 4 process bằng [Procfile](Procfile):
 
@@ -64,7 +66,7 @@ Biến làm đổi cách chạy:
 | --- | --- | --- |
 | `ADVISOR_PLANNER_MODE` | `llm` (mặc định) / `laya` / `rule` | Planner kiểm luật trước; khi luật không quyết được thì hỏi LLM (1 lời gọi ngắn), Laya (`LAYA_SERVER_URL`), hoặc dùng bước mặc định |
 | `ADVISOR_VERIFIER` | `llm` (mặc định) / `rules` / `off` | Lời gọi LLM thêm mỗi câu: `llm` 1 (3 nếu viết lại), `rules` 0 (1 nếu viết lại), `off` 0 (agent đơn) |
-| `VERIFIER_LLM_MODEL` | tên model | Model riêng (rẻ hơn) cho Verifier, cùng provider |
+| `VERIFIER_LLM_PROVIDER`, `VERIFIER_LLM_MODEL` | tên provider, tên model | Judge riêng cho Verifier, cố định cho mọi model trả lời (trống: dùng model của câu trả lời) |
 | `CHAT_DATABASE_URL` | trống / `off` / `postgresql+asyncpg://...` | SQLite mặc định / chỉ trong bộ nhớ / PostgreSQL (`uv sync --extra postgres`) |
 
 Provider OpenAI-compatible khác dùng được ngay bằng `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`; muốn có tên riêng

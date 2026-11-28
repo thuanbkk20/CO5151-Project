@@ -34,6 +34,22 @@ def test_verifier_can_use_its_own_model_of_the_same_provider():
     assert asked == [("fake", "cheap")]
 
 
+def test_verifier_can_use_a_fixed_provider_for_every_answer_model():
+    asked = []
+
+    class Picky(Models):
+        def create(self, provider, model):
+            asked.append((provider, model))
+            return Model()
+
+    answer_model = Model()
+    answer_model.provider = "other"
+    verifier_factory(replace(SETTINGS, verifier_provider="fake"), Picky(Model()))(answer_model)
+    assert asked == [("fake", None)]
+    with pytest.raises(ValueError):
+        verifier_factory(replace(SETTINGS, verifier_provider="nokey"), Models(Model()))
+
+
 def test_planner_modes():
     model = Model()
     assert isinstance(router_factory(SETTINGS)(model), LLMActionRouter)

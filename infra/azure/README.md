@@ -45,6 +45,43 @@ SSH; checkout ref, `uv sync --locked --no-dev`; ghi `/opt/co5151/accounts.json` 
 `demo` bị từ chối, trang trả 200. Code trên server chỉ lấy từ `origin`, nên commit chưa push thì không deploy được.
 Ref phải có `GUEST_LOGIN` (từ `ffae96f`), nếu không bước kiểm tra `khach` sẽ báo lỗi.
 
+## Azure OpenAI
+
+`openai.tf` tạo resource Azure OpenAI ở `koreacentral` và deployment `gpt-4.1-mini` (lý do:
+[docs/design/azure-openai.md](../../docs/design/azure-openai.md)). Để app (local hoặc bản deploy) dùng nó, ghi vào
+`.env` / `.env.production`, key đi thẳng vào file, không in ra màn hình:
+
+```bash
+# ở gốc repo; đổi .env thành .env.production cho bản deploy. Xóa LLM_MODEL nếu đang đặt model của provider khác.
+{ echo "AZURE_OPENAI_BASE_URL=$(terraform -chdir=infra/azure output -raw openai_base_url)"
+  echo "AZURE_OPENAI_API_KEY=$(az cognitiveservices account keys list -n co5151-openai -g co5151-rg --query key1 -o tsv)"
+} >> .env
+# rồi đặt LLM_PROVIDER=azure
+```
+
+Đổi key (khi lộ): `az cognitiveservices account keys regenerate -n co5151-openai -g co5151-rg --key-name key1`, ghi
+lại vào `.env` và chạy `deploy.sh`.
+
+## Azure AI Foundry
+
+`foundry.tf` tạo resource `AIServices` ở `koreacentral` và một deployment cho mỗi model trong `foundry_models`
+(`variables.tf`; lý do và kết quả gọi thử: [docs/design/foundry-models.md](../../docs/design/foundry-models.md)).
+Thêm model: thêm một dòng vào `foundry_models` (tên, format, phiên bản, capacity), `terraform apply`, thêm tên vào
+danh sách của provider `foundry` trong `PROVIDERS` (`backend/src/co5151_backend/infrastructure/llm.py`); model gửi
+tham số khác mặc định thì thêm vào `MODEL_PROFILES` cùng file. Model bán qua Marketplace (Mistral...) không deploy
+được trên subscription miễn phí.
+
+```bash
+# ở gốc repo; đổi .env thành .env.production cho bản deploy
+{ echo "AZURE_FOUNDRY_BASE_URL=$(terraform -chdir=infra/azure output -raw foundry_base_url)"
+  echo "AZURE_FOUNDRY_API_KEY=$(az cognitiveservices account keys list -n co5151-foundry -g co5151-rg --query key1 -o tsv)"
+} >> .env
+```
+
+Đổi key: như Azure OpenAI, thay `co5151-openai` bằng `co5151-foundry`.
+
+## Vận hành trên VM
+
 Trên VM (`terraform output ssh_command`):
 
 ```bash

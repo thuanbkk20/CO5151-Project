@@ -11,9 +11,13 @@ from co5151_contracts import IssueCode, Verdict, VerdictStatus, VerificationIssu
 
 Check = Callable[[VerificationRequest], list[VerificationIssue]]
 
-# No rewrite can fix these, so the only safe reply is a refusal: the evidence is missing, or the draft could not
-# be verified at all.
+# No rewrite can fix these, so the only safe reply is a refusal: nothing was retrieved for what the draft cites (a
+# rule check), or the draft could not be verified at all.
 REFUSE_CODES = frozenset({IssueCode.MISSING_EVIDENCE, IssueCode.UNVERIFIED})
+# From the judge, MISSING_EVIDENCE asks for a rewrite: the Advisor can drop the unsupported conclusion or say the
+# evidence is not enough. The judge also reported it for one side claim of an answer the evidence did support (first
+# test on the deployment, 27/11). A draft still failing after the last round is refused anyway.
+JUDGE_REFUSE_CODES = frozenset({IssueCode.UNVERIFIED})
 
 
 class Judge(Protocol):
@@ -34,13 +38,14 @@ class ComplianceVerifier:
     async def verify(self, request: VerificationRequest) -> Verdict:
         issues = [issue for check in self._checks for issue in check(request)]
         if issues or self._judge is None:
-            return _verdict(issues)
+            return _verdict(issues, REFUSE_CODES)
         review = await self._judge.review(request)
-        return _verdict(review.issues, input_tokens=review.input_tokens, output_tokens=review.output_tokens)
+        return _verdict(review.issues, JUDGE_REFUSE_CODES, input_tokens=review.input_tokens,
+                        output_tokens=review.output_tokens)  # fmt: skip
 
 
-def _verdict(issues: list[VerificationIssue], **tokens: int) -> Verdict:
+def _verdict(issues: list[VerificationIssue], refuse_codes: frozenset[IssueCode], **tokens: int) -> Verdict:
     if not issues:
         return Verdict(status=VerdictStatus.PASS, **tokens)
-    refuse = any(issue.code in REFUSE_CODES for issue in issues)
+    refuse = any(issue.code in refuse_codes for issue in issues)
     return Verdict(status=VerdictStatus.REFUSE if refuse else VerdictStatus.REVISE, issues=issues, **tokens)
