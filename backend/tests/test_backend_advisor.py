@@ -416,3 +416,12 @@ def test_fixed_replies_r1_r2_follow_the_use_cases():
     assert f'"{prompts.LIMIT_REACHED}"' in doc and f'"{prompts.REFUSAL_UNGROUNDED}"' in doc
     for text in (prompts.CLARIFY, prompts.INCOMPLETE, prompts.REFUSAL_OTHER_STUDENT, prompts.REFUSAL_UNVERIFIED):
         assert "Tôi" not in text and "bạn" in text.lower()
+
+
+def test_the_writer_span_keeps_the_seed_of_the_run():
+    from co5151_backend.application.agents.advisor.advisor import Draft, _writer_output
+
+    model = Model()
+    model.seed = 1
+    assert _writer_output(Draft("x", None), model) == {"text": "x", "by": "fake/fake-1", "seed": 1}
+    assert "seed" not in _writer_output(Draft("x", Outcome.ANSWER), model)  # a template uses no LLM

@@ -3,6 +3,13 @@
 Cập nhật: 2026-11-27. Người làm: **Kiên làm toàn bộ** (giao từng task cho code agent). Nguồn: proposal D1, báo cáo D2,
 mail thầy 24/11, trang đồ án (R1–R9), rà code ngày 27/11 trên `feat/foundry-models` (`bf41bae`).
 
+**Tiến độ 28/11 (code agent, chưa push):** xong A1, A3–A7, B1, B3, C1–C6, D1–D3, E1–E3, F1. B2, B4 làm trong RAG
+graph (`regulation-graph`), không sửa server BM25 của Đức; `applies_to` theo khóa còn mở (regulation-graph.md "Chưa
+quyết" 1). Nhánh nối tiếp nhau trên `feat/foundry-models`: `feat/regulation-graph` → `feat/agent-improvements` →
+`feat/eval-conversations`. Kế hoạch và hash từng commit: [regulation-graph.md](design/regulation-graph.md),
+[agent-improvements.md](design/agent-improvements.md), [eval-conversations.md](design/eval-conversations.md). Còn: A2,
+E4, E5, F2, G (Kiên).
+
 ## Mốc (mail thầy 24/11, thay mọi lịch trước)
 
 - **06/12 (CN) 23:59**: nộp báo cáo PDF 6–8 trang, slide PDF, bảng phản hồi góp ý D2, bảng đóng góp + AI-use, link repo

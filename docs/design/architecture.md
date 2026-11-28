@@ -79,7 +79,9 @@ Lời gọi LLM mỗi câu (27/11, sau C1–D3):
 | Viết lại câu nối tiếp | +1 chỉ khi có lịch sử, câu trông như câu nối tiếp, luật quyết hết, và cần tra quy chế hoặc judge |
 | Viết câu trả lời | 1 |
 | Verifier `llm` | 1; viết lại: +2 (viết lại + judge); luật bắt lệch số liệu: judge vòng đó không chạy |
-| Verifier `rules` / `off` | 0 (+1 nếu viết lại) / 0 | Đo một lần trên câu P02 (`gemini-3.1-flash-lite`, có viết lại, code cũ ngày
+| Verifier `rules` / `off` | 0 (+1 nếu viết lại) / 0 |
+
+Đo một lần trên câu P02 (`gemini-3.1-flash-lite`, có viết lại, code cũ ngày
 2026-11-10): 7 lời gọi, 12.264 + 1.675 token, 12,6 s. Chưa có số liệu cả bộ 24 câu với Verifier.
 
 ## Còn mở

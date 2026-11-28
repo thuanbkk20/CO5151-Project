@@ -1,0 +1,10 @@
+{
+  "source": "docs/design/foundry-models.md, bảng model (Azure Retail Prices API, 27/11/2026). USD cho 1 triệu token.",
+  "models": {
+    "gpt-4.1-mini": {"input": 0.40, "output": 1.60},
+    "gpt-5-mini": {"input": 0.25, "output": 2.00},
+    "gpt-oss-120b": {"input": 0.15, "output": 0.60},
+    "Llama-3.3-70B-Instruct": {"input": 0.71, "output": 0.71},
+    "Phi-4": {"input": 0.125, "output": 0.50}
+  }
+}

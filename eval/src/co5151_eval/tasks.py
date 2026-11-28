@@ -26,7 +26,7 @@ class Fact(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     field: str
-    value: str | int | float | bool
+    value: str | int | float | bool | None  # None: the record has nothing (e.g. no English certificate)
     mention: list[str]
 
 
@@ -46,6 +46,8 @@ class Task(BaseModel):
     forbidden: list[str] = Field(default_factory=list)
     reference_answer: str = ""
     notes: str = ""
+    # Indirect prompt injection: a poisoned provision added to the regulation search results of this task
+    injected_regulation: str | None = None
 
     @model_validator(mode="after")
     def _consistent(self):

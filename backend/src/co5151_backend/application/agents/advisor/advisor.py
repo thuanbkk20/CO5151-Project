@@ -270,4 +270,7 @@ def _writer_output(draft: Draft | None, model: ChatModel | None) -> dict:
     if draft is None:
         return {"text": None, "by": "none", "note": "không có LLM để viết lại"}
     by = f"{model.provider}/{model.model}" if draft.outcome is None and model else "template"
-    return {"text": draft.text, "by": by}
+    out = {"text": draft.text, "by": by}
+    if by != "template" and getattr(model, "seed", None) is not None:  # the trace keeps the seed of the run
+        out["seed"] = model.seed
+    return out

@@ -16,6 +16,17 @@ class Usage(BaseModel):
         return self.input_tokens + self.output_tokens
 
 
+class RoleUsage(BaseModel):
+    """Tokens of the LLM calls of one role (router, writer, judge) on one model, in one answer."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    role: str
+    model: str  # provider/model
+    input_tokens: int = 0
+    output_tokens: int = 0
+
+
 class AgentResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -24,6 +35,7 @@ class AgentResponse(BaseModel):
     citations: list[str] = Field(default_factory=list)
     tool_calls: list[str] = Field(default_factory=list)
     usage: Usage = Field(default_factory=Usage)
+    usage_by_role: list[RoleUsage] = Field(default_factory=list)  # empty: the agent does not report it
     verifier_rounds: int | None = None
 
 

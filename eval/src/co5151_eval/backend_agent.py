@@ -19,15 +19,16 @@ import regulation_server
 from co5151_backend.container import Adapters, Container, build_container
 from co5151_backend.domain.conversation import Message, MessageRole, utcnow
 from co5151_backend.domain.principal import Principal, Role
-from co5151_backend.domain.trace import Trace
+from co5151_backend.domain.trace import Span, Trace
 from co5151_backend.infrastructure.config import Settings
 from co5151_backend.infrastructure.identity import DemoAccountDirectory
+from co5151_backend.infrastructure.llm import ProviderChatModels
 from co5151_backend.infrastructure.persistence.memory import InMemoryChatRepository, InMemoryTraceRepository
 from co5151_contracts import ToolResult
 from co5151_contracts.security import AuthError
 from regulation_server.regulation_service_v2 import RegulationServiceV2
 
-from .agent import AgentResponse, Usage
+from .agent import AgentResponse, RoleUsage, Usage
 from .gold import RecordOracle
 from .tasks import Outcome
 
@@ -55,6 +56,26 @@ class InProcessRegulations:
         if res.ok and hasattr(res.data, "model_dump"):  # the MCP server sends JSON: give the agent the same shape
             return ToolResult(ok=True, data=res.data.model_dump(mode="json"))
         return res
+
+
+INJECTED_ID = "QD2933-2021-CL99.9"  # looks like a provision id, so no rule singles it out
+
+
+class PoisonedRegulations:
+    """Regulation gateway whose search results end with a poisoned provision (indirect prompt injection, E3): the
+    attacker controls a document of the corpus, not the question."""
+
+    def __init__(self, inner: InProcessRegulations, text: str):
+        self._inner = inner
+        self._text = text
+
+    async def call(self, tool: str, args: dict[str, Any]) -> ToolResult:
+        res = await self._inner.call(tool, args)
+        if tool != "search_regulations" or not res.ok:
+            return res
+        poisoned = {"id": INJECTED_ID, "evidence": {"provision_id": INJECTED_ID, "title": "Khoản 99.9",
+                                                    "source_text": self._text}}  # fmt: skip
+        return ToolResult(ok=True, data={**res.data, "results": [*res.data.get("results", []), poisoned]})
 
 
 @cache
@@ -101,8 +122,27 @@ def _settings(**overrides: Any) -> Settings:
     return dataclasses.replace(Settings.from_env(), student_token_secret=secret, database_url=None, **overrides)
 
 
-def _response(trace: Trace, text: str) -> AgentResponse:
+ROLE_OF_NODE = {"planner": "router", "writer": "writer", "verifier": "judge"}
+
+
+def usage_by_role(trace: Trace, spans: list[Span]) -> list[RoleUsage]:
+    """Tokens per role and model, from the spans of the answer (the judge may run on its own model)."""
+    rows: dict[tuple[str, str], RoleUsage] = {}
+    for span in spans:
+        role = ROLE_OF_NODE.get(span.node)
+        if role is None or not span.usage.total:
+            continue
+        judge = (span.input.get("checks") or {}).get("judge") if role == "judge" else None
+        model = f"{judge['provider']}/{judge['model']}" if judge else (trace.llm or "unknown")
+        row = rows.setdefault((role, model), RoleUsage(role=role, model=model))
+        row.input_tokens += span.usage.input_tokens
+        row.output_tokens += span.usage.output_tokens
+    return list(rows.values())
+
+
+def _response(trace: Trace, text: str, spans: list[Span] = ()) -> AgentResponse:
     return AgentResponse(
+        usage_by_role=usage_by_role(trace, list(spans)),
         text=text,
         outcome=Outcome(trace.outcome.value) if trace.outcome else Outcome.ANSWER,
         citations=list(trace.citations),
@@ -115,19 +155,38 @@ def _response(trace: Trace, text: str) -> AgentResponse:
 class BackendAgent:
     """One evaluation session: a new conversation per answer, seeded with the task's history."""
 
-    def __init__(self, name: str, settings: Settings):
+    def __init__(self, name: str, settings: Settings, seed: int | None = None):
         self.name = name
         self._settings = settings
+        self._seed = seed
+        self._injected: str | None = None
+
+    def inject_regulation(self, text: str | None) -> None:
+        """Every later answer of this agent finds `text` among the regulations it searches (E3)."""
+        self._injected = text
+
+    def _regulations(self) -> InProcessRegulations | PoisonedRegulations:
+        regulations = InProcessRegulations(regulation_service(_engine()))
+        return PoisonedRegulations(regulations, self._injected) if self._injected else regulations
 
     def _container(self) -> Container:
         chats = InMemoryChatRepository()
+        # The run's seed goes with every LLM call of a provider that takes one (`LLM_SEED`)
+        env = {**os.environ, "LLM_SEED": str(self._seed)} if self._seed is not None else None
         adapters = Adapters(chats=chats, traces=InMemoryTraceRepository(chats),
                             accounts=_accounts(), student=InProcessStudentRecord(_oracle().service),
-                            regulations=InProcessRegulations(regulation_service(_engine())))  # fmt: skip
+                            regulations=self._regulations(),
+                            models=ProviderChatModels(env))  # fmt: skip
         return build_container(self._settings, adapters)
 
     def describe(self) -> dict[str, Any]:
-        return {**self._container().describe(), "regulation_source": f"{_engine()} (in-process)"}
+        return {
+            **self._container().describe(),
+            "name": self.name,
+            "seed": self._seed,
+            "verifier_provider": self._settings.verifier_provider,
+            "regulation_source": f"{_engine()} (in-process)",
+        }
 
     @staticmethod
     def _principal(session_token: str | None) -> Principal:
@@ -153,17 +212,50 @@ class BackendAgent:
             await container.chats.add_message(Message(str(uuid.uuid4()), conversation.id, role, turn["content"],
                                                       utcnow()))  # fmt: skip
         answer = await container.ask.execute(principal, conversation.id, question)
-        return _response(answer.trace, answer.message.content)
+        spans = await container.conversations.spans(principal, answer.trace.trace_id)
+        return _response(answer.trace, answer.message.content, spans)
 
 
 def make_agent(seed: int = 0) -> BackendAgent:
     """The Advisor with the Compliance Verifier configured by `ADVISOR_VERIFIER` (default `llm`)."""
-    return BackendAgent("advisor", _settings())
+    return BackendAgent("advisor", _settings(), seed)
 
 
 def make_agent_no_verifier(seed: int = 0) -> BackendAgent:
     """Baseline of the proposal: the same Advisor as a single agent, whatever `ADVISOR_VERIFIER` says."""
-    return BackendAgent("advisor-no-verifier", _settings(verifier_mode="off"))
+    return BackendAgent("advisor-no-verifier", _settings(verifier_mode="off"), seed)
+
+
+def make_agent_config(seed: int = 0, *, planner: str = "llm", verifier: str = "llm",
+                      judge: str | None = None) -> BackendAgent:  # fmt: skip
+    """One ablation cell (E2), whatever the environment says for these three axes:
+
+    - `planner`: `rule` (rules only) or `llm` (rules, then the LLM router where they stop);
+    - `verifier`: `off` (single agent), `rules` (free checks only) or `llm` (checks, then the LLM judge);
+    - `judge`: None for a judge on the answer's own model, or `provider/model` for a separate judge.
+
+    The fourth axis, retrieval, is `REGULATION_ENGINE` (bm25 / graph), measured without LLM by `co5151-eval retrieval`.
+    """
+    provider, _, model = (judge or "").partition("/")
+    if judge and not model:
+        raise ValueError(f"judge must look like provider/model, got {judge!r}")
+    settings = _settings(planner_mode=planner, verifier_mode=verifier, verifier_provider=provider or None,
+                         verifier_model=model or None)  # fmt: skip
+    return BackendAgent(f"advisor[planner={planner},verifier={verifier},judge={judge or 'same'}]", settings, seed)
+
+
+# Named cells for `co5151-eval run --agent co5151_eval.backend_agent:<name>`; the full system is `make_agent`
+# (judge from VERIFIER_LLM_*), the single agent `make_agent_no_verifier`.
+def ablation_rule_planner(seed: int = 0) -> BackendAgent:
+    return make_agent_config(seed, planner="rule")
+
+
+def ablation_rules_verifier(seed: int = 0) -> BackendAgent:
+    return make_agent_config(seed, verifier="rules")
+
+
+def ablation_same_model_judge(seed: int = 0) -> BackendAgent:
+    return make_agent_config(seed, verifier="llm", judge=None)
 
 
 def regulation_ids(question: str) -> list[str]:
