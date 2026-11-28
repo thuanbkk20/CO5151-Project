@@ -115,6 +115,12 @@ def answer_prompt(
         parts.append(f"\nVăn bản quy chế đào tạo trích dẫn:\n<regulations>\n{_data(regulations)}\n</regulations>")
     if preferences:
         parts.append(f"\nNguyện vọng cá nhân của sinh viên: {', '.join(preferences)}")
+    if not evidence.regulations:  # a record question, or nothing found: no word about the regulations
+        parts.append(
+            "\nHãy trả lời đúng câu hỏi của sinh viên, rõ ràng, nêu cụ thể các số liệu ở trên. Lượt này không có đoạn "
+            "quy chế nào: không nêu quy định, điều kiện, ngưỡng hay điều khoản nào, kể cả nói rằng quy chế không nêu."
+        )
+        return "\n".join(parts)
     parts.append(
         "\nHãy trả lời câu hỏi của sinh viên một cách rõ ràng, chính xác, nêu cụ thể các số liệu facts "
         "và trích dẫn điều khoản quy chế tương ứng.\n"

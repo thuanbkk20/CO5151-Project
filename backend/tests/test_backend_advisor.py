@@ -284,6 +284,13 @@ EVIDENCE = Evidence(credits_earned=113, program_credits=128, ctdt="2023", capsto
                     regulations_checked=True, regulations=[CL55])  # fmt: skip
 
 
+def test_without_regulations_the_writer_is_told_to_say_nothing_about_them():
+    record_only = Evidence(credits_earned=102, program_credits=128, cgpa=2.51)
+    asked = prompts.answer_prompt("Em tích lũy bao nhiêu tín chỉ?", record_only, logged_in=True, preferences=[])
+    assert "không nêu quy định" in asked and "trích dẫn điều khoản" not in asked
+    assert "trích dẫn điều khoản" in prompts.answer_prompt(GRADUATION, EVIDENCE, logged_in=True, preferences=[])
+
+
 async def test_llm_writes_from_the_evidence_and_leaks_nothing():
     model = Model(f"Bạn đủ điều kiện {prompts.CANARY} token={TOKEN}")
     history = [ChatTurn("user", "Em muốn ra trường sớm"), ChatTurn("assistant", "Được.")]
